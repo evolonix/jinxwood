@@ -349,34 +349,84 @@ for (const width of [640, 960, 1280]) {
 // Icons
 // ---------------------------------------------------------------------------
 
-// The small favicon is the peeking eyes: the cat emblem turns to mud below
-// about 48px. public/favicon.svg is hand-written and is the source here.
-await sharp(pub("favicon.svg"), { density: 384 })
-  .resize(32, 32)
-  .png()
-  .toFile(pub("favicon-32.png"));
+// The favicon and every app icon come from one drawing: the cat in the hollow
+// on a plum rounded square, supplied on a white background. The drawn square is
+// a little taller than it is wide and its corners are rounded, so it cannot be
+// used as it stands: an icon file has to be exactly square, and some platforms
+// want the art to run right to the edges so they can round it themselves.
+//
+// So: remove the white, fill what was white with the square's own plum, and
+// take the centre square. That is the full-bleed icon. The rounded versions
+// are that same square with the corners masked off again.
+const iconArt = await cutOut("icon.webp", { tolerance: 24, lighterIsBg: true });
 
-/** The emblem centred on a night square, filling `cover` of its width. */
-async function emblemIcon(size, cover) {
-  const art = await sharp(cutOuts.emblem)
-    .resize({
-      width: Math.round(size * cover),
-      height: Math.round(size * cover),
-      fit: "inside",
-    })
-    .toBuffer();
-  return sharp({
-    create: { width: size, height: size, channels: 3, background: NIGHT },
+/** The plum the drawn square is filled with, read from just inside its edge. */
+function edgeColour({ rgba, w, h }) {
+  let inner = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) inner[i] = rgba[i * 4 + 3] === 0 ? 1 : 0;
+  for (let step = 0; step < 3; step++) inner = dilate(inner, w, h);
+  let outer = inner;
+  for (let step = 0; step < 4; step++) outer = dilate(outer, w, h);
+  // The band between the two is mostly plain plum, with a few leaf tips. The
+  // median ignores those.
+  const channels = [[], [], []];
+  for (let i = 0; i < w * h; i++) {
+    if (!outer[i] || inner[i]) continue;
+    for (let c = 0; c < 3; c++) channels[c].push(rgba[i * 4 + c]);
+  }
+  const [r, g, b] = channels.map(
+    (values) => values.sort((x, y) => x - y)[values.length >> 1],
+  );
+  return { r, g, b };
+}
+
+const iconFilled = await sharp(
+  await trimmed(iconArt.rgba, iconArt.w, iconArt.h, 0),
+)
+  .flatten({ background: edgeColour(iconArt) })
+  .png()
+  .toBuffer();
+const iconMeta = await sharp(iconFilled).metadata();
+const iconSide = Math.min(iconMeta.width, iconMeta.height);
+const iconSquare = await sharp(iconFilled)
+  .extract({
+    left: (iconMeta.width - iconSide) >> 1,
+    top: (iconMeta.height - iconSide) >> 1,
+    width: iconSide,
+    height: iconSide,
   })
-    .composite([{ input: art, gravity: "centre" }])
+  .png()
+  .toBuffer();
+
+/** The icon with rounded, transparent corners, for places that show it as is. */
+function roundedIcon(size) {
+  const radius = Math.round(size * 0.225);
+  const mask = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+      <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}"/>
+    </svg>`,
+  );
+  return sharp(iconSquare)
+    .resize(size, size)
+    .ensureAlpha()
+    .composite([{ input: mask, blend: "dest-in" }])
     .png();
 }
-await (await emblemIcon(180, 0.84)).toFile(pub("apple-touch-icon.png"));
-await (await emblemIcon(192, 0.84)).toFile(pub("icon-192.png"));
-await (await emblemIcon(512, 0.84)).toFile(pub("icon-512.png"));
-// Maskable icons are cropped to a circle or squircle by the launcher, so the
-// art stays inside the central safe zone.
-await (await emblemIcon(512, 0.62)).toFile(pub("icon-maskable-512.png"));
+
+await roundedIcon(32).toFile(pub("favicon-32.png"));
+await roundedIcon(192).toFile(pub("icon-192.png"));
+await roundedIcon(512).toFile(pub("icon-512.png"));
+// iOS rounds the home-screen icon itself and paints transparency black, and a
+// maskable icon is cropped to whatever shape the launcher uses. Both get the
+// full-bleed square; the cat sits well inside the central safe zone.
+await sharp(iconSquare)
+  .resize(180, 180)
+  .png()
+  .toFile(pub("apple-touch-icon.png"));
+await sharp(iconSquare)
+  .resize(512, 512)
+  .png()
+  .toFile(pub("icon-maskable-512.png"));
 
 // ---------------------------------------------------------------------------
 // Social image
