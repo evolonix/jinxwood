@@ -8,6 +8,8 @@ package-lock.json
 
 # Generated / virtual modules
 .react-router-next
+# Written by scripts/build-brand.mjs
+src/app/_lib/brand.gen.ts
 
 # Editor / OS
 .DS_Store
