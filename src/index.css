@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+/* Narrow portrait screens (phones held upright), where the hero swaps to its
+   portrait crop and stacks differently. Matches the <picture> media query. */
+@custom-variant tall (@media (max-aspect-ratio: 4/5));
+
+@theme {
+  --font-display:
+    "Fraunces Variable", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  /* Fraunces's two personality axes, turned up as the brand asks: soft
+     terminals and the "wonky" alternate letterforms. Optical size is left out
+     on purpose so the browser keeps picking it from the font size. */
+  --font-display--font-variation-settings: "SOFT" 100, "WONK" 1;
+  --font-sans:
+    "Nunito Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Enchanted Night: the page, and the tones built around it. */
+  --color-night: #2b1e3f;
+  --color-night-deep: #1a122d;
+  --color-night-raised: #382a50;
+  --color-night-line: #4a3b66;
+
+  /* Moonlight Parchment: text. Muted is 8.7:1 on night, 7.3:1 on raised. */
+  --color-parchment: #f4ede0;
+  --color-parchment-muted: #c9bfd1;
+
+  /* Jinx Ember: buttons, links, highlights. 7.7:1 against night either way
+     round, so button text on ember is always night, never parchment. */
+  --color-ember: #f2a93b;
+  --color-ember-bright: #f7bd62;
+
+  /* Woodland Moss: decoration only at its brand value (3.1:1 on night). The
+     light tone is the one that is safe as text (7.2:1). */
+  --color-moss: #3e7c59;
+  --color-moss-light: #7fbf98;
+
+  --shadow-glow:
+    0 0 0 1px rgb(242 169 59 / 0.25), 0 8px 30px -6px rgb(242 169 59 / 0.45);
+
+  --animate-firefly: firefly var(--firefly-duration, 9s) ease-in-out infinite;
+  --animate-blink: blink 7s ease-in-out infinite;
+
+  @keyframes firefly {
+    0%,
+    100% {
+      opacity: 0;
+      transform: translate(0, 0);
+    }
+    20% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+      transform: translate(var(--firefly-x, 14px), var(--firefly-y, -22px));
+    }
+    75% {
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    93%,
+    100% {
+      transform: scaleY(1);
+    }
+    96% {
+      transform: scaleY(0.08);
+    }
+  }
+}
+
+/* Safe-area insets (viewport-fit=cover). Each utility floors the inset at the
+   design gutter so the layout is unchanged on devices without notches, then
+   expands to clear them when present. */
+@utility px-safe-lg {
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+:root {
+  /* Height of the sticky header; the home hero slides up underneath it. */
+  --header-h: 4.5rem;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-night text-parchment font-sans antialiased;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-variation-settings: var(--font-display--font-variation-settings);
+    font-optical-sizing: auto;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Pin the focus-ring colour on interactive elements at rest so it never
+     animates in from currentColor on first focus. */
+  :where(a, button, input, textarea, select, summary, [tabindex]) {
+    outline-color: var(--color-ember);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-night);
+  }
+
+  html {
+    /* Clear the sticky header when scrolling anchors into view. */
+    scroll-padding-top: calc(var(--header-h) + 1rem + env(safe-area-inset-top));
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Decorative loops have no resting frame worth freezing on: fireflies would
+     stop invisible anyway, and the eyes must not freeze mid-blink. */
+  .animate-firefly {
+    display: none;
+  }
+  .animate-blink {
+    animation: none !important;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
