@@ -2,6 +2,8 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { Link, type LinkProps } from "react-router";
 
 interface CommonProps {
+  /** A small leading icon. The underline then sits under the label only. */
+  icon?: ReactNode;
   className?: string;
   children: ReactNode;
 }
@@ -22,13 +24,30 @@ type AppLinkExternal = CommonProps &
 
 export type AppLinkProps = AppLinkInternal | AppLinkExternal;
 
-const BASE =
-  "text-ember hover:text-ember-bright underline decoration-ember/40 decoration-1 underline-offset-4 transition-colors hover:decoration-ember-bright";
+const COLOR = "text-ember hover:text-ember-bright transition-colors";
+const UNDERLINE =
+  "underline decoration-ember/40 decoration-1 underline-offset-4 hover:decoration-ember-bright";
 
 /** An inline text link: a route inside the site (`to`) or any URL (`href`). */
 export function AppLink(props: AppLinkProps) {
-  const { className, children, ...rest } = props;
-  const merged = [BASE, className].filter(Boolean).join(" ");
+  const { icon, className, children: label, ...rest } = props;
+  const merged = (
+    icon
+      ? [COLOR, "inline-flex items-center gap-1.5", className]
+      : [COLOR, UNDERLINE, className]
+  )
+    .filter(Boolean)
+    .join(" ");
+  const children = icon ? (
+    <>
+      <span aria-hidden className="shrink-0">
+        {icon}
+      </span>
+      <span className={UNDERLINE}>{label}</span>
+    </>
+  ) : (
+    label
+  );
 
   if ("to" in rest && rest.to !== undefined) {
     const { to, ...linkRest } = rest as Omit<

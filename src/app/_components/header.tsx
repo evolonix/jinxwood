@@ -22,6 +22,7 @@ export function Header() {
 
   return (
     <header
+      data-site-header
       className={`pt-safe sticky top-0 z-40 border-b transition-colors duration-300 ${
         scrolled
           ? "border-night-line bg-night/90 backdrop-blur"

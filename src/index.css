@@ -88,6 +88,18 @@
 :root {
   /* Height of the sticky header; the home hero slides up underneath it. */
   --header-h: 4.5rem;
+  /* Height of a game's own navigation bar, under the header on its pages. */
+  --subnav-h: 3rem;
+}
+
+/* From tablet width up, a game's navigation bar sticks right under the header
+   and the two read as one block, so the divider belongs under the lower bar
+   only. On a phone that bar scrolls away and the header keeps its own line.
+   Kept out of the layers so it wins over the header's border utility. */
+@media (width >= 40rem) {
+  html:has([data-subnav]) [data-site-header] {
+    border-bottom-color: transparent;
+  }
 }
 
 html,
@@ -132,6 +144,15 @@ body {
     /* Clear the sticky header when scrolling anchors into view. */
     scroll-padding-top: calc(var(--header-h) + 1rem + env(safe-area-inset-top));
     scroll-behavior: smooth;
+  }
+  /* A game's navigation bar sticks under the header from tablet width up, so
+     anchors on its pages have to clear both. */
+  @media (width >= 40rem) {
+    html:has([data-subnav]) {
+      scroll-padding-top: calc(
+        var(--header-h) + var(--subnav-h) + 1rem + env(safe-area-inset-top)
+      );
+    }
   }
 }
 

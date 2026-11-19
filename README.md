@@ -2,11 +2,11 @@
 
 The website for Jinxwood, the gaming brand of Evolonix LLC: <https://jinxwood.games>.
 
-A small static site: a home page, a games index with a page per game, a press and brand kit page, and privacy and terms pages.
+A small static site: a home page, a games index, a press and brand kit page, and privacy and terms pages. Each game has its own set of pages under `/games/<slug>`; Pinochle: Two-Handed has a home page, the complete rules, support, a privacy policy and terms of use.
 
 ## Stack
 
-React 19, Vite 8, TypeScript, Tailwind CSS 4, and file-based routing from [`@evolonix/react-router-next`](https://www.npmjs.com/package/@evolonix/react-router-next) (routes live in `src/app/**/page.tsx`). It is the same toolchain as the Pinochle site and jasonruesch.dev. Hosted on GitHub Pages.
+React 19, Vite 8, TypeScript, Tailwind CSS 4, and file-based routing from [`@evolonix/react-router-next`](https://www.npmjs.com/package/@evolonix/react-router-next) (routes live in `src/app/**/page.tsx`). It is the same toolchain as jasonruesch.dev. Hosted on GitHub Pages.
 
 ## Develop
 
@@ -22,15 +22,16 @@ npm install
 npm run dev
 ```
 
-| Script                  | What it does                                                     |
-| ----------------------- | ---------------------------------------------------------------- |
-| `npm run dev`           | Dev server                                                       |
-| `npm run build`         | Type-check, build, then write a static page per route            |
-| `npm run preview`       | Serve the production build                                       |
-| `npm run preview:pages` | Serve the production build the way GitHub Pages does (real 404s) |
-| `npm run lint`          | ESLint                                                           |
-| `npm run format`        | Prettier, writing changes (`format:check` only reports)          |
-| `npm run build:brand`   | Regenerate every brand image from `brand/source/`                |
+| Script                   | What it does                                                     |
+| ------------------------ | ---------------------------------------------------------------- |
+| `npm run dev`            | Dev server                                                       |
+| `npm run build`          | Type-check, build, then write a static page per route            |
+| `npm run preview`        | Serve the production build                                       |
+| `npm run preview:pages`  | Serve the production build the way GitHub Pages does (real 404s) |
+| `npm run lint`           | ESLint                                                           |
+| `npm run format`         | Prettier, writing changes (`format:check` only reports)          |
+| `npm run build:brand`    | Regenerate every brand image from `brand/source/`                |
+| `npm run build:pinochle` | Regenerate the Pinochle screenshots and art from the app repo    |
 
 ## Where things are
 
@@ -38,13 +39,29 @@ npm run dev
 - `src/app/_lib/seo.ts` holds each route's search title and description.
 - `src/index.css` holds the design tokens: the four brand colours and the tones built from them, the fonts, and the motion.
 - `brand/source/` holds the source art. Everything under `public/img/`, the icons, `og.jpg` and `public/press/` is generated from it.
+- `src/app/games/pinochle/` holds the Pinochle pages, with their own components (`_components/`) and copy, routes and search metadata (`_lib/`). Their media is in `public/media/pinochle/`.
 
 ## Add a game
 
-1. Put its icon and screenshots in `public/img/games/<slug>/`.
-2. Add an entry to `GAMES` in `src/app/_lib/content.ts`.
+1. Add an entry to `GAMES` in `src/app/_lib/content.ts`. That gives the game its card on the home page and on `/games`. A store link marked `live: false` is recorded but not shown, so a listing can be added before it opens.
+2. Build its pages in `src/app/games/<slug>/`, the way `games/pinochle/` is laid out: a `layout.tsx` for the game's own navigation, a `page.tsx` per route, and its media in `public/media/<slug>/`.
+3. Export the pages' titles and descriptions from the game's `_lib/seo.ts` and spread them into `PAGES` in `src/app/_lib/seo.ts`. That is what gives each route a static HTML file and a sitemap entry.
 
-That gives the game a card on the home page and `/games`, its own page at `/games/<slug>`, a static HTML file, and a sitemap entry. A store link marked `live: false` is recorded but not shown, so a listing can be added before it opens.
+## Pinochle pages
+
+The Pinochle pages were moved here from the game's own site (the `feat/v2.0` branch of the `pinochle` repo) and restyled to the Jinxwood theme. The store listings point at these URLs for support, privacy and terms, so those three pages have to stay reachable, and their text is the published text: bump `PRIVACY.updated` or `TERMS.updated` in `games/pinochle/_lib/content.ts` when it changes.
+
+Everything Android on these pages (the Google Play badge, the Android screenshots and FAQs, the privacy wording) waits on `PLAY.live` in that file.
+
+Screenshots, Game Center art and the app icon are generated from the app repo (`pinochle-app`, expected beside this one) into `public/media/pinochle/img/` and committed:
+
+```bash
+PINOCHLE_DIR=/path/to/pinochle-app npm run build:pinochle
+```
+
+Screenshots are resized in 16 bits, dithered back to 8 bits with the game's own noise and saved as near-lossless WebP at 1200 px (about 150 to 500 KB each). The felt is a shallow gradient the game dithers so it does not band into rings, and both an 8-bit resize and lossy WebP would undo that.
+
+The gameplay clip on the game's home page, `public/media/pinochle/video/pinochle-2.0-preview.mp4` (about 20 MB, loaded only on play), is the 2.0 press clip, and `pinochle-2.0-preview-play.mp4` is the same clip with an end card that adds Google Play, played once `PLAY.live` is on. Neither is produced by `build:pinochle`. The app repo's `Docs/PressKit.md` describes how the clip is recorded and encoded; `scripts/pinochle-press-video/title-cards.py` renders its opening and closing cards.
 
 ## Brand images
 
@@ -69,7 +86,7 @@ GitHub Pages serves a file or a 404, so a single-page app's routes would all ans
 
 ## Privacy page
 
-The privacy page says the site loads nothing from third parties. That is why the fonts are self-hosted. Adding analytics, an embed, or a hosted font means changing that page too, and bumping `PRIVACY.updated`.
+The privacy page says the site loads nothing from third parties. That is why the fonts and the Pinochle clip are self-hosted. Adding analytics, an embed, or a hosted font means changing that page too, and bumping `PRIVACY.updated`. The Pinochle support form sends nothing to the site: it composes an email in the visitor's own mail app.
 
 ## Deploy
 

@@ -11,10 +11,10 @@
 //
 // Node imports this .ts file directly (Node 24 strips types; the app's
 // erasableSyntaxOnly keeps it strip-safe), so the two copies cannot drift. That
-// is also why the one import below spells out its .ts extension, and why
-// content.ts has to stay free of imports itself.
+// is also why the one import below spells out its .ts extension, and why the
+// files it reaches have to stay free of anything a bundler would resolve.
 
-import { GAMES } from "./content.ts";
+import { PINOCHLE_PAGES } from "../games/pinochle/_lib/seo.ts";
 
 /** Canonical origin, no trailing slash. */
 export const SITE_URL = "https://jinxwood.games";
@@ -63,19 +63,20 @@ const STATIC_PAGES: Record<string, PageSeo> = {
   },
 };
 
-/** The route a game's page lives at. */
+/** The route a game's home page lives at. */
 export function gamePath(slug: string): string {
   return `/games/${slug}`;
 }
 
 /**
- * Every indexable route: the fixed pages plus one per game. Being in this
- * table is what gives a route its static HTML file and its sitemap entry —
- * scripts/build-routes.mjs iterates it.
+ * Every indexable route: the studio's pages plus each game's own, which the
+ * game keeps beside its pages. Being in this table is what gives a route its
+ * static HTML file and its sitemap entry — scripts/build-routes.mjs iterates
+ * it.
  */
 export const PAGES: Record<string, PageSeo> = {
   ...STATIC_PAGES,
-  ...Object.fromEntries(GAMES.map((game) => [gamePath(game.slug), game.seo])),
+  ...PINOCHLE_PAGES,
 };
 
 /** Applied to any URL that didn't match a route, so 404s stay out of the index. */

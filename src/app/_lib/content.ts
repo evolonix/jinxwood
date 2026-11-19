@@ -50,18 +50,15 @@ export interface Game {
   price: string;
   status: "released" | "coming-soon";
   stores: readonly StoreLink[];
-  /** The game's own website, where its rules, support and policies live. */
-  site: string;
+  /** Routes of the game's own support and policy pages on this site. */
   links: { support: string; privacy: string; terms: string };
   art: { icon: GameImage; shots: readonly GameImage[] };
-  /** Search title and description for the game's page. */
-  seo: { title: string; description: string };
 }
 
 /**
- * Every game the studio lists. Adding one here is all it takes to give it a
- * card on /games, a page at /games/<slug>, static HTML and a sitemap entry.
- * Art goes in public/img/games/<slug>/.
+ * Every game the studio lists: what its card on the home page and on /games
+ * says. The game's own pages live in src/app/games/<slug>/, with their copy,
+ * search metadata and media (public/media/<slug>/) alongside.
  */
 export const GAMES: readonly Game[] = [
   {
@@ -93,44 +90,26 @@ export const GAMES: readonly Game[] = [
         live: false,
       },
     ],
-    site: "https://jasonruesch.dev/pinochle/",
     links: {
-      support: "https://jasonruesch.dev/pinochle/support/",
-      privacy: "https://jasonruesch.dev/pinochle/privacy/",
-      terms: "https://jasonruesch.dev/pinochle/terms/",
+      support: "/games/pinochle/support",
+      privacy: "/games/pinochle/privacy",
+      terms: "/games/pinochle/terms",
     },
     art: {
       icon: {
-        src: "/img/games/pinochle/icon.webp",
+        src: "/media/pinochle/img/app-icon.webp",
         width: 512,
         height: 512,
         alt: "",
       },
       shots: [
         {
-          src: "/img/games/pinochle/shot-1.webp",
-          width: 1600,
-          height: 1000,
-          alt: "A hand of two-handed pinochle in play against the computer",
-        },
-        {
-          src: "/img/games/pinochle/shot-2.webp",
-          width: 1600,
-          height: 1000,
-          alt: "A hint highlighting the cards that can answer the lead",
-        },
-        {
-          src: "/img/games/pinochle/shot-3.webp",
-          width: 1600,
-          height: 1000,
-          alt: "An online match of two-handed pinochle",
+          src: "/media/pinochle/img/shots/mac-classic.webp",
+          width: 1200,
+          height: 750,
+          alt: "A deal of two-handed pinochle against the computer, with cameo court cards in hand",
         },
       ],
-    },
-    seo: {
-      title: "Pinochle: Two-Handed — a Jinxwood Game",
-      description:
-        "Pinochle: Two-Handed is the classic two-player card duel for iPhone, iPad, Mac, and Apple TV, with three AI opponents, online play, and SharePlay.",
     },
   },
 ];

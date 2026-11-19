@@ -9,10 +9,9 @@
 //
 // The logos exist only as flat rasters on a solid background, so the first job
 // is cutting them out. The rest is resizing: hero sizes, icons, the social
-// image, press downloads, and the Pinochle art copied from the sibling repo.
+// image and press downloads.
 
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -487,31 +486,6 @@ await hero
   .resize({ width: 2560 })
   .jpeg({ quality: 90, mozjpeg: true })
   .toFile(pub("press/jinxwood-forest.jpg"));
-
-// ---------------------------------------------------------------------------
-// Game art
-// ---------------------------------------------------------------------------
-
-// Pinochle's icon and screenshots come from its own site's repo, which sits
-// beside this one. Skipped (with the committed copies left in place) when that
-// repo isn't checked out.
-const pinochle = join(root, "../pinochle/public/img");
-const PINOCHLE_ART = {
-  "app-icon.webp": "icon.webp",
-  "shots/mac-classic.webp": "shot-1.webp",
-  "shots/mac-hints.webp": "shot-2.webp",
-  "shots/mac-online.webp": "shot-3.webp",
-};
-if (existsSync(pinochle)) {
-  await mkdir(pub("img/games/pinochle"), { recursive: true });
-  for (const [from, to] of Object.entries(PINOCHLE_ART)) {
-    await copyFile(join(pinochle, from), pub(`img/games/pinochle/${to}`));
-  }
-} else {
-  console.warn(
-    "build-brand: ../pinochle not found, game art left as committed",
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Generated sizes

@@ -6,7 +6,7 @@ import { usePageMeta } from "../_lib/use-page-meta";
 
 /**
  * The privacy policy for this website only. Each game publishes its own policy
- * on its own site, linked from here. The prose is the published policy: keep
+ * on its own pages, linked from here. The prose is the published policy: keep
  * edits deliberate, keep it true (it promises no third-party requests, so do
  * not add a hosted font, analytics script or embed without changing it), and
  * bump PRIVACY.updated in _lib/content.ts whenever the text changes.
@@ -28,9 +28,11 @@ export default function Privacy() {
 
       <Clause heading="What this site collects">
         <p>
-          Nothing. The site has no accounts, no forms, no cookies, no analytics
-          and no advertising. Its fonts, images and scripts are all served from
-          this domain, so loading a page does not contact any third party.
+          Nothing. The site has no accounts, no cookies, no analytics and no
+          advertising. Its fonts, images, video and scripts are all served from
+          this domain, so loading a page does not contact any third party. The
+          one form, on a game&apos;s support page, sends nothing to this site:
+          it opens a ready-written message in your own email app.
         </p>
       </Clause>
 
@@ -64,7 +66,7 @@ export default function Privacy() {
         <ul className="list-disc space-y-1 pl-5">
           {GAMES.map((game) => (
             <li key={game.slug}>
-              <AppLink href={game.links.privacy}>
+              <AppLink to={game.links.privacy}>
                 {game.name} privacy policy
               </AppLink>
             </li>
@@ -74,9 +76,8 @@ export default function Privacy() {
 
       <Clause heading="Links to other sites">
         <p>
-          This site links to app stores and to each game&apos;s own website.
-          Those sites have their own privacy practices, which this policy does
-          not cover.
+          This site links to app stores and other outside services. Those sites
+          have their own privacy practices, which this policy does not cover.
         </p>
       </Clause>
 

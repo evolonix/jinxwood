@@ -6,7 +6,7 @@ import { usePageMeta } from "../_lib/use-page-meta";
 
 /**
  * The terms for this website only. Each game publishes its own terms on its
- * own site, linked from here. Bump TERMS.updated in _lib/content.ts whenever
+ * own pages, linked from here. Bump TERMS.updated in _lib/content.ts whenever
  * the text changes.
  */
 export default function Terms() {
@@ -53,9 +53,7 @@ export default function Terms() {
         <ul className="list-disc space-y-1 pl-5">
           {GAMES.map((game) => (
             <li key={game.slug}>
-              <AppLink href={game.links.terms}>
-                {game.name} terms of use
-              </AppLink>
+              <AppLink to={game.links.terms}>{game.name} terms of use</AppLink>
             </li>
           ))}
         </ul>

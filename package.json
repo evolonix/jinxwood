@@ -13,7 +13,8 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "preview:pages": "node scripts/serve-pages.mjs",
-    "build:brand": "node scripts/build-brand.mjs"
+    "build:brand": "node scripts/build-brand.mjs",
+    "build:pinochle": "node scripts/build-pinochle-assets.mjs"
   },
   "dependencies": {
     "@evolonix/react-router-next": "^3.6.0",
