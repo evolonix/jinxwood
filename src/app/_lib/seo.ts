@@ -19,6 +19,17 @@ import { PINOCHLE_PAGES } from "../games/pinochle/_lib/seo.ts";
 /** Canonical origin, no trailing slash. */
 export const SITE_URL = "https://jinxwood.games";
 
+/**
+ * Whether search engines may list the site. While this is false, every page
+ * carries a noindex directive and no sitemap is published, so the site stays
+ * out of search results while it is being finished. Set it to true to launch.
+ *
+ * Crawlers are still allowed to fetch the pages (robots.txt does not block
+ * them): a crawler that cannot fetch a page never sees its noindex, and a
+ * blocked URL can still be listed, bare, if another site links to it.
+ */
+export const INDEXABLE = false;
+
 /** The link-preview image every page shares (scripts/build-brand.mjs). */
 export const SOCIAL_IMAGE = `${SITE_URL}/og.jpg`;
 
@@ -33,6 +44,11 @@ export interface PageSeo {
   description: string;
   /** Kept out of the sitemap and marked noindex. */
   noindex?: boolean;
+}
+
+/** True when a page must tell search engines not to list it. */
+export function isNoindex(seo: PageSeo): boolean {
+  return !INDEXABLE || seo.noindex === true;
 }
 
 const STATIC_PAGES: Record<string, PageSeo> = {

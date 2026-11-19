@@ -82,7 +82,9 @@ Two things to keep true:
 
 ## Search and link previews
 
-GitHub Pages serves a file or a 404, so a single-page app's routes would all answer 404 to a crawler. `scripts/build-routes.mjs` runs at the end of `npm run build` and writes a real `index.html` for every route in `PAGES`, each with its own title, description, canonical URL and link-preview tags, plus `sitemap.xml`.
+GitHub Pages serves a file or a 404, so a single-page app's routes would all answer 404 to a crawler. `scripts/build-routes.mjs` runs at the end of `npm run build` and writes a real `index.html` for every route in `PAGES`, each with its own title, description, canonical URL and link-preview tags, plus `sitemap.xml` and `robots.txt`.
+
+The site is currently held out of search: `INDEXABLE` in `src/app/_lib/seo.ts` is `false`, so every page carries `noindex` and no sitemap is published. Set it to `true` to launch. `robots.txt` allows crawling in both states on purpose, because a crawler that is blocked from a page never sees its `noindex`.
 
 ## Privacy page
 

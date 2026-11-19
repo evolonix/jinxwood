@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { canonicalUrl, PAGES, SOCIAL_IMAGE, type PageSeo } from "./seo";
+import {
+  canonicalUrl,
+  isNoindex,
+  PAGES,
+  SOCIAL_IMAGE,
+  type PageSeo,
+} from "./seo";
 
 interface Options {
   /** Overrides the PAGES lookup — used by the 404 page, which has no route. */
@@ -21,7 +27,8 @@ interface Options {
  */
 export function usePageMeta(path: string, options: Options = {}) {
   const { seo = PAGES[path], jsonLd } = options;
-  const { title, description, noindex } = seo;
+  const { title, description } = seo;
+  const noindex = isNoindex(seo);
   const url = canonicalUrl(path);
   // Serialize outside the effect so a fresh object literal per render doesn't
   // re-run it; the JSON is the actual dependency.

@@ -10,7 +10,9 @@
 // (from the same PAGES table the runtime hook uses). GitHub Pages then answers
 // /press/ with 200 and correct metadata before a line of JS executes; React
 // Router takes over from there and renders the same page. Also emits
-// sitemap.xml from the same table so the URL list can't drift either.
+// sitemap.xml from the same table so the URL list can't drift either, and
+// robots.txt. While the site is held out of search (INDEXABLE in seo.ts), every
+// page is stamped noindex instead and the sitemap is left out.
 //
 // Two things about loading are fixed up on the way: the heading font gets a
 // preload (its hashed filename is only known after the build), and the hero
@@ -21,7 +23,14 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { canonicalUrl, PAGES, SOCIAL_IMAGE } from "../src/app/_lib/seo.ts";
+import {
+  canonicalUrl,
+  INDEXABLE,
+  isNoindex,
+  PAGES,
+  SITE_URL,
+  SOCIAL_IMAGE,
+} from "../src/app/_lib/seo.ts";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(repoRoot, "dist");
@@ -62,9 +71,16 @@ function upsert(html, pattern, tag) {
     : html.replace("</head>", `    ${tag}\n  </head>`);
 }
 
-function withMeta(html, path, { title, description, noindex }) {
+function withMeta(html, path, seo) {
+  const { title, description } = seo;
+  const noindex = isNoindex(seo);
   const url = canonicalUrl(path);
   let out = html;
+  out = upsert(
+    out,
+    /<meta\s+name="robots"[^>]*>/s,
+    `<meta name="robots" content="${noindex ? "noindex, follow" : "index, follow"}" />`,
+  );
   out = out.replace(/<title>.*?<\/title>/s, `<title>${escape(title)}</title>`);
   out = upsert(
     out,
@@ -126,17 +142,29 @@ for (const [path, seo] of Object.entries(PAGES)) {
   written.push(path);
 }
 
-const urls = Object.entries(PAGES)
-  .filter(([, seo]) => !seo.noindex)
-  .map(([path]) => `  <url><loc>${canonicalUrl(path)}</loc></url>`)
-  .join("\n");
+// Crawling stays allowed either way: while the site is held back, a crawler
+// has to be able to fetch a page to see its noindex.
+const robots = ["User-agent: *", "Allow: /"];
 
-await writeFile(
-  join(dist, "sitemap.xml"),
-  `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
-);
+if (INDEXABLE) {
+  const urls = Object.entries(PAGES)
+    .filter(([, seo]) => !isNoindex(seo))
+    .map(([path]) => `  <url><loc>${canonicalUrl(path)}</loc></url>`)
+    .join("\n");
+
+  await writeFile(
+    join(dist, "sitemap.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+  );
+  robots.push("", `Sitemap: ${SITE_URL}/sitemap.xml`);
+}
+
+await writeFile(join(dist, "robots.txt"), robots.join("\n") + "\n");
 
 console.log(
-  `build-routes: wrote ${written.length} route pages (${written.join(", ")}) + sitemap.xml`,
+  `build-routes: wrote ${written.length} route pages (${written.join(", ")}) + robots.txt` +
+    (INDEXABLE
+      ? " + sitemap.xml"
+      : "; held out of search, so noindex and no sitemap"),
 );
