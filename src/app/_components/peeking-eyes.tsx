@@ -6,7 +6,8 @@ interface PeekingEyesProps {
 
 /**
  * The pair of glowing eyes from the wordmark's "oo", on their own. Decorative:
- * they blink every few seconds, and hold still under reduced motion.
+ * they blink twice when they appear and then hold still, and never blink under
+ * reduced motion.
  */
 export function PeekingEyes({ className = "h-16 w-auto" }: PeekingEyesProps) {
   const iris = useId();

@@ -566,11 +566,18 @@ const MELD_CLASS_ORDER: MeldClass[] = ["A", "B", "C"];
 /** Every meld and its value, grouped by the class that governs re-melding. */
 function MeldTable() {
   return (
-    <div className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-night-line">
+    // Focusable and named, so a keyboard can scroll it sideways when it is
+    // wider than the screen.
+    <div
+      role="region"
+      aria-labelledby="meld-table-caption"
+      tabIndex={0}
+      className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-night-line"
+    >
       {/* 20rem is the narrowest the three columns stay readable. It fits the
           column on a 375px phone; anything narrower scrolls sideways. */}
       <table className="w-full min-w-80 border-collapse text-left text-sm">
-        <caption className="sr-only">
+        <caption id="meld-table-caption" className="sr-only">
           Pinochle melds, their cards, and their point values
         </caption>
         <thead>
@@ -596,7 +603,7 @@ function MeldTable() {
           >
             <tr>
               <th
-                scope="colgroup"
+                scope="rowgroup"
                 colSpan={3}
                 className="px-4 py-2 text-xs font-semibold tracking-[0.14em] uppercase bg-night-raised/60 text-parchment-muted"
               >
@@ -605,14 +612,17 @@ function MeldTable() {
             </tr>
             {MELDS.filter((meld) => meld.cls === cls).map((meld) => (
               <tr key={meld.name}>
-                <td className="px-4 py-3 align-top font-medium text-parchment">
+                <th
+                  scope="row"
+                  className="px-4 py-3 align-top font-medium text-parchment"
+                >
                   {meld.name}
                   {meld.also && (
                     <span className="block text-xs font-normal text-parchment-muted">
                       also called {meld.also}
                     </span>
                   )}
-                </td>
+                </th>
                 <td className="px-4 py-3 align-top text-parchment-muted">
                   {meld.detail}
                 </td>
@@ -631,9 +641,14 @@ function MeldTable() {
 /** What each captured card is worth when the tricks are counted. */
 function CounterTable() {
   return (
-    <div className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-night-line">
+    <div
+      role="region"
+      aria-labelledby="counter-table-caption"
+      tabIndex={0}
+      className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-night-line"
+    >
       <table className="w-full min-w-72 border-collapse text-left text-sm">
-        <caption className="sr-only">
+        <caption id="counter-table-caption" className="sr-only">
           Point value of each rank when captured in a trick
         </caption>
         <thead>
@@ -661,9 +676,9 @@ function CounterTable() {
         <tbody className="divide-y border-t divide-night-line border-night-line">
           {COUNTERS.map((counter) => (
             <tr key={counter.rank}>
-              <td className="px-4 py-3 font-medium text-parchment">
+              <th scope="row" className="px-4 py-3 font-medium text-parchment">
                 {counter.rank}
-              </td>
+              </th>
               <td className="px-4 py-3 tabular-nums text-parchment-muted">
                 {counter.count}
               </td>
@@ -676,17 +691,25 @@ function CounterTable() {
             </tr>
           ))}
           <tr className="bg-night-raised">
-            <td colSpan={3} className="px-4 py-3 font-medium text-parchment">
+            <th
+              scope="row"
+              colSpan={3}
+              className="px-4 py-3 font-medium text-parchment"
+            >
               Counters in the deck
-            </td>
+            </th>
             <td className="px-4 py-3 text-right font-semibold tabular-nums text-parchment">
               {DEAL_POINTS.counters}
             </td>
           </tr>
           <tr className="bg-night-raised">
-            <td colSpan={3} className="px-4 py-3 font-medium text-parchment">
+            <th
+              scope="row"
+              colSpan={3}
+              className="px-4 py-3 font-medium text-parchment"
+            >
               Last trick
-            </td>
+            </th>
             <td className="px-4 py-3 text-right font-semibold tabular-nums text-parchment">
               {DEAL_POINTS.lastTrick}
             </td>

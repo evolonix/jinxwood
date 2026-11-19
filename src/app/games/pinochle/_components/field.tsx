@@ -23,11 +23,12 @@ const DENSITY: Record<Density, string> = {
 // No vertical margin here — the caller adds it, because the select wraps its
 // control in a relative box that has to own the spacing instead.
 const CONTROL_BASE =
-  "block w-full rounded-lg border-0 ring-1 ring-inset placeholder:text-parchment-muted focus:ring-2 focus-visible:outline-none bg-night text-parchment ring-night-line";
+  "block w-full rounded-lg border-0 ring-1 ring-inset placeholder:text-parchment-muted focus:ring-2 focus-visible:outline-none bg-night text-parchment ring-night-edge";
 
 function controlClass(density: Density, hasError: boolean, extra?: string) {
+  // Both error tones are 3:1 or better against the card the field sits on.
   const ring = hasError
-    ? "focus:ring-rose-500 ring-rose-700"
+    ? "focus:ring-rose-300 ring-rose-400"
     : "focus:ring-ember";
   return [CONTROL_BASE, DENSITY[density], ring, extra]
     .filter(Boolean)

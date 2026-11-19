@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { IMAGE_SIZES } from "../_lib/brand.gen";
 import { STUDIO } from "../_lib/content";
-import { ArrowRightIcon } from "./icons";
+import { ArrowRightIcon, PauseIcon, PlayIcon } from "./icons";
 import { Button } from "./button";
 import { Fireflies } from "./fireflies";
 import { Logo } from "./logo";
@@ -16,6 +17,28 @@ function srcSet(name: string, widths: number[], ext: "avif" | "webp") {
   return widths.map((w) => `/img/hero/${name}-${w}.${ext} ${w}w`).join(", ");
 }
 
+/** Where the visitor's choice to stop the fireflies is remembered. */
+const MOTION_KEY = "jinxwood:hero-motion";
+
+// Storage can be unavailable (private windows, blocked site data); the choice
+// then simply lasts for this visit.
+function readPaused(): boolean {
+  try {
+    return localStorage.getItem(MOTION_KEY) === "paused";
+  } catch {
+    return false;
+  }
+}
+
+function writePaused(paused: boolean) {
+  try {
+    if (paused) localStorage.setItem(MOTION_KEY, "paused");
+    else localStorage.removeItem(MOTION_KEY);
+  } catch {
+    // Nothing to do: the state still holds for this visit.
+  }
+}
+
 /**
  * The home page's opening: the forest illustration edge to edge, sliding up
  * under the transparent header.
@@ -27,8 +50,21 @@ function srcSet(name: string, widths: number[], ext: "avif" | "webp") {
  * top and the buttons over a fade at the bottom, leaving the castle clear. The
  * image box is also taller than the section there, which slides the castle
  * down out from under the headline.
+ *
+ * Every scrim that sits behind words is tied to where the words are, not to a
+ * share of the screen, so the text keeps its contrast (4.5:1, or 3:1 for the
+ * headline) on a short phone, a square window or a zoomed page, where a
+ * percentage would leave it over the sunset.
+ *
+ * The fireflies drift for as long as the page is open, so there is a button to
+ * stop them. It is not shown under reduced motion, where they never start.
  */
 export function Hero() {
+  const [paused, setPaused] = useState(readPaused);
+  const toggleMotion = () => {
+    writePaused(!paused);
+    setPaused(!paused);
+  };
   return (
     <section className="tall:min-h-[92svh] relative isolate -mt-(--header-h) flex min-h-[max(36rem,min(100svh,56.25vw))] overflow-hidden">
       <picture>
@@ -66,40 +102,63 @@ export function Hero() {
         />
       </picture>
 
-      {/* Scrims. Top: keeps the header legible. Side (wide) or top and bottom
-          (tall): puts the words on night. Bottom: fades the art into the page
+      {/* Scrims. Top: keeps the header legible. Side: puts the words on night
+          on everything but an upright phone, which gets one scrim behind each
+          block of words instead (below). Bottom: fades the art into the page
           so the image has no hard edge. */}
       <div
         aria-hidden="true"
-        className="from-night-deep/80 tall:h-[56%] tall:from-night-deep/95 tall:via-night-deep/75 tall:via-60% absolute inset-x-0 top-0 h-36 bg-linear-to-b to-transparent"
+        className="from-night-deep/80 absolute inset-x-0 top-0 h-36 bg-linear-to-b to-transparent"
       />
       <div
         aria-hidden="true"
-        className="from-night/95 via-night/65 tall:hidden absolute inset-0 bg-linear-to-r via-40% to-transparent to-70%"
+        className="hero-scrim-side tall:hidden absolute inset-0"
       />
       <div
         aria-hidden="true"
-        className="from-night tall:h-[52%] tall:via-night/80 absolute inset-x-0 bottom-0 h-44 bg-linear-to-t to-transparent"
+        className="from-night absolute inset-x-0 bottom-0 h-44 bg-linear-to-t to-transparent"
       />
 
-      <Fireflies />
+      {!paused && <Fireflies />}
+
+      <button
+        type="button"
+        onClick={toggleMotion}
+        aria-label={paused ? "Play animation" : "Pause animation"}
+        className="border-parchment/45 bg-night/60 text-parchment hover:border-parchment hover:bg-night/85 absolute top-[calc(var(--header-h)+0.5rem)] right-[max(1.5rem,env(safe-area-inset-right))] z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-sm transition-colors motion-reduce:hidden"
+      >
+        {paused ? <PlayIcon /> : <PauseIcon />}
+      </button>
 
       <div className="px-safe-lg tall:justify-between tall:pb-10 relative mx-auto flex w-full max-w-6xl flex-col justify-center gap-6 pt-[calc(var(--header-h)+1.5rem)] pb-20">
-        <div className="max-w-xl">
+        <div className="relative max-w-xl">
+          {/* Upright phone: night from the top of the screen to just under
+              the headline, then a fade. Wider than the screen on purpose; the
+              section clips it. */}
+          <div
+            aria-hidden="true"
+            className="from-night-deep/95 via-night-deep/80 tall:block absolute -inset-x-[100vw] -top-[100vh] -bottom-20 hidden bg-linear-to-b via-[calc(100%-5rem)] to-transparent"
+          />
           <Logo
             name="wordmark"
             sizes="(max-width: 30rem) 76vw, 22rem"
-            className="tall:w-[min(22rem,58vw)] h-auto w-[min(22rem,76vw)] drop-shadow-[0_4px_24px_rgb(26_18_45/0.6)]"
+            className="tall:w-[min(22rem,58vw)] relative h-auto w-[min(22rem,76vw)] drop-shadow-[0_4px_24px_rgb(26_18_45/0.6)]"
           />
-          <h1 className="mt-6 text-4xl leading-[1.08] [text-shadow:0_2px_20px_rgb(26_18_45/0.75)] sm:text-5xl lg:text-6xl">
+          <h1 className="relative mt-6 text-4xl leading-[1.08] [text-shadow:0_2px_20px_rgb(26_18_45/0.75)] sm:text-5xl lg:text-6xl">
             {STUDIO.tagline}
           </h1>
         </div>
-        <div className="max-w-xl">
-          <p className="text-parchment/90 text-lg [text-shadow:0_1px_12px_rgb(26_18_45/0.8)]">
+        <div className="relative max-w-xl">
+          {/* Upright phone: the same from the bottom of the screen up to just
+              over the introduction. */}
+          <div
+            aria-hidden="true"
+            className="from-night via-night/85 tall:block absolute -inset-x-[100vw] -top-20 -bottom-[100vh] hidden bg-linear-to-t via-[calc(100%-5rem)] to-transparent"
+          />
+          <p className="text-parchment relative text-lg [text-shadow:0_1px_12px_rgb(26_18_45/0.8)]">
             {STUDIO.intro}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="relative mt-6 flex flex-wrap gap-3">
             <Button to="/games" size="lg">
               See our games
               <ArrowRightIcon />

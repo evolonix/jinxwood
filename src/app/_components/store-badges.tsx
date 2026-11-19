@@ -1,20 +1,9 @@
 import { liveStores, type Game, type StoreLink } from "../_lib/content";
 import { AppleIcon } from "./icons";
 
-const STORE: Record<
-  StoreLink["kind"],
-  { lead: string; name: string; label: (game: string) => string }
-> = {
-  "app-store": {
-    lead: "Download on the",
-    name: "App Store",
-    label: (game) => `Download ${game} on the App Store`,
-  },
-  "google-play": {
-    lead: "Get it on",
-    name: "Google Play",
-    label: (game) => `Get ${game} on Google Play`,
-  },
+const STORE: Record<StoreLink["kind"], { lead: string; name: string }> = {
+  "app-store": { lead: "Download on the", name: "App Store" },
+  "google-play": { lead: "Get it on", name: "Google Play" },
 };
 
 interface StoreBadgesProps {
@@ -35,21 +24,24 @@ export function StoreBadges({ game, className }: StoreBadgesProps) {
       className={["flex flex-wrap gap-3", className].filter(Boolean).join(" ")}
     >
       {stores.map((store) => {
-        const { lead, name, label } = STORE[store.kind];
+        const { lead, name } = STORE[store.kind];
         return (
           <a
             key={store.kind}
             href={store.url}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={label(game.name)}
+            // Starts with the words on the badge, so someone who speaks what
+            // they see ("click Download on the App Store") hits it, then says
+            // which game and that it leaves the site.
+            aria-label={`${lead} ${name}: ${game.name} (opens in a new tab)`}
             className="inline-flex items-center gap-2.5 rounded-xl bg-black px-4 py-2.5 text-white ring-1 ring-white/20 transition-colors hover:bg-zinc-900"
           >
             {store.kind === "app-store" && <AppleIcon className="h-7 w-7" />}
             <span className="flex flex-col leading-none">
               <span className="text-[0.625rem] font-medium tracking-wide">
                 {lead}
-              </span>
+              </span>{" "}
               <span className="mt-0.5 text-xl font-semibold tracking-tight">
                 {name}
               </span>

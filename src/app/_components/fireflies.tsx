@@ -24,7 +24,10 @@ const FIREFLIES = [
   { left: "93%", top: "44%", size: 4, duration: 10, delay: 6, x: -12, y: -24 },
 ];
 
-/** A few amber lights drifting over the hero. Hidden under reduced motion. */
+/**
+ * A few amber lights drifting over the hero. Hidden under reduced motion, and
+ * left out altogether while the visitor has the hero's animation paused.
+ */
 export function Fireflies() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0">

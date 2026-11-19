@@ -19,7 +19,9 @@ export function AppStoreBadge({ className, page }: AppStoreBadgeProps) {
       href={storeUrl(page)}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Download ${APP.name} on the App Store`}
+      // Starts with the words on the badge, so someone who speaks what they
+      // see hits it, then says which game and that it leaves the site.
+      aria-label={`Download on the App Store: ${APP.name} (opens in a new tab)`}
       className={[
         "inline-flex items-center gap-2.5 rounded-xl bg-black px-4 py-2.5 text-white ring-1 ring-white/20 transition-colors hover:bg-zinc-900",
         className,
@@ -31,7 +33,7 @@ export function AppStoreBadge({ className, page }: AppStoreBadgeProps) {
       <span className="flex flex-col leading-none">
         <span className="text-[0.625rem] font-medium tracking-wide">
           Download on the
-        </span>
+        </span>{" "}
         <span className="mt-0.5 text-xl font-semibold tracking-tight">
           App Store
         </span>

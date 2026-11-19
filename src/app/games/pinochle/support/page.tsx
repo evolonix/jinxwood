@@ -45,7 +45,8 @@ export default function Support() {
         return undefined;
       case "email":
         if (!v) return "An email address is required.";
-        if (!EMAIL_RE.test(v)) return "Enter a valid email address.";
+        if (!EMAIL_RE.test(v))
+          return "Enter a valid email address, like name@example.com.";
         return undefined;
       case "topic":
         if (!v) return "Choose what your message is about.";
@@ -92,8 +93,16 @@ export default function Support() {
       // land off-target or leave the field under the sticky header), and it
       // won't scroll at all when the field is already focused — so we always
       // center the field explicitly, regardless of focus or prior state.
+      // An explicit "smooth" overrides the stylesheet's reduced-motion
+      // opt-out, so the preference is checked here.
+      const still = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       el.focus({ preventScroll: true });
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.scrollIntoView({
+        behavior: still ? "auto" : "smooth",
+        block: "center",
+      });
       return;
     }
   }

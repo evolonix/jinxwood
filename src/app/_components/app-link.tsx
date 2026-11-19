@@ -30,7 +30,22 @@ const UNDERLINE =
 
 /** An inline text link: a route inside the site (`to`) or any URL (`href`). */
 export function AppLink(props: AppLinkProps) {
-  const { icon, className, children: label, ...rest } = props;
+  const { icon, className, children: text, ...rest } = props;
+  const external = "href" in rest && rest.href !== undefined ? rest : null;
+  const opensNewTab = external
+    ? (external.newTab ??
+      (external.target === "_blank" || /^https?:/.test(external.href)))
+    : false;
+  // A link that opens a new tab says so to a screen reader, which otherwise
+  // gives no sign that the page has changed underneath.
+  const label = opensNewTab ? (
+    <>
+      {text}
+      <span className="sr-only"> (opens in a new tab)</span>
+    </>
+  ) : (
+    text
+  );
   const merged = (
     icon
       ? [COLOR, "inline-flex items-center gap-1.5", className]
@@ -60,15 +75,11 @@ export function AppLink(props: AppLinkProps) {
       </Link>
     );
   }
-  const { newTab, href, ...anchorRest } = rest as Omit<
-    AppLinkExternal,
-    "className" | "children"
-  >;
-  const external = newTab ?? /^https?:/.test(href);
+  const anchorRest = { ...(rest as AppLinkExternal) };
+  delete anchorRest.newTab;
   return (
     <a
-      href={href}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      {...(opensNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       {...anchorRest}
       className={merged}
     >

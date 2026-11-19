@@ -20,6 +20,9 @@
   --color-night-deep: #1a122d;
   --color-night-raised: #382a50;
   --color-night-line: #4a3b66;
+  /* The edge of a form field. A field is only found by its outline, so this
+     one is 3:1 or better against every night tone; night-line is not. */
+  --color-night-edge: #8f7fb0;
 
   /* Moonlight Parchment: text. Muted is 8.7:1 on night, 7.3:1 on raised. */
   --color-parchment: #f4ede0;
@@ -39,7 +42,9 @@
     0 0 0 1px rgb(242 169 59 / 0.25), 0 8px 30px -6px rgb(242 169 59 / 0.45);
 
   --animate-firefly: firefly var(--firefly-duration, 9s) ease-in-out infinite;
-  --animate-blink: blink 7s ease-in-out infinite;
+  /* Two blinks and then still: movement that starts by itself has to stop
+     within five seconds unless the page offers a way to stop it. */
+  --animate-blink: blink 2.2s ease-in-out 2;
 
   @keyframes firefly {
     0%,
@@ -61,11 +66,11 @@
 
   @keyframes blink {
     0%,
-    93%,
+    82%,
     100% {
       transform: scaleY(1);
     }
-    96% {
+    91% {
       transform: scaleY(0.08);
     }
   }
@@ -83,6 +88,22 @@
 }
 @utility pb-safe {
   padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
+/* The home hero's side scrim, for every shape but an upright phone. The dark
+   part reaches exactly as far as the column of words does, whatever the screen
+   width, then fades out, so the words are always on night and the art is clear
+   beyond them. The first length is where that column ends: the page gutter, or
+   the centred 72rem page's left edge plus its gutter, then the 36rem column. */
+@utility hero-scrim-side {
+  --hero-text-edge: calc(max(1.5rem, (100vw - 72rem) / 2 + 1.5rem) + 36rem);
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-night) 95%, transparent),
+    color-mix(in srgb, var(--color-night) 72%, transparent)
+      var(--hero-text-edge),
+    transparent calc(var(--hero-text-edge) + 16rem)
+  );
 }
 
 :root {
@@ -156,6 +177,15 @@ body {
   }
 }
 
+/* On a phone a game page can have a download bar fixed to the bottom of the
+   screen. Keep whatever takes keyboard focus clear of it, as the top padding
+   above does for the bars at the top. */
+@media (width < 48rem) {
+  html:has([data-get-bar]) {
+    scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -165,7 +195,7 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  /* Decorative loops have no resting frame worth freezing on: fireflies would
+  /* Decorative motion has no resting frame worth freezing on: fireflies would
      stop invisible anyway, and the eyes must not freeze mid-blink. */
   .animate-firefly {
     display: none;

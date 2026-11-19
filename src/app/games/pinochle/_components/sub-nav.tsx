@@ -38,14 +38,16 @@ export function SubNav() {
     // Sticks under the site header from tablet width up. On a phone the two
     // bars together would take too much of the screen, so this one scrolls
     // away. index.css reads data-subnav to keep anchors clear of both bars.
+    // Nearly opaque, for the same reason the header is: what scrolls under a
+    // more see-through bar can pull the highlighted item below 4.5:1.
     // The 1px is the header's bottom border, which is part of its height:
     // without it the bar would sit a pixel lower at the top of the page than
     // it does once it sticks.
     <div
       data-subnav
-      className="border-night-line bg-night/90 z-30 border-b backdrop-blur sm:sticky sm:top-[calc(var(--header-h)+env(safe-area-inset-top)+1px)]"
+      className="border-night-line bg-night/95 z-30 border-b backdrop-blur sm:sticky sm:top-[calc(var(--header-h)+env(safe-area-inset-top)+1px)]"
     >
-      <div className="px-safe-lg mx-auto flex h-(--subnav-h) max-w-6xl items-center gap-4">
+      <div className="px-safe-lg mx-auto flex max-w-6xl flex-col gap-1 py-2 sm:h-(--subnav-h) sm:flex-row sm:items-center sm:gap-4 sm:py-0">
         <SectionLink
           hash="#top"
           onHome={onHome}
@@ -63,10 +65,12 @@ export function SubNav() {
           </span>
         </SectionLink>
 
-        {/* Six items do not fit a phone, so the row scrolls sideways there. */}
+        {/* Six items do not fit across a phone, so there they wrap onto a
+            second row under the game's name. Nothing scrolls sideways: at
+            320px wide (a 400% zoom) every item is still on screen. */}
         <nav
           aria-label={APP.shortName}
-          className="-mr-2 ml-auto flex items-center gap-1 overflow-x-auto [scrollbar-width:none]"
+          className="-mx-3 flex flex-wrap items-center gap-x-1 sm:mx-0 sm:-mr-2 sm:ml-auto sm:flex-nowrap"
         >
           {ITEMS.map((item) => {
             // "page" when the item's own route is the one being viewed, "true"

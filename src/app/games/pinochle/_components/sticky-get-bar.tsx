@@ -34,6 +34,7 @@ export function StickyGetBar({ watchId }: { watchId: string }) {
 
   return (
     <div
+      data-get-bar
       aria-hidden={!show}
       inert={!show}
       className={[

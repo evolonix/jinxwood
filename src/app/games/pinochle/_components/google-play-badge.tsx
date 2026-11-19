@@ -23,7 +23,9 @@ export function GooglePlayBadge({ className }: GooglePlayBadgeProps) {
       href={PLAY_URL}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Get ${APP.name} on Google Play`}
+      // Starts with the words in the badge artwork, then says which game and
+      // that it leaves the site.
+      aria-label={`Get it on Google Play: ${APP.name} (opens in a new tab)`}
       className={["inline-flex rounded-xl", className]
         .filter(Boolean)
         .join(" ")}

@@ -271,14 +271,16 @@ export default function Home() {
             {REVIEWS.map((r) => (
               <li key={r.author + r.quote.slice(0, 16)}>
                 <Card>
-                  <p
-                    className="text-ember"
-                    aria-label={`${r.stars} out of 5 stars`}
-                  >
-                    {"★".repeat(r.stars)}
-                    <span className="text-night-line">
-                      {"★".repeat(5 - r.stars)}
+                  {/* aria-label is not read on a paragraph, so the rating is
+                      real text and the stars are hidden from screen readers. */}
+                  <p className="text-ember">
+                    <span aria-hidden="true">
+                      {"★".repeat(r.stars)}
+                      <span className="text-night-line">
+                        {"★".repeat(5 - r.stars)}
+                      </span>
                     </span>
+                    <span className="sr-only">{r.stars} out of 5 stars</span>
                   </p>
                   <blockquote className="mt-3 text-parchment-muted">
                     “{r.quote}”

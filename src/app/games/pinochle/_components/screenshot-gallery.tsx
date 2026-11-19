@@ -8,8 +8,11 @@ export function ScreenshotGallery() {
 
   return (
     <div>
+      {/* A row of toggle buttons. They were marked up as tabs, but tabs
+          promise a tab panel and arrow-key movement that are not here; a
+          pressed button says the same thing and works with Tab and Enter. */}
       <div
-        role="tablist"
+        role="group"
         aria-label="Choose a device"
         className="mb-8 flex flex-wrap gap-2"
       >
@@ -19,8 +22,7 @@ export function ScreenshotGallery() {
             <button
               key={d}
               type="button"
-              role="tab"
-              aria-selected={active}
+              aria-pressed={active}
               onClick={() => setDevice(d)}
               className={[
                 "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",

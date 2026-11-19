@@ -76,18 +76,20 @@ export default function Press() {
           {PALETTE.map((colour) => (
             <li
               key={colour.hex}
-              className="ring-night-line overflow-hidden rounded-2xl ring-1"
+              className="ring-night-line flex flex-col overflow-hidden rounded-2xl ring-1"
             >
+              {/* The hex value sits on its own dark chip: parchment straight
+                  on the moss swatch is 4.3:1, short of the 4.5:1 small text
+                  needs. */}
               <div
-                className="flex h-28 items-end p-4 font-mono text-sm font-semibold"
-                style={{
-                  backgroundColor: colour.hex,
-                  color: colour.dark ? "#F4EDE0" : "#2B1E3F",
-                }}
+                className="flex h-28 items-end p-4"
+                style={{ backgroundColor: colour.hex }}
               >
-                {colour.hex}
+                <span className="bg-night-deep text-parchment rounded-md px-2 py-1 font-mono text-sm font-semibold">
+                  {colour.hex}
+                </span>
               </div>
-              <div className="bg-night-raised h-full p-4">
+              <div className="bg-night-raised flex-1 p-4">
                 <h3 className="text-lg">{colour.name}</h3>
                 <p className="text-parchment-muted mt-1 text-sm">
                   {colour.use}

@@ -59,6 +59,22 @@ export function DownloadIcon({ className }: IconProps) {
   );
 }
 
+export function PauseIcon({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M9 5v14M15 5v14" />
+    </Line>
+  );
+}
+
+export function PlayIcon({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M8 5.5v13l10-6.5z" />
+    </Line>
+  );
+}
+
 export function ExternalIcon({ className }: IconProps) {
   return (
     <Line className={className}>

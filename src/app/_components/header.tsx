@@ -8,7 +8,9 @@ import { Logo } from "./logo";
 /**
  * Sticky site header. Transparent at the top of a page, so the home hero shows
  * through it, and solid night once the page has scrolled. Three links fit on
- * the narrowest phone, so there is no menu to open.
+ * a phone, so there is no menu to open. At 320px wide, which is also a desktop
+ * window zoomed to 400%, only two fit: "Say hello" steps aside there, and the
+ * same address is in the footer of every page.
  */
 export function Header() {
   const scrolled = useScrolled();
@@ -21,11 +23,14 @@ export function Header() {
   const hideLogo = path === "/" && !scrolled;
 
   return (
+    // Nearly opaque once scrolled: whatever passes underneath shows through
+    // the rest, and a bright screenshot under a more see-through bar pulls the
+    // highlighted link below 4.5:1.
     <header
       data-site-header
       className={`pt-safe sticky top-0 z-40 border-b transition-colors duration-300 ${
         scrolled
-          ? "border-night-line bg-night/90 backdrop-blur"
+          ? "border-night-line bg-night/95 backdrop-blur"
           : "border-transparent"
       }`}
     >
@@ -61,7 +66,7 @@ export function Header() {
             href={`mailto:${STUDIO.email}`}
             variant="outline"
             size="sm"
-            className="bg-night/40 ml-1 backdrop-blur-sm max-sm:px-3"
+            className="bg-night/40 ml-1 backdrop-blur-sm max-sm:px-3 max-[22.4rem]:hidden"
           >
             Say hello
           </Button>
