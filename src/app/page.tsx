@@ -22,6 +22,9 @@ const ORGANIZATION = {
 export default function Home() {
   usePageMeta("/", { jsonLd: [ORGANIZATION] });
   const featured = GAMES.filter((game) => game.status === "released");
+  // With one game out, the heading and the line under it talk about that
+  // game; they turn plural by themselves when a second one is released.
+  const single = featured.length === 1;
   return (
     <>
       <Hero />
@@ -29,8 +32,12 @@ export default function Home() {
       <Section
         id="games"
         eyebrow="Now playing"
-        title={featured.length === 1 ? "Our first game" : "Our games"}
-        description="Classic games, made with care, on the devices you already own."
+        title={single ? "Our first game" : "Our games"}
+        description={
+          single
+            ? "A classic game, made with care, on the devices you already own."
+            : "Classic games, made with care, on the devices you already own."
+        }
       >
         <div className="grid gap-8">
           {featured.map((game) => (
