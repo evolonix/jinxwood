@@ -97,5 +97,5 @@ Pushing to `main` runs `.github/workflows/deploy.yml`, which checks formatting, 
 One-time setup:
 
 1. In the repository's Pages settings, set the source to GitHub Actions and the custom domain to `jinxwood.com`. Set the domain straight away: without it the site is published under a subpath, where its root-relative URLs break.
-2. At the domain's DNS host, point the apex at GitHub Pages with `A` records for `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153` (and the matching `AAAA` records from GitHub's documentation), and add a `CNAME` for `www` to `jasonruesch.github.io`.
+2. At the domain's DNS host, point the apex at GitHub Pages with `A` records for `185.199.108.153`, `185.199.109.153`, `185.199.110.153` and `185.199.111.153` (and the matching `AAAA` records from GitHub's documentation), and add a `CNAME` for `www` to `evolonix.github.io`.
 3. Once the certificate is issued, turn on Enforce HTTPS.
