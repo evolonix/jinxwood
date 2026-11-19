@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 // No `base`: the site is served from the root of its own domain
-// (https://jinxwood.games), not from a project-page subdirectory.
+// (https://jinxwood.com), not from a project-page subdirectory.
 export default defineConfig({
   plugins: [reactRouterNext(), react(), tailwindcss()],
 });

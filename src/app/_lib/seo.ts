@@ -17,7 +17,7 @@
 import { PINOCHLE_PAGES } from "../games/pinochle/_lib/seo.ts";
 
 /** Canonical origin, no trailing slash. */
-export const SITE_URL = "https://jinxwood.games";
+export const SITE_URL = "https://jinxwood.com";
 
 /**
  * Whether search engines may list the site. While this is false, every page

@@ -9,7 +9,7 @@ export const STUDIO = {
   owner: "Evolonix LLC",
   copyright: "© 2026 Evolonix LLC",
   legalLine: "Jinxwood is the gaming brand of Evolonix LLC.",
-  url: "https://jinxwood.games",
+  url: "https://jinxwood.com",
   email: "hello@jinxwood.games",
   tagline: "Games with a little mischief and a little magic.",
   intro:
