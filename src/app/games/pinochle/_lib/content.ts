@@ -233,8 +233,6 @@ export interface Feature {
   title: string;
   body: string;
   icon: FeatureIcon;
-  /** Tailwind gradient classes for the card's accent strip. */
-  tone: string;
   /** The App Store custom product page that tells this feature's story. */
   storePage?: StorePage;
 }
@@ -244,27 +242,23 @@ export const FEATURES: Feature[] = [
     title: "Classic two-handed rules",
     body: "The full classic ruleset — flushes, marriages, pinochles, the dix, and declare-out. Nothing simplified away.",
     icon: "cards",
-    tone: "from-moss to-ember",
   },
   {
     title: "A guided first game",
     body: "New to Pinochle? Play a real deal with a short tip at each step. After that, legal-move highlighting and suggested plays are there when you want them.",
     icon: "book",
-    tone: "from-ember to-ember-bright",
     storePage: "learn",
   },
   {
     title: "The Daily Deal",
     body: "The same cards for everyone, every day — and free for good. Beat Ace's score — the Hard computer's — for gold, and build a streak, with streak freezes for the days life gets in the way.",
     icon: "calendar",
-    tone: "from-moss to-moss-light",
     storePage: "daily",
   },
   {
     title: "Three AI opponents, and a ladder",
     body: "Dix, Jack, and Ace: from an easygoing teacher to a card-counting shark that tracks the deck. Beat each three times to earn a new card back or table — and a coach after every deal shows you where the points went.",
     icon: "cpu",
-    tone: "from-moss to-ember",
   },
   {
     title: "Online, and on FaceTime",
@@ -272,13 +266,11 @@ export const FEATURES: Feature[] = [
       "Quick match or invite a friend over Game Center, or deal in on a FaceTime call with SharePlay on iPhone, iPad, and Mac." +
       (PLAY.live ? " (Apple devices; not on Android yet.)" : ""),
     icon: "globe",
-    tone: "from-ember to-ember-bright",
   },
   {
     title: "Make it yours",
     body: `Cameo court cards on five table themes, card backs in three patterns and six colors — plus three more to earn — three game speeds, and haptics on ${PLAY.live ? "iPhone and Android" : "iPhone"}.`,
     icon: "palette",
-    tone: "from-moss to-moss-light",
   },
   {
     title: "Made for the living room",
@@ -286,7 +278,6 @@ export const FEATURES: Feature[] = [
       ? "Full game-controller support, VoiceOver and TalkBack throughout, and a focus-based interface built for Apple TV, Android TV, and the big screen."
       : "Full game-controller support, VoiceOver throughout, and a focus-based interface built for Apple TV and the big screen.",
     icon: "controller",
-    tone: "from-moss to-ember",
   },
   {
     title: "No ads, no tracking",
@@ -294,7 +285,6 @@ export const FEATURES: Feature[] = [
       ? "No subscription and nothing collected — one purchase unlocks every device on that store. Just cards."
       : "No subscription and nothing collected — one purchase unlocks every device. Just cards.",
     icon: "shield",
-    tone: "from-ember to-ember-bright",
   },
 ];
 

@@ -138,8 +138,13 @@ export default function HowToPlay() {
       </section>
 
       <div className="px-safe-lg mx-auto max-w-6xl py-12 sm:py-16">
-        <div className="grid gap-10 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-14">
-          <aside className="lg:sticky lg:top-[calc(var(--header-h)+var(--subnav-h)+1.5rem)] lg:self-start">
+        {/* minmax(0, 1fr) at every width: a plain single column would grow to
+            fit its widest table and push the text past the page's gutter. */}
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-14">
+          {/* The contents list is a sidebar. Below desktop width there is no
+              side to put it on and it would only push the rules down the page,
+              so it is left out. */}
+          <aside className="hidden lg:sticky lg:top-[calc(var(--header-h)+var(--subnav-h)+1.5rem)] lg:block lg:self-start">
             <nav aria-labelledby="toc-heading">
               <Eyebrow as="h2" id="toc-heading" className="mb-3">
                 On this page
@@ -166,7 +171,7 @@ export default function HowToPlay() {
               </ol>
             </nav>
 
-            <Card className="mt-8 hidden lg:block" accent="from-moss to-ember">
+            <Card className="mt-8">
               <img
                 src={asset("img/app-icon.webp")}
                 alt=""
@@ -554,7 +559,9 @@ const MELD_CLASS_ORDER: MeldClass[] = ["A", "B", "C"];
 function MeldTable() {
   return (
     <div className="mt-6 overflow-x-auto rounded-2xl ring-1 ring-night-line">
-      <table className="w-full min-w-88 border-collapse text-left text-sm">
+      {/* 20rem is the narrowest the three columns stay readable. It fits the
+          column on a 375px phone; anything narrower scrolls sideways. */}
+      <table className="w-full min-w-80 border-collapse text-left text-sm">
         <caption className="sr-only">
           Pinochle melds, their cards, and their point values
         </caption>

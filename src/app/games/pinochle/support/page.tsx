@@ -165,10 +165,6 @@ export default function Support() {
             aria-labelledby="send-heading"
             className="relative space-y-4 overflow-hidden rounded-2xl p-6 ring-1 bg-night-raised ring-night-line"
           >
-            <div
-              aria-hidden
-              className="from-moss to-ember absolute inset-x-0 top-0 h-1 bg-linear-to-r"
-            />
             <h2 id="send-heading" className="text-lg font-semibold">
               Send a message
             </h2>

@@ -15,12 +15,17 @@ interface GameCardProps {
 /**
  * A game at a glance: icon, name, pitch, platforms and where to get it, beside
  * a screenshot. Used on the home page and the games index.
+ *
+ * The whole card goes to the game's page. The link is the game's name, and its
+ * ::after is stretched over the card, so there is still one link for a screen
+ * reader and the pointer shows everywhere. The store badge and the button sit
+ * above that layer to stay clickable in their own right.
  */
 export function GameCard({ game, as: Heading = "h3" }: GameCardProps) {
   const [shot] = game.art.shots;
   const to = gamePath(game.slug);
   return (
-    <article className="bg-night-raised ring-night-line grid overflow-hidden rounded-3xl ring-1 transition-shadow duration-300 hover:shadow-glow lg:grid-cols-[1fr_1.15fr]">
+    <article className="bg-night-raised ring-night-line group relative grid overflow-hidden rounded-3xl ring-1 transition-shadow duration-300 hover:shadow-glow lg:grid-cols-[1fr_1.15fr]">
       <div className="flex flex-col gap-5 p-6 sm:p-8">
         <div className="flex items-center gap-4">
           <img
@@ -34,7 +39,11 @@ export function GameCard({ game, as: Heading = "h3" }: GameCardProps) {
           />
           <div>
             <Heading className="text-2xl sm:text-3xl">
-              <Link to={to} viewTransition className="hover:text-ember">
+              <Link
+                to={to}
+                viewTransition
+                className="group-hover:text-ember transition-colors after:absolute after:inset-0"
+              >
                 {game.name}
               </Link>
             </Heading>
@@ -45,21 +54,15 @@ export function GameCard({ game, as: Heading = "h3" }: GameCardProps) {
         <p className="text-parchment-muted">{game.description}</p>
         <PlatformList platforms={game.platforms} />
         <div className="mt-auto flex flex-wrap items-center gap-4 pt-2">
-          <StoreBadges game={game} />
-          <Button to={to} variant="outline">
+          <StoreBadges game={game} className="relative z-10" />
+          <Button to={to} variant="outline" className="relative z-10">
             More about {game.shortName}
             <ArrowRightIcon />
           </Button>
         </div>
       </div>
       {shot && (
-        <Link
-          to={to}
-          viewTransition
-          tabIndex={-1}
-          aria-hidden="true"
-          className="bg-night-deep block"
-        >
+        <div className="bg-night-deep">
           <img
             src={shot.src}
             width={shot.width}
@@ -69,7 +72,7 @@ export function GameCard({ game, as: Heading = "h3" }: GameCardProps) {
             decoding="async"
             className="h-full w-full object-cover"
           />
-        </Link>
+        </div>
       )}
     </article>
   );

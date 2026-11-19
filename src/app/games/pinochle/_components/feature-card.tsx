@@ -34,7 +34,7 @@ const ICONS: Record<
 export function FeatureCard({ feature }: { feature: Feature }) {
   const Icon = ICONS[feature.icon];
   return (
-    <Card accent={feature.tone} className="h-full">
+    <Card className="h-full">
       <span className="text-ember inline-flex h-10 w-10 items-center justify-center rounded-xl bg-ember/10">
         <Icon className="h-5 w-5" />
       </span>

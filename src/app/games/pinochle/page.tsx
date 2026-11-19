@@ -181,7 +181,7 @@ export default function Home() {
           label="Gameplay video: a title card, then a hand of two-handed pinochle being dealt, played, and melded against the computer"
           className="mt-10"
         />
-        <Card accent="from-moss to-ember" className="mt-10">
+        <Card className="mt-10">
           {/* Folded by default: most visitors are new, and a changelog reads as
               noise before they know the game; returning players open it. */}
           <details className="group">
@@ -361,7 +361,7 @@ export default function Home() {
             </ol>
 
             <div className="space-y-6">
-              <Card accent="from-ember to-ember-bright">
+              <Card>
                 <h3 className="text-lg font-semibold text-parchment">
                   Meld scoring
                 </h3>
