@@ -30,7 +30,7 @@ export default function Privacy() {
       </p>
       <p className="mt-8 text-lg">
         Pinochle (&ldquo;the app&rdquo;) is a card game for {PLATFORM_LIST},
-        developed by Evolonix LLC and published under its Jinxwood brand.
+        developed by Evolonix LLC, doing business as Jinxwood Games.
       </p>
 
       <Clause heading="Data collection">

@@ -21,7 +21,7 @@ export default function Terms() {
       </p>
       <p className="mt-8 text-lg">
         These terms cover Pinochle: Two-Handed (&ldquo;the app&rdquo;), a card
-        game developed by Evolonix LLC and published under its Jinxwood brand
+        game developed by Evolonix LLC, doing business as Jinxwood Games
         (&ldquo;the developer&rdquo;). By downloading or playing the app, you
         agree to them.
       </p>

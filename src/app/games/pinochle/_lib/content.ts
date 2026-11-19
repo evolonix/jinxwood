@@ -43,7 +43,7 @@ export function storeUrl(page?: StorePage): string {
 // clears, and that day this flips to true (see the app repo's
 // Docs/AndroidPlan.md, "Launch day").
 export const PLAY = {
-  packageName: "dev.jasonruesch.Pinochle",
+  packageName: "games.jinxwood.pinochle",
   live: false,
 } as const;
 

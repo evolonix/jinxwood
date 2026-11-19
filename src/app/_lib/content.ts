@@ -86,7 +86,7 @@ export const GAMES: readonly Game[] = [
       },
       {
         kind: "google-play",
-        url: "https://play.google.com/store/apps/details?id=dev.jasonruesch.Pinochle",
+        url: "https://play.google.com/store/apps/details?id=games.jinxwood.pinochle",
         live: false,
       },
     ],

@@ -73,8 +73,16 @@ const SCHEMA = [
     operatingSystem: OPERATING_SYSTEMS,
     softwareVersion: STORE.version,
     installUrl: STORE_URL,
-    author: { "@type": "Organization", name: "Evolonix LLC" },
-    publisher: { "@type": "Organization", name: "Jinxwood" },
+    author: {
+      "@type": "Organization",
+      name: "Jinxwood Games",
+      legalName: "Evolonix LLC",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Jinxwood Games",
+      legalName: "Evolonix LLC",
+    },
   },
 ];
 

@@ -80,8 +80,16 @@ const SCHEMA = [
     description: PAGES[PATH].description,
     mainEntityOfPage: canonicalUrl(PATH),
     inLanguage: "en",
-    author: { "@type": "Organization", name: "Jinxwood" },
-    publisher: { "@type": "Organization", name: "Evolonix LLC" },
+    author: {
+      "@type": "Organization",
+      name: "Jinxwood Games",
+      legalName: "Evolonix LLC",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Jinxwood Games",
+      legalName: "Evolonix LLC",
+    },
     about: { "@type": "Thing", name: "Pinochle", alternateName: "Binocle" },
     mentions: {
       "@type": "SoftwareApplication",
