@@ -48,6 +48,12 @@ export interface Game {
   highlights: readonly string[];
   platforms: readonly Platform[];
   price: string;
+  /** What follows the free part: said after `price` on the game's card. */
+  priceNote: string;
+  /** The version on sale, and when it and the first version came out. */
+  release: { version: string; date: string; firstReleased: string };
+  /** The name the game is published under. */
+  developer: string;
   status: "released" | "coming-soon";
   stores: readonly StoreLink[];
   /** Routes of the game's own support and policy pages on this site. */
@@ -68,7 +74,7 @@ export const GAMES: readonly Game[] = [
     subtitle: "The classic two-handed duel",
     tagline: "One deck, two players, two hundred fifty points a deal.",
     description:
-      "Two-handed pinochle the way it is played at the kitchen table: one 48-card deck, melds, tricks and a race to 1,000. Play against the computer, challenge a friend online, or deal a hand over FaceTime.",
+      "Two-handed pinochle the way it is played at the kitchen table: one 48-card deck, melds, tricks, and a race to 1,000. Play against the computer, challenge a friend online, or deal a hand over FaceTime.",
     highlights: [
       "The complete two-handed rules",
       "Three AI opponents",
@@ -77,6 +83,13 @@ export const GAMES: readonly Game[] = [
     ],
     platforms: ["iPhone", "iPad", "Mac", "Apple TV"],
     price: "Free to try for 14 days",
+    priceNote: "One purchase after that. No subscription, no ads.",
+    release: {
+      version: "2.0",
+      date: "November 21, 2026",
+      firstReleased: "July 31, 2026",
+    },
+    developer: "Jinxwood Games",
     status: "released",
     stores: [
       {
@@ -194,8 +207,16 @@ export const PRESS = {
 } as const;
 
 /** Bump when the text of the policy pages changes. */
-export const PRIVACY = { updated: "November 18, 2026" } as const;
-export const TERMS = { updated: "November 18, 2026" } as const;
+export const PRIVACY = { updated: "November 20, 2026" } as const;
+export const TERMS = { updated: "November 20, 2026" } as const;
+
+/** A list as a sentence would say it: "iPhone, iPad, Mac, and Apple TV". */
+export function sentenceList(items: readonly string[]): string {
+  return new Intl.ListFormat("en-US", {
+    style: "long",
+    type: "conjunction",
+  }).format(items);
+}
 
 export function gameBySlug(slug: string): Game | undefined {
   return GAMES.find((game) => game.slug === slug);

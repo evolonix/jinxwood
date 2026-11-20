@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { IMAGE_SIZES } from "../_lib/brand.gen";
-import { STUDIO } from "../_lib/content";
+import { GAMES, sentenceList, STUDIO } from "../_lib/content";
+import { gamePath } from "../_lib/seo";
 import { ArrowRightIcon, PauseIcon, PlayIcon } from "./icons";
 import { Button } from "./button";
 import { Fireflies } from "./fireflies";
@@ -65,6 +66,11 @@ export function Hero() {
     writePaused(!paused);
     setPaused(!paused);
   };
+  // The introduction names the first game out, and while it is the only one
+  // the main button goes straight to it.
+  const released = GAMES.filter((game) => game.status === "released");
+  const [first] = released;
+  const only = released.length === 1 ? first : undefined;
   return (
     <section className="tall:min-h-[92svh] relative isolate -mt-(--header-h) flex min-h-[max(36rem,min(100svh,56.25vw))] overflow-hidden">
       <picture>
@@ -157,10 +163,12 @@ export function Hero() {
           />
           <p className="text-parchment relative text-lg [text-shadow:0_1px_12px_rgb(26_18_45/0.8)]">
             {STUDIO.intro}
+            {first &&
+              ` Our first, ${first.name}, is out now on ${sentenceList(first.platforms)}, and ${first.price.charAt(0).toLowerCase()}${first.price.slice(1)}.`}
           </p>
           <div className="relative mt-6 flex flex-wrap gap-3">
-            <Button to="/games" size="lg">
-              See our games
+            <Button to={only ? gamePath(only.slug) : "/games"} size="lg">
+              {only ? `Play ${only.shortName}` : "See our games"}
               <ArrowRightIcon />
             </Button>
             <Button

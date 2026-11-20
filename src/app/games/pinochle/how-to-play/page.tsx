@@ -129,10 +129,10 @@ export default function HowToPlay() {
             How to play two-handed pinochle
           </h1>
           <p className="text-parchment-muted mt-5 max-w-2xl text-lg">
-            Pinochle for two players is the original game, not a cut-down
-            version of the partnership one — one 48-card deck, twelve cards
-            each, and a stock you draw from until it runs dry. Here is the whole
-            ruleset: the deal, the melds and what they score, the dix, the
+            Pinochle for two players is a complete game in its own right, not a
+            cut-down version of the partnership one — one 48-card deck, twelve
+            cards each, and a stock you draw from until it runs dry. Here is the
+            whole ruleset: the deal, the melds and what they score, the dix, the
             playoff after the stock is gone, and the race to 1,000.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -398,15 +398,16 @@ export default function HowToPlay() {
               <CounterTable />
               <p>
                 That is {DEAL_POINTS.counters} points sitting in the deck. Add{" "}
-                {DEAL_POINTS.lastTrick} for the last trick and every deal is
-                worth exactly <strong>{DEAL_POINTS.total}</strong> in counters —
-                melds on top of it.
+                {DEAL_POINTS.lastTrick} for the last trick and{" "}
+                <strong>{DEAL_POINTS.total}</strong> trick points are at stake
+                in every deal, with melds on top.
               </p>
               <p>
-                Round your trick total to the nearest ten before adding it up: a
-                total ending in 7, 8 or 9 rounds up, anything less rounds down.
-                47 counts 50; 46 counts 40. Your score for the deal is your
-                melds plus your rounded trick points.
+                Round your trick total before adding it up: a total ending in 7,
+                8, or 9 rounds up to the next ten, and anything less rounds
+                down. 47 counts 50; 46 counts 40. Because both players round,
+                the two totals can come to 240 instead of 250. Your score for
+                the deal is your melds plus your rounded trick points.
               </p>
             </RuleSection>
 
@@ -474,8 +475,8 @@ export default function HowToPlay() {
               <DeviceFrame shot={HINTS_SHOT} />
               <p className="mt-4 text-sm text-parchment-muted">
                 Learning it at the table is easier with a referee. {APP.name}{" "}
-                highlights the cards you may legally play, suggests the melds in
-                your hand, and does every count above for you —{" "}
+                highlights the cards you may legally play, lists the melds you
+                can lay down, and does every count above for you —{" "}
                 <AppLink to={{ pathname: route(), hash: "#features" }}>
                   see what else it does
                 </AppLink>{" "}
@@ -501,8 +502,8 @@ export default function HowToPlay() {
           <h2 className="text-3xl sm:text-4xl">Now find someone to play</h2>
           <p className="text-parchment-muted mt-3 text-lg">
             {PLAY.live
-              ? `Three AI opponents on ${PLATFORM_LIST} — plus online matches over Game Center and SharePlay over FaceTime on Apple devices.`
-              : "Three AI opponents, online matches over Game Center, and SharePlay over FaceTime — on iPhone, iPad, Mac, and Apple TV."}
+              ? `Three computer opponents on ${PLATFORM_LIST}. Online matches over Game Center on Apple devices, and SharePlay over FaceTime on iPhone, iPad, and Mac.`
+              : "Three computer opponents and online matches over Game Center on iPhone, iPad, Mac, and Apple TV, plus SharePlay over FaceTime on iPhone, iPad, and Mac."}
           </p>
           <div className="mt-8">
             <StoreBadges page="learn" />

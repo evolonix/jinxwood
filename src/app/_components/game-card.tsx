@@ -52,6 +52,10 @@ export function GameCard({ game, as: Heading = "h3" }: GameCardProps) {
         </div>
         <p className="font-display text-xl">{game.tagline}</p>
         <p className="text-parchment-muted">{game.description}</p>
+        <p>
+          <strong className="font-semibold">{game.price}.</strong>{" "}
+          <span className="text-parchment-muted">{game.priceNote}</span>
+        </p>
         <PlatformList platforms={game.platforms} />
         <div className="mt-auto flex flex-wrap items-center gap-4 pt-2">
           <StoreBadges game={game} className="relative z-10" />

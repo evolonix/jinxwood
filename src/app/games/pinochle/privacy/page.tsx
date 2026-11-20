@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import { AppLink } from "../../../_components/app-link";
 import { Clause } from "../../../_components/clause";
 import { Eyebrow } from "../../../_components/eyebrow";
-import { PLATFORM_LIST, PLAY, PRIVACY } from "../_lib/content";
+import { PRIVACY } from "../_lib/content";
 import { usePageMeta } from "../../../_lib/use-page-meta";
 import { route } from "../_lib/routes";
 
@@ -29,18 +29,18 @@ export default function Privacy() {
         Last updated: {PRIVACY.updated}
       </p>
       <p className="mt-8 text-lg">
-        Pinochle (&ldquo;the app&rdquo;) is a card game for {PLATFORM_LIST},
-        developed by Evolonix LLC, doing business as Jinxwood Games.
+        Pinochle (&ldquo;the app&rdquo;) is a card game for iPhone, iPad, Mac,
+        Apple TV, and Android, developed by Evolonix LLC, doing business as
+        Jinxwood Games.
       </p>
 
       <Clause heading="Data collection">
         <p>
           The app does not collect, store, or transmit any personal data. There
           are no accounts, no analytics, no advertising, and no tracking of any
-          kind. Your match progress and settings are stored only on your device
-          (and in your personal iCloud/Game Center data managed by Apple
-          {PLAY.live && ", or Google Play Games data managed by Google"}, where
-          applicable).
+          kind. Your match progress and settings are stored only on your device.
+          Scores and achievements you earn through Game Center are kept by
+          Apple, and through Google Play Games by Google.
         </p>
       </Clause>
 
@@ -58,21 +58,19 @@ export default function Privacy() {
         </p>
       </Clause>
 
-      {PLAY.live && (
-        <Clause heading="Google Play (Android)">
-          <p>
-            On Android, purchases go through Google Play Billing, and
-            leaderboards and achievements through Google Play Games if you sign
-            in to it. The date your free trial started is kept in Google&apos;s
-            Block Store, tied to your Google Account, so reinstalling
-            doesn&apos;t reset it. All of this is handled by Google under{" "}
-            <AppLink href={PRIVACY.googlePolicyUrl}>
-              Google&apos;s own privacy policy
-            </AppLink>
-            ; the developer does not receive, collect, or store any of it.
-          </p>
-        </Clause>
-      )}
+      <Clause heading="Google Play (Android)">
+        <p>
+          On Android, purchases go through Google Play Billing, and leaderboards
+          and achievements through Google Play Games if you sign in to it. The
+          date your free trial started is kept in Google&apos;s Block Store,
+          tied to your Google Account, so reinstalling doesn&apos;t reset it.
+          All of this is handled by Google under{" "}
+          <AppLink href={PRIVACY.googlePolicyUrl}>
+            Google&apos;s own privacy policy
+          </AppLink>
+          ; the developer does not receive, collect, or store any of it.
+        </p>
+      </Clause>
 
       <Clause heading="SharePlay">
         <p>

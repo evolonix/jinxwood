@@ -3,7 +3,14 @@ import { AppLink } from "../_components/app-link";
 import { Eyebrow } from "../_components/eyebrow";
 import { DownloadIcon } from "../_components/icons";
 import { Logo, type LogoName } from "../_components/logo";
-import { GAMES, PALETTE, PRESS, STUDIO } from "../_lib/content";
+import {
+  GAMES,
+  liveStores,
+  PALETTE,
+  PRESS,
+  sentenceList,
+  STUDIO,
+} from "../_lib/content";
 import { gamePath } from "../_lib/seo";
 import { usePageMeta } from "../_lib/use-page-meta";
 
@@ -40,6 +47,50 @@ export default function Press() {
           </Fact>
         </dl>
       </Block>
+
+      {GAMES.filter((game) => game.status === "released").map((game) => {
+        const playToFollow = game.stores.some(
+          (store) => store.kind === "google-play" && !store.live,
+        );
+        return (
+          <Block key={game.slug} title={`${game.name} at a glance`}>
+            <dl className="grid max-w-3xl gap-x-8 gap-y-4 sm:grid-cols-[10rem_1fr]">
+              <Fact term="Version">
+                {game.release.version}, released {game.release.date} (first
+                released {game.release.firstReleased})
+              </Fact>
+              <Fact term="Price">
+                {game.price}. {game.priceNote}
+              </Fact>
+              <Fact term="Platforms">
+                {sentenceList(game.platforms)}
+                {playToFollow && "; Android on Google Play to follow"}
+              </Fact>
+              <Fact term="Developer">{game.developer}</Fact>
+              <Fact term="Get it">
+                {liveStores(game).map((store, i) => (
+                  <span key={store.kind}>
+                    {i > 0 && ", "}
+                    <AppLink href={store.url}>
+                      {store.kind === "app-store" ? "App Store" : "Google Play"}
+                    </AppLink>
+                  </span>
+                ))}
+              </Fact>
+              <Fact term="Press contact">
+                <AppLink href={`mailto:${STUDIO.email}`}>
+                  {STUDIO.email}
+                </AppLink>
+              </Fact>
+            </dl>
+            <p className="text-parchment-muted mt-6 max-w-3xl">
+              The screenshots and gameplay video on{" "}
+              <AppLink to={gamePath(game.slug)}>the game&apos;s page</AppLink>{" "}
+              are free to use in coverage.
+            </p>
+          </Block>
+        );
+      })}
 
       <Block title="Logos">
         <ul className="grid gap-6 sm:grid-cols-2">
