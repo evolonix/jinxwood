@@ -121,7 +121,7 @@ export default function HowToPlay() {
       <section className="border-night-line from-night to-night-deep relative isolate overflow-hidden border-b bg-linear-to-b">
         <div
           aria-hidden
-          className="bg-ember/15 pointer-events-none absolute top-1/4 -right-24 -z-10 h-96 w-96 rounded-full blur-3xl"
+          className="glow text-ember/15 pointer-events-none absolute top-1/4 -right-24 -z-10 h-96 w-96"
         />
         <div className="px-safe-lg relative mx-auto max-w-6xl py-16 sm:py-20">
           <Eyebrow>The complete rules</Eyebrow>
@@ -496,7 +496,7 @@ export default function HowToPlay() {
       <section className="border-night-line bg-night-deep relative isolate overflow-hidden border-t">
         <div
           aria-hidden
-          className="bg-ember/15 pointer-events-none absolute top-1/2 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+          className="glow text-ember/15 pointer-events-none absolute top-1/2 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2"
         />
         <div className="px-safe-lg relative mx-auto flex max-w-3xl flex-col items-center py-16 text-center sm:py-20">
           <h2 className="text-3xl sm:text-4xl">Now find someone to play</h2>

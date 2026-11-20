@@ -99,11 +99,11 @@ export default function Home() {
       >
         <div
           aria-hidden
-          className="bg-ember/15 pointer-events-none absolute top-1/4 -right-24 -z-10 h-96 w-96 rounded-full blur-3xl"
+          className="glow text-ember/15 pointer-events-none absolute top-1/4 -right-24 -z-10 h-96 w-96"
         />
         <div
           aria-hidden
-          className="bg-moss/25 pointer-events-none absolute -bottom-40 -left-24 -z-10 h-96 w-96 rounded-full blur-3xl"
+          className="glow text-moss/25 pointer-events-none absolute -bottom-40 -left-24 -z-10 h-96 w-96"
         />
         <div className="px-safe-lg relative mx-auto grid max-w-6xl items-center gap-12 py-20 sm:py-28 lg:grid-cols-2">
           <div>
@@ -440,7 +440,7 @@ export default function Home() {
       <section className="border-night-line bg-night-deep relative isolate overflow-hidden border-t">
         <div
           aria-hidden
-          className="bg-ember/15 pointer-events-none absolute top-1/2 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+          className="glow text-ember/15 pointer-events-none absolute top-1/2 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2"
         />
         <div className="px-safe-lg relative mx-auto flex max-w-3xl flex-col items-center py-20 text-center sm:py-24">
           <h2 className="text-3xl sm:text-4xl">{APP.tagline}</h2>
