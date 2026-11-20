@@ -29,10 +29,12 @@ export default function Privacy() {
       <Clause heading="What this site collects">
         <p>
           Nothing. The site has no accounts, no cookies, no analytics and no
-          advertising. Its fonts, images, video and scripts are all served from
-          this domain, so loading a page does not contact any third party. The
-          one form, on a game&apos;s support page, sends nothing to this site:
-          it opens a ready-written message in your own email app.
+          advertising. If you pause the animation on the home page, your browser
+          remembers that choice on your device; it is never sent to us. Its
+          fonts, images, video and scripts are all served from this domain, so
+          loading a page does not contact any third party. The one form, on a
+          game&apos;s support page, sends nothing to this site: it opens a
+          ready-written message in your own email app.
         </p>
       </Clause>
 

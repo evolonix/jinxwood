@@ -252,8 +252,8 @@ export default function Home() {
           <h2 className="text-3xl sm:text-4xl">One deck, every screen</h2>
           <p className="mt-4 max-w-2xl text-lg text-parchment-muted">
             {PLAY.live
-              ? "The new look and cameo court cards on Apple and Android phones, tablets, computers, and the big screen."
-              : "The new look and cameo court cards on iPhone, iPad, Mac, and the big screen."}{" "}
+              ? "The new look, with kings, queens, and jacks in gold-framed profile, on Apple and Android phones, tablets, computers, and TVs."
+              : "The new look, with kings, queens, and jacks in gold-framed profile, on iPhone, iPad, Mac, and Apple TV."}{" "}
             Pick a device to take a look.
           </p>
           <div className="mt-10">
@@ -341,7 +341,7 @@ export default function Home() {
       >
         <div className="px-safe-lg mx-auto max-w-6xl py-16 sm:py-20">
           <Eyebrow className="mb-3">How to play</Eyebrow>
-          <h2 className="text-3xl sm:text-4xl">Learn it in a deal</h2>
+          <h2 className="text-3xl sm:text-4xl">The game in six steps</h2>
           <p className="mt-4 max-w-2xl text-lg text-parchment-muted">
             Two-handed pinochle plays in two phases. Here&apos;s the shape of
             it, start to 1,000 — the app teaches the rest as you go, and the{" "}
@@ -417,12 +417,14 @@ export default function Home() {
             {PLAY.live ? "Game Center & Google Play Games" : "Game Center"}
           </Eyebrow>
           <h2 className="text-3xl sm:text-4xl">
-            Fifteen achievements to chase
+            {PLAY.live
+              ? "Achievements to chase"
+              : "Fifteen achievements to chase"}
           </h2>
           <p className="mt-4 max-w-2xl text-lg text-parchment-muted">
             {PLAY.live
-              ? "Rack up wins, streaks, and legendary hands — tracked on Game Center leaderboards, and on Google Play Games on Android."
-              : "Rack up wins, streaks, and legendary hands — all tracked on Game Center leaderboards."}
+              ? "Fifteen on Game Center, fourteen on Google Play Games. Wins, streaks, and legendary hands earn them, and five leaderboards on each rank you against other players."
+              : "Wins, streaks, and legendary hands earn achievements, and five Game Center leaderboards rank you against other players."}
           </p>
         </div>
 

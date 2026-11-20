@@ -11,6 +11,10 @@ import { usePageMeta } from "../_lib/use-page-meta";
  */
 export default function Terms() {
   usePageMeta("/terms");
+  // Google asks for its credit line wherever its badge is shown.
+  const onGooglePlay = GAMES.some((game) =>
+    game.stores.some((store) => store.kind === "google-play" && store.live),
+  );
   return (
     <div className="px-safe-lg mx-auto max-w-3xl py-12 sm:py-16">
       <Eyebrow className="mb-3">Legal</Eyebrow>
@@ -40,8 +44,11 @@ export default function Terms() {
           the studio and its games. Any other use needs our permission first.
         </p>
         <p>
-          Apple, iPhone, iPad, Mac, Apple TV and App Store are trademarks of
-          Apple Inc. Other names and marks belong to their owners.
+          Apple, iPhone, iPad, Mac, and Apple TV are trademarks of Apple Inc.
+          App Store is a service mark of Apple Inc.
+          {onGooglePlay &&
+            " Google Play and the Google Play logo are trademarks of Google LLC."}{" "}
+          Other names and marks belong to their owners.
         </p>
       </Clause>
 

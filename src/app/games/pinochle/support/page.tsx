@@ -250,7 +250,7 @@ export default function Support() {
                 type="text"
                 inputMode="decimal"
                 placeholder={STORE.version}
-                hint="Shown at the bottom of the app's main title screen."
+                hint="Shown under the Pinochle wordmark on the title screen, and in Settings."
               />
             </div>
             <FieldTextarea
@@ -261,7 +261,13 @@ export default function Support() {
               onBlur={handleFieldBlur}
               hint="For a bug: what you were doing, what you expected, and what happened instead."
             />
-            <Button type="submit">Send message</Button>
+            <div>
+              <Button type="submit">Open in my email app</Button>
+              <p className="mt-3 text-sm text-parchment-muted">
+                This opens your email app with your message filled in. Press
+                send there.
+              </p>
+            </div>
           </form>
 
           <aside aria-labelledby="reach-heading" className="space-y-6 text-sm">
@@ -305,7 +311,7 @@ export default function Support() {
               label="Privacy"
               value={
                 <>
-                  Nothing is collected, tracked, or sent anywhere — see the{" "}
+                  The app collects nothing. See the{" "}
                   <AppLink to={route("/privacy")}>privacy policy</AppLink>.
                 </>
               }
@@ -359,7 +365,13 @@ export default function Support() {
                   {faq.link && (
                     <>
                       {" "}
-                      <AppLink href={faq.link.href}>{faq.link.label}</AppLink>
+                      {faq.link.href.startsWith("/") ? (
+                        <AppLink to={route(faq.link.href)}>
+                          {faq.link.label}
+                        </AppLink>
+                      ) : (
+                        <AppLink href={faq.link.href}>{faq.link.label}</AppLink>
+                      )}
                     </>
                   )}
                 </p>

@@ -38,7 +38,9 @@ export function storeUrl(page?: StorePage): string {
 
 /* -- Google Play listing (2.0) --------------------------------------------- */
 // Everything Android on the site — the Google Play badge, "and Android" in the
-// platform list, the Android FAQs and privacy wording — waits on `live`. 2.0
+// platform list and the Android FAQs — waits on `live`. The privacy policy is
+// the exception: it covers Android already, because the Play listing links to
+// it while Google reviews the app. 2.0
 // launches on the App Store first; Google Play follows once its closed test
 // clears, and that day this flips to true (see the app repo's
 // Docs/AndroidPlan.md, "Launch day").
@@ -83,11 +85,11 @@ export const APP = {
  * try it" — no cost to start, no subscription trap, no rules to learn first. */
 export const HERO = {
   headline: "Two-handed pinochle, whenever you want a game",
-  subhead: `A sharp computer opponent, a free Daily Deal, and a guided first game that teaches you as you play — on ${PLATFORM_LIST}.`,
+  subhead: `Three computer opponents, a free Daily Deal, and a guided first game that teaches you as you play. On ${PLATFORM_LIST}.`,
   trust: [
     "Free to try for 14 days",
     "One purchase — no subscription, no ads",
-    "Learn it in one deal",
+    "Never played? The first game teaches you",
   ],
 } as const;
 
@@ -111,7 +113,7 @@ export const WHATS_NEW: string[] = [
   "Play upright on iPhone: the table stacks top to bottom and your hand sits in one arc under your thumb. Turn the phone any time and the table follows.",
   "Made for iPhone Duo: folded or open, upright or sideways, switching as you fold and unfold.",
   "A whole new look, with cameo court cards: kings, queens, and jacks in gold-framed profile.",
-  "The Daily Deal, free for good: build a streak, with streak freezes, and beat Ace's score on the same cards for gold.",
+  "The Daily Deal, free for good: build a streak, with streak freezes, and match or beat Ace's score on the same cards for gold.",
   "Meet your opponents: Dix, Jack, and Ace are the Easy, Medium, and Hard computers.",
   "A guided first game, and a coach after every deal.",
   "Your stats, and a ladder: beat each computer three times to earn a new card-back color, the Walnut table, and the Crown card back.",
@@ -129,33 +131,33 @@ export const EARLIER_RELEASE: { version: string; items: string[] } | null =
 export const DOWNLOAD_FAQS: Faq[] = [
   {
     question: "What does it cost?",
-    answer: `Nothing to start: every opponent and mode is free for 14 days. After that, one purchase unlocks the full game for good on your ${PLATFORM_LIST} — no subscription and no ads. The Daily Deal and the guided first game stay free either way, and ${PLAY.live ? "the store" : "the App Store"} shows the price in your currency before you buy.`,
+    answer: `Nothing to start: every opponent and mode is free for 14 days from the moment you start the trial. After that, one purchase unlocks the full game for good on your ${PLATFORM_LIST}, with no subscription and no ads. The Daily Deal and the guided first game stay free either way. ${PLAY.live ? "The store" : "The App Store"} shows the price in your currency before you buy.`,
   },
   {
     question: "Which pinochle rules does it use?",
     answer:
-      "Classic two-handed pinochle as Bicycle publishes it: a 48-card deck, a meld after each trick you win while the stock lasts, then the playoff, where you must follow suit and try to win. Play a single deal or the race to 1,000 with declare-out.",
+      "Classic two-handed pinochle as Bicycle publishes it: a 48-card deck, a meld after each trick you win while the stock lasts, then the playoff, where you must follow suit and beat a trump lead if you can. Play a single deal or the race to 1,000, with declaring out.",
     link: { label: "Read the full rules", href: "/how-to-play" },
   },
   {
     question: "I've never played. Can I learn here?",
     answer:
-      "Yes. A guided first game teaches you a real deal one short tip at a time, Dix, the Easy computer, points out a good card when you're stuck, and after every deal a coach names the costliest slip. How to Play shows every meld in real cards.",
+      "Yes. A guided first game teaches you a real deal, one short tip at a time. After that, Dix, the Easy opponent, points out a good card when you're stuck, and a coach names your costliest slip after every deal. How to Play shows every meld in real cards.",
   },
   {
     question: "Can I play with family and friends?",
     answer:
-      "Yes — online through Game Center with a quick match or an invite, or on a FaceTime call with SharePlay on iPhone, iPad, and Mac." +
-      (PLAY.live ? " Online play isn't on Android yet." : ""),
+      "Yes. Play online through Game Center with a quick match or an invite, or on a FaceTime call with SharePlay on iPhone, iPad, and Mac. Online play is part of the one-time unlock once the trial ends." +
+      (PLAY.live ? " It isn't on Android yet." : ""),
   },
   {
     question: "Does it work offline?",
     answer:
-      "Yes. Playing the computer needs no connection and no account; only online matches use the internet.",
+      "Yes. Playing the computer needs no connection and no account. You need the internet only to start the trial, buy the unlock, or play online.",
   },
   {
     question: "Is it easy to see and use?",
-    answer: `The deck uses four suit colors so spades, hearts, clubs, and diamonds never blur together, ${PLAY.live ? "VoiceOver and TalkBack read" : "VoiceOver reads"} every card and play, and the ${PLAY.live ? "TV versions are" : "Apple TV version is"} built to be read from the couch with ${PLAY.live ? "a remote" : "the Siri Remote"} or a controller.`,
+    answer: `Each suit has its own color, so spades, hearts, clubs, and diamonds never blur together. ${PLAY.live ? "VoiceOver and TalkBack read" : "VoiceOver reads"} every card and play. On ${PLAY.live ? "Apple TV and Android TV" : "Apple TV"}, the game is built to be read from the couch and played with ${PLAY.live ? "a remote" : "the Siri Remote"} or a controller.`,
   },
   {
     question: "What happens to my data?",
@@ -173,7 +175,14 @@ export const DOWNLOAD_FAQS: Faq[] = [
             "No — the App Store and Google Play sell separately, so an unlock bought on one doesn't carry to the other. Within each, one purchase covers all your devices, and the Daily Deal and the guided first game are free on both.",
         },
       ]
-    : []),
+    : [
+        // Answers the Android visitor until the Play badge is on the page.
+        {
+          question: "Is there an Android version?",
+          answer:
+            "It's on its way to Google Play. The badge will appear on this page the day it's available.",
+        },
+      ]),
 ];
 
 /* -- Reviews ----------------------------------------------------------------- */
@@ -240,50 +249,50 @@ export interface Feature {
 export const FEATURES: Feature[] = [
   {
     title: "Classic two-handed rules",
-    body: "The full classic ruleset — flushes, marriages, pinochles, the dix, and declare-out. Nothing simplified away.",
+    body: "The full classic ruleset — flushes, marriages, pinochles, the dix, and declaring out. Nothing simplified away.",
     icon: "cards",
   },
   {
     title: "A guided first game",
-    body: "New to Pinochle? Play a real deal with a short tip at each step. After that, legal-move highlighting and suggested plays are there when you want them.",
+    body: "New to pinochle? Play a real deal with a short tip at each step. After that, the game always shows which cards you can play, and Dix, the Easy opponent, suggests one when you stall.",
     icon: "book",
     storePage: "learn",
   },
   {
     title: "The Daily Deal",
-    body: "The same cards for everyone, every day — and free for good. Beat Ace's score — the Hard computer's — for gold, and build a streak, with streak freezes for the days life gets in the way.",
+    body: "The same cards for everyone, every day, and free for good. Match or beat the score Ace, the Hard opponent, makes on those cards to win gold. Build a streak, with streak freezes for the days life gets in the way.",
     icon: "calendar",
     storePage: "daily",
   },
   {
-    title: "Three AI opponents, and a ladder",
-    body: "Dix, Jack, and Ace: from an easygoing teacher to a card-counting shark that tracks the deck. Beat each three times to earn a new card back or table — and a coach after every deal shows you where the points went.",
+    title: "Three opponents, and a ladder",
+    body: "Dix, Jack, and Ace run from an easygoing teacher to a shark that counts every card played. Beat each one three times to earn a new card back or table. After every deal, a coach shows you where the points went.",
     icon: "cpu",
   },
   {
     title: "Online, and on FaceTime",
     body:
-      "Quick match or invite a friend over Game Center, or deal in on a FaceTime call with SharePlay on iPhone, iPad, and Mac." +
+      "Find a quick match or invite a friend through Game Center, or deal in on a FaceTime call with SharePlay on iPhone, iPad, and Mac." +
       (PLAY.live ? " (Apple devices; not on Android yet.)" : ""),
     icon: "globe",
   },
   {
     title: "Make it yours",
-    body: `Cameo court cards on five table themes, card backs in three patterns and six colors — plus three more to earn — three game speeds, and haptics on ${PLAY.live ? "iPhone and Android" : "iPhone"}.`,
+    body: `Cameo court cards, five table themes, card backs in three patterns and six colors, three game speeds, and haptics on ${PLAY.live ? "iPhone and Android phones" : "iPhone"}. Three more designs can only be won: the Plum card back, the Walnut table, and the Crown card back.`,
     icon: "palette",
   },
   {
     title: "Made for the living room",
     body: PLAY.live
-      ? "Full game-controller support, VoiceOver and TalkBack throughout, and a focus-based interface built for Apple TV, Android TV, and the big screen."
-      : "Full game-controller support, VoiceOver throughout, and a focus-based interface built for Apple TV and the big screen.",
+      ? "Full game-controller support, VoiceOver and TalkBack throughout, and a layout built to be read and steered from the couch on Apple TV and Android TV."
+      : "Full game-controller support, VoiceOver throughout, and a layout built to be read and steered from the couch on Apple TV.",
     icon: "controller",
   },
   {
     title: "No ads, no tracking",
     body: PLAY.live
-      ? "No subscription and nothing collected — one purchase unlocks every device on that store. Just cards."
-      : "No subscription and nothing collected — one purchase unlocks every device. Just cards.",
+      ? "No ads, no tracking, and no subscription. One purchase covers every device on the store you bought it from. Just cards."
+      : "No ads, no tracking, and no subscription. One purchase unlocks the game on every Apple device you own. Just cards.",
     icon: "shield",
   },
 ];
@@ -313,11 +322,11 @@ export const RULES: Rule[] = [
   },
   {
     heading: "Phase two — the playoff",
-    body: "Once the stock runs out, following suit becomes the law and you must try to win the trick. Every counter now matters as you play out your final twelve.",
+    body: "Once the stock runs out, you must follow suit, trump if you can't, and beat a trump lead if you're able. Every point card now matters as you play out your final twelve.",
   },
   {
     heading: "The race",
-    body: "Win a single deal, or play the full match to 1,000 with escalating thresholds and the “Declare Out” finish. Two hundred fifty points are on the table each deal.",
+    body: "Win a single deal, or play the full match to 1,000. If both players pass 1,000 in the same deal, the target rises to 1,250. Sure you're already there? Declare out and win on the spot, or lose if you miscounted. 250 trick points are on the table each deal, with melds on top.",
   },
 ];
 
@@ -437,8 +446,8 @@ export const RULES_FACTS: { term: string; value: string }[] = [
   { term: "Deck", value: "48 cards — A 10 K Q J 9, twice in each suit" },
   { term: "Dealt", value: "12 cards each; the next card turned for trump" },
   {
-    term: "Points per deal",
-    value: "250 — 240 in counters, 10 for the last trick",
+    term: "Trick points per deal",
+    value: "250 (240 in counters, 10 for the last trick), with melds on top",
   },
   { term: "Game", value: "First to 1,000, or a single deal" },
   { term: "A deal takes", value: "About ten minutes" },
@@ -456,7 +465,7 @@ export const RULES_TIPS: Tip[] = [
   },
   {
     heading: "Respect the ten",
-    body: "The ten ranks second, above the king, and carries 10 counters. That makes it the most dangerous card in your hand: lead a bare ten and you are offering your opponent ten points and the lead. Save tens to capture with, or lead them only when you hold the ace.",
+    body: "The ten ranks second, above the king, and is worth 10 points. That makes it the most dangerous card in your hand: lead a bare ten and you are offering your opponent ten points and the lead. Save tens to capture with, or lead them only when you hold the ace.",
   },
   {
     heading: "Melded cards are still your hand",
@@ -480,7 +489,7 @@ export const RULES_FAQS: Faq[] = [
   {
     question: "Can you play pinochle with only 2 players?",
     answer:
-      "Yes — two-handed pinochle is the original form of the game, and it is a genuine duel rather than a cut-down version of the four-player partnership game. One 48-card pinochle deck, 12 cards each, and a stock you draw from until it runs out.",
+      "Yes — two-handed pinochle is a classic form of the game, and it is a genuine duel rather than a cut-down version of the four-player partnership game. One 48-card pinochle deck, 12 cards each, and a stock you draw from until it runs out.",
   },
   {
     question: "How many cards are in a pinochle deck?",
@@ -510,12 +519,12 @@ export const RULES_FAQS: Faq[] = [
   {
     question: "How many points do you need to win at pinochle?",
     answer:
-      "The standard game is a race to 1,000 across as many deals as it takes, with 250 points on the table each deal. A single deal on its own is a perfectly good short game — the higher total after one deal wins.",
+      "The standard game is a race to 1,000 across as many deals as it takes, with 250 trick points on the table each deal, plus melds. A single deal on its own is a perfectly good short game — the higher total after one deal wins.",
   },
   {
     question: "How long does a game of two-handed pinochle take?",
     answer:
-      "A single deal is about ten minutes. A full race to 1,000 usually runs four to six deals, so roughly three quarters of an hour — less when the melds fall your way.",
+      "As a rough guide, a single deal is about ten minutes. A full race to 1,000 usually runs four to six deals, so roughly three quarters of an hour, or less when the melds fall your way.",
   },
 ];
 
@@ -683,29 +692,29 @@ export interface Badge {
 }
 
 export const ACHIEVEMENTS: Badge[] = [
-  { file: "ach.first_win", name: "First Win" },
+  { file: "ach.first_win", name: "Welcome to the Table" },
   { file: "ach.regular", name: "Regular" },
   { file: "ach.on_a_tear", name: "On a Tear" },
-  { file: "ach.comeback", name: "Comeback" },
-  { file: "ach.sweep", name: "Sweep" },
+  { file: "ach.comeback", name: "The Comeback" },
+  { file: "ach.sweep", name: "Clean Sweep" },
   { file: "ach.skunked", name: "Skunked" },
   { file: "ach.big_deal", name: "Big Deal" },
   { file: "ach.double_pinochle", name: "Double Pinochle" },
-  { file: "ach.run", name: "Run" },
+  { file: "ach.run", name: "Run It" },
   { file: "ach.aces_around", name: "Aces Around" },
   { file: "ach.club_champion", name: "Club Champion" },
   { file: "ach.called_it", name: "Called It" },
   { file: "ach.matchmaker", name: "Matchmaker" },
   { file: "ach.nine_lives", name: "Nine Lives" },
-  { file: "ach.everywhere", name: "Everywhere" },
+  { file: "ach.everywhere", name: "Any Table, Anywhere" },
 ];
 
 export const LEADERBOARDS: Badge[] = [
-  { file: "lb.wins.total", name: "Total Wins" },
+  { file: "lb.wins.total", name: "Total Match Wins" },
   { file: "lb.wins.weekly", name: "Weekly Wins" },
-  { file: "lb.streak.best", name: "Best Streak" },
-  { file: "lb.deal.best", name: "Best Deal" },
-  { file: "lb.meld.best", name: "Best Meld" },
+  { file: "lb.streak.best", name: "Longest Win Streak" },
+  { file: "lb.deal.best", name: "Best Single Deal" },
+  { file: "lb.meld.best", name: "Biggest Meld Hand" },
 ];
 
 /* -- Support -------------------------------------------------------------- */
@@ -748,12 +757,12 @@ const ANDROID_FAQS: Faq[] = [
   {
     question: "Can I play online on Android?",
     answer:
-      "Not yet — online matches use Apple's Game Center and SharePlay, so they're on iPhone, iPad, Mac, and Apple TV. Everything else, the Daily Deal included, is the same on Android.",
+      "Not yet. Online matches run on Apple's Game Center and FaceTime, so they're only on Apple devices. Everything else, the Daily Deal included, is the same on Android.",
   },
   {
     question: "Where are my achievements on Android?",
     answer:
-      "In Google Play Games. Open Your Record, then Stats, and tap Achievements or Leaderboards — the first time, sign in to Play Games. They follow your Google Account, separately from Game Center on Apple devices.",
+      "In Google Play Games. Open Your Record and tap Achievements or Leaderboards. The first time, sign in to Play Games. They follow your Google Account, separately from Game Center on Apple devices.",
   },
   {
     question:
@@ -764,7 +773,7 @@ const ANDROID_FAQS: Faq[] = [
   {
     question: "Can I play on Android TV with a remote?",
     answer:
-      "Yes — Android TV gets the same focus-based interface as Apple TV, built to be read from the couch. Use the remote's arrows and select, or a game controller; Back pauses a match.",
+      "Yes. Android TV has the same couch-friendly layout as Apple TV. Use the remote's arrows and select, or a game controller; Back pauses a match.",
   },
   {
     question: "I want a refund for a Google Play purchase.",
@@ -798,12 +807,13 @@ export const SUPPORT_FAQS: Faq[] = [
   {
     question: "The game wouldn't let me play a card.",
     answer:
-      "Once the stock runs out, phase two begins: you must follow the suit led, and if you can beat the trick you have to. Cards you can't legally play are dimmed. The in-app How to Play screen walks through the full ruleset.",
+      "Once the stock runs out, phase two begins: you must follow the suit led, trump if you can't, and beat a trump lead if you can. Cards you can't legally play are dimmed. How to Play in the app walks through it, and so do the complete rules here.",
+    link: { label: "Read the complete rules", href: "/how-to-play" },
   },
   {
     question: "Can I play on Apple TV with a controller?",
     answer:
-      "Yes — Apple TV uses a focus-based interface, and game controllers are supported there as well as on iPhone, iPad, and Mac.",
+      "Yes. The Apple TV version is built for the Siri Remote and game controllers, and controllers also work on iPhone, iPad, and Mac.",
   },
   {
     question: "What happens when my free trial ends?",
@@ -829,7 +839,7 @@ export const SUPPORT_FAQS: Faq[] = [
   {
     question: "Where does the Daily Deal's target score come from?",
     answer:
-      "It's what Ace, the Hard computer, scores playing your seat on the same cards, worked out on your device — so everyone gets the same target. Match it for gold; within 85% is silver, within 70% bronze.",
+      "It's what Ace, the Hard computer, scores playing your seat on the same cards, worked out on your device — so everyone gets the same target. Match or beat it for gold; 85% of it or more is silver, 70% or more bronze.",
   },
   {
     question: "I bought Pinochle before it was free. Do I have to pay again?",
@@ -851,7 +861,7 @@ export const SUPPORT_FAQS: Faq[] = [
 // App Store listing points at) live here.
 export const PRIVACY = {
   /** Rendered as "Last updated" on /privacy. Bump whenever the prose changes. */
-  updated: "November 18, 2026",
+  updated: "November 20, 2026",
   /** Apple governs Game Center and SharePlay data under its own policy. */
   applePolicyUrl: "https://www.apple.com/legal/privacy/",
   /** Google governs Play Billing, Play Games and Block Store data (Android). */
@@ -864,7 +874,7 @@ export const PRIVACY = {
 // The terms prose lives in src/app/terms/page.tsx, like the privacy policy's.
 export const TERMS = {
   /** Rendered as "Last updated" on /terms. Bump whenever the prose changes. */
-  updated: "November 18, 2026",
+  updated: "November 20, 2026",
   /** Apple's standard EULA governs App Store downloads. */
   appleEulaUrl:
     "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",

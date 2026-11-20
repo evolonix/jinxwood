@@ -25,6 +25,13 @@ export default function Terms() {
         (&ldquo;the developer&rdquo;). By downloading or playing the app, you
         agree to them.
       </p>
+      {/* Until the Apple developer account is converted to the company's, the
+          App Store names the individual as seller. Remove this once the listing
+          shows the company. */}
+      <p className="mt-4">
+        On the App Store, the game is listed under Jason Ruesch, who founded
+        Evolonix LLC, until the developer account moves to the company.
+      </p>
 
       <Clause heading="Your license">
         <p>
@@ -44,10 +51,11 @@ export default function Terms() {
 
       <Clause heading="Free trial and purchase">
         <p>
-          The full game is free to play for 14 days from the first time you
-          choose a game. After that, a one-time in-app purchase unlocks it for
+          The full game is free to play for 14 days from the moment you start
+          the free trial. After that, a one-time in-app purchase unlocks it for
           good. There is no subscription. A match you had already started can
-          always be finished, and the Daily Deal stays free either way.
+          always be finished, and the Daily Deal and the guided first game stay
+          free either way.
         </p>
         <p>
           Purchases are made and processed by Apple or Google; the developer
@@ -59,8 +67,9 @@ export default function Terms() {
 
       <Clause heading="Online play, leaderboards, and achievements">
         <p>
-          Online matches, SharePlay, leaderboards, and achievements are provided
-          by Apple&apos;s Game Center and Google Play Games, under their own
+          Online matches, leaderboards, and achievements run on Apple&apos;s
+          Game Center, and SharePlay runs on FaceTime. On Android, leaderboards
+          and achievements run on Google Play Games. Each service has its own
           terms. The developer doesn&apos;t run these services and can&apos;t
           promise they&apos;ll always be available. Please play fairly and treat
           other players with respect.
