@@ -571,6 +571,11 @@ const cutOuts = {
     WORDMARK,
     { enlarge: true },
   ),
+  // The emblem from the same lockup, whose edges were drawn against cream.
+  "emblem-light": await onCanvas(
+    await trimmed(emblemOnly(creamLockup), creamLockup.w, creamLockup.h),
+    EMBLEM,
+  ),
 };
 
 /** Intrinsic sizes, written to brand.gen.ts so <img> can reserve its box. */
@@ -583,6 +588,7 @@ const LOGO_WIDTHS = {
   emblem: [240, 480, 640],
   "lockup-light": [640, 1280],
   "wordmark-light": [640, 1280],
+  "emblem-light": [240, 480, 640],
 };
 for (const [name, png] of Object.entries(cutOuts)) {
   const meta = await sharp(png).metadata();
@@ -780,7 +786,12 @@ await sharp(cutOuts.wordmark)
 await sharp(cutOuts["wordmark-light"])
   .png(png)
   .toFile(pub("press/jinxwood-wordmark-for-light.png"));
-await sharp(cutOuts.emblem).png(png).toFile(pub("press/jinxwood-emblem.png"));
+await sharp(cutOuts.emblem)
+  .png(png)
+  .toFile(pub("press/jinxwood-emblem-for-dark.png"));
+await sharp(cutOuts["emblem-light"])
+  .png(png)
+  .toFile(pub("press/jinxwood-emblem-for-light.png"));
 await hero
   .clone()
   .resize({ width: 2560 })
