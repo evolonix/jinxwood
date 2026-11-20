@@ -18,6 +18,10 @@ export const IMAGE_SIZES = {
     "width": 1538,
     "height": 626
   },
+  "wordmark-light": {
+    "width": 979,
+    "height": 397
+  },
   "hero": {
     "width": 3584,
     "height": 2016

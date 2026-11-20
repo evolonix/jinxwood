@@ -267,6 +267,8 @@ const creamLockup = await cutOut("lockup-cream.webp", {
 const EMBLEM_EDGE = 820;
 const emblemOnly = (lockup) =>
   keepPieces(lockup.rgba, lockup.w, lockup.h, (b) => b.x1 < EMBLEM_EDGE);
+const letteringOnly = (lockup) =>
+  keepPieces(lockup.rgba, lockup.w, lockup.h, (b) => b.x1 >= EMBLEM_EDGE);
 
 const cutOuts = {
   // For dark backgrounds — what the site itself uses.
@@ -275,6 +277,13 @@ const cutOuts = {
   emblem: await trimmed(emblemOnly(plumLockup), plumLockup.w, plumLockup.h),
   // For light backgrounds — press kit only.
   "lockup-light": await trimmed(creamLockup.rgba, creamLockup.w, creamLockup.h),
+  // There is no dark wordmark drawn by itself, so this one is the lettering
+  // lifted out of the light-background lockup.
+  "wordmark-light": await trimmed(
+    letteringOnly(creamLockup),
+    creamLockup.w,
+    creamLockup.h,
+  ),
 };
 
 /** Intrinsic sizes, written to brand.gen.ts so <img> can reserve its box. */
@@ -286,6 +295,7 @@ const LOGO_WIDTHS = {
   lockup: [640, 1280],
   emblem: [240, 480, 640],
   "lockup-light": [640, 1280],
+  "wordmark-light": [640, 960],
 };
 for (const [name, png] of Object.entries(cutOuts)) {
   const meta = await sharp(png).metadata();
@@ -480,6 +490,9 @@ await sharp(cutOuts["lockup-light"])
 await sharp(cutOuts.wordmark)
   .png(png)
   .toFile(pub("press/jinxwood-wordmark-for-dark.png"));
+await sharp(cutOuts["wordmark-light"])
+  .png(png)
+  .toFile(pub("press/jinxwood-wordmark-for-light.png"));
 await sharp(cutOuts.emblem).png(png).toFile(pub("press/jinxwood-emblem.png"));
 await hero
   .clone()

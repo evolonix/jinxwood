@@ -7,6 +7,7 @@ import { IMAGE_SIZES } from "../_lib/brand.gen";
  *   emblem        the cat in the tree hollow
  *   lockup        emblem and wordmark together
  *   lockup-light  the lockup drawn for light backgrounds (press kit only)
+ *   wordmark-light  the lettering from that lockup, by itself (press kit only)
  */
 export type LogoName = keyof typeof WIDTHS;
 
@@ -16,6 +17,7 @@ const WIDTHS = {
   lockup: [640, 1280],
   emblem: [240, 480, 640],
   "lockup-light": [640, 1280],
+  "wordmark-light": [640, 960],
 } as const;
 
 interface LogoProps {

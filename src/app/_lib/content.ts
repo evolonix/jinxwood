@@ -160,11 +160,18 @@ export const PRESS = {
       note: "Transparent PNG, 1538 × 626",
     },
     {
-      label: "Wordmark",
+      label: "Wordmark for dark backgrounds",
       file: "/press/jinxwood-wordmark-for-dark.png",
       preview: "wordmark",
       on: "night",
       note: "Transparent PNG, 1367 × 551",
+    },
+    {
+      label: "Wordmark for light backgrounds",
+      file: "/press/jinxwood-wordmark-for-light.png",
+      preview: "wordmark-light",
+      on: "parchment",
+      note: "Transparent PNG, 979 × 397",
     },
     {
       label: "Emblem",
