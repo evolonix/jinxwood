@@ -60,7 +60,7 @@ const STATIC_PAGES: Record<string, PageSeo> = {
   "/games": {
     title: "Games — Jinxwood",
     description:
-      "The games from Jinxwood, starting with Pinochle: Two-Handed, the classic two-player card duel for iPhone, iPad, Mac, and Apple TV.",
+      "The games from Jinxwood, starting with Pinochle: Two-Handed, the classic two-player card duel for iPhone, iPad, Mac, Apple TV, and Android.",
   },
   "/press": {
     title: "Press and Brand Kit — Jinxwood",
