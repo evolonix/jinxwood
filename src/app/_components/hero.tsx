@@ -145,11 +145,15 @@ export function Hero() {
             aria-hidden="true"
             className="from-night-deep/95 via-night-deep/80 tall:block absolute -inset-x-[100vw] -top-[100vh] -bottom-20 hidden bg-linear-to-b via-[calc(100%-5rem)] to-transparent"
           />
-          <Logo
-            name="wordmark"
-            sizes="(max-width: 30rem) 76vw, 22rem"
-            className="tall:w-[min(22rem,58vw)] relative h-auto w-[min(22rem,76vw)] drop-shadow-[0_4px_24px_rgb(26_18_45/0.6)]"
-          />
+          {/* The header takes this wordmark over as the page scrolls; the
+              marker is how it finds it (see useWordmarkDock). */}
+          <div data-hero-wordmark className="relative w-fit">
+            <Logo
+              name="wordmark"
+              sizes="(max-width: 30rem) 76vw, 22rem"
+              className="tall:w-[min(22rem,58vw)] h-auto w-[min(22rem,76vw)] drop-shadow-[0_4px_24px_rgb(26_18_45/0.6)]"
+            />
+          </div>
           <h1 className="relative mt-6 text-4xl leading-[1.08] [text-shadow:0_2px_20px_rgb(26_18_45/0.75)] sm:text-5xl lg:text-6xl">
             {STUDIO.tagline}
           </h1>
