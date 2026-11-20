@@ -86,7 +86,7 @@ export const GAMES: readonly Game[] = [
     priceNote: "One purchase after that. No subscription, no ads.",
     release: {
       version: "2.0",
-      date: "November 21, 2026",
+      date: "November 20, 2026",
       firstReleased: "July 31, 2026",
     },
     developer: "Jinxwood Games",
