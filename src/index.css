@@ -164,6 +164,8 @@ body {
   html {
     /* Clear the sticky header when scrolling anchors into view. */
     scroll-padding-top: calc(var(--header-h) + 1rem + env(safe-area-inset-top));
+    /* For anchors within a page. A move to another page jumps instead: the
+       root layout switches this off while the path changes. */
     scroll-behavior: smooth;
   }
   /* A game's navigation bar sticks under the header from tablet width up, so

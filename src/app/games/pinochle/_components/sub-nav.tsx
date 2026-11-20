@@ -129,7 +129,7 @@ interface SectionLinkProps {
  * Link to a section of the game's home page. On that page it is a native
  * anchor, so the browser does the smooth scroll and clears the sticky bars
  * (index.css). From the game's other pages the target has to route home first;
- * <ScrollRestoration /> in the root layout then scrolls to the anchor.
+ * <ScrollRestoration /> in the root layout then jumps to the anchor.
  */
 function SectionLink({
   hash,
