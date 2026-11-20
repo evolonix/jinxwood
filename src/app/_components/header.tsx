@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { STUDIO } from "../_lib/content";
 import { useScrolled } from "../_lib/use-scrolled";
+import { useWordmarkDock } from "../_lib/use-wordmark-dock";
 import { Button } from "./button";
 import { Logo } from "./logo";
 
@@ -11,6 +12,12 @@ import { Logo } from "./logo";
  * a phone, so there is no menu to open. At 320px wide, which is also a desktop
  * window zoomed to 400%, only two fit: "Say hello" steps aside there, and the
  * same address is in the footer of every page.
+ *
+ * The home page is the exception on both counts. Its hero shows the wordmark
+ * large, so the header carries none at first, and its bar stays clear until
+ * the scroll reaches that wordmark. From there the wordmark travels up into
+ * the header and the bar fades in behind it, both following the scroll (see
+ * useWordmarkDock).
  */
 export function Header() {
   const scrolled = useScrolled();
@@ -18,9 +25,9 @@ export function Header() {
   // GitHub Pages redirects a route's bare path to its trailing-slash form, so
   // normalize before comparing.
   const path = pathname.replace(/\/+$/, "") || "/";
-  // The home hero already shows the wordmark large, so the header's copy stays
-  // out of the way until the hero has scrolled off.
-  const hideLogo = path === "/" && !scrolled;
+  const home = path === "/";
+  const dock = useWordmarkDock(home);
+  const hideLogo = home && dock === "rest";
 
   return (
     // Nearly opaque once scrolled: whatever passes underneath shows through
@@ -28,29 +35,43 @@ export function Header() {
     // highlighted link below 4.5:1.
     <header
       data-site-header
-      className={`pt-safe sticky top-0 z-40 border-b transition-colors duration-300 ${
-        scrolled
-          ? "border-night-line bg-night/95 backdrop-blur"
-          : "border-transparent"
+      className={`pt-safe sticky top-0 z-40 border-b ${
+        home
+          ? "header-docking"
+          : `transition-colors duration-300 ${
+              scrolled
+                ? "border-night-line bg-night/95 backdrop-blur"
+                : "border-transparent"
+            }`
       }`}
     >
       <div className="px-safe-lg mx-auto flex h-(--header-h) max-w-6xl items-center gap-2 sm:gap-3">
+        {/* No fade on the wordmark: on the home page it has to appear in the
+            same instant the hero's copy disappears. */}
         <Link
+          data-wordmark-slot
           to="/"
           viewTransition
           aria-label={`${STUDIO.name} home`}
           aria-hidden={hideLogo || undefined}
           tabIndex={hideLogo ? -1 : undefined}
-          className={`shrink-0 transition-opacity duration-300 ${
-            hideLogo ? "pointer-events-none opacity-0" : "opacity-100"
-          }`}
+          className={`shrink-0 ${hideLogo ? "pointer-events-none invisible" : ""}`}
         >
-          <Logo
-            name="wordmark"
-            sizes="7rem"
-            alt=""
-            className="h-9 w-auto sm:h-11"
-          />
+          <span
+            data-wordmark-mark
+            className={`block origin-top-left ${
+              dock === "moving" ? "will-change-transform" : ""
+            }`}
+          >
+            {/* On the home page it starts at the hero's size, so it asks for
+                the file the hero already loaded. */}
+            <Logo
+              name="wordmark"
+              sizes={home ? "(max-width: 30rem) 76vw, 22rem" : "7rem"}
+              alt=""
+              className="h-9 w-auto sm:h-11"
+            />
+          </span>
         </Link>
         <nav
           aria-label="Primary"

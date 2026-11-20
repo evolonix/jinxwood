@@ -132,6 +132,29 @@
   );
 }
 
+/* The home page's header bar. It comes in as the hero's wordmark docks, so
+   its color, hairline and blur all follow --dock, which runs from 0 to 1 with
+   the scroll (see useWordmarkDock). At 1 it matches the bar on other pages. */
+@utility header-docking {
+  background-color: color-mix(
+    in srgb,
+    var(--color-night) calc(var(--dock, 0) * 95%),
+    transparent
+  );
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--color-night-line) calc(var(--dock, 0) * 100%),
+    transparent
+  );
+  backdrop-filter: blur(calc(var(--dock, 0) * 8px));
+}
+
+/* While the header's wordmark stands in for the home hero's, on its way up
+   or docked, the hero's own is hidden so the two never show together. */
+html[data-wordmark-away] [data-hero-wordmark] {
+  visibility: hidden;
+}
+
 :root {
   /* Height of the sticky header; the home hero slides up underneath it. */
   --header-h: 4.5rem;
