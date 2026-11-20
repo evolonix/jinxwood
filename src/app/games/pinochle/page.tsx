@@ -90,8 +90,8 @@ export default function Home() {
   usePageMeta(route(), { jsonLd: SCHEMA });
   return (
     <>
-      {/* Hero. It starts on the page colour, so it meets the navigation above
-          without a seam, and deepens towards its lower edge. The two glows
+      {/* Hero. It starts on the page color, so it meets the navigation above
+          without a seam, and deepens toward its lower edge. The two glows
           keep clear of the top for the same reason. */}
       <section
         id="top"

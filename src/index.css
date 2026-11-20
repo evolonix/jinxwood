@@ -94,7 +94,7 @@
    part reaches exactly as far as the column of words does, whatever the screen
    width, then fades out, so the words are always on night and the art is clear
    beyond them. The first length is where that column ends: the page gutter, or
-   the centred 72rem page's left edge plus its gutter, then the 36rem column. */
+   the centered 72rem page's left edge plus its gutter, then the 36rem column. */
 @utility hero-scrim-side {
   --hero-text-edge: calc(max(1.5rem, (100vw - 72rem) / 2 + 1.5rem) + 36rem);
   background-image: linear-gradient(
@@ -145,7 +145,7 @@ body {
     text-wrap: balance;
   }
 
-  /* Pin the focus-ring colour on interactive elements at rest so it never
+  /* Pin the focus-ring color on interactive elements at rest so it never
      animates in from currentColor on first focus. */
   :where(a, button, input, textarea, select, summary, [tabindex]) {
     outline-color: var(--color-ember);

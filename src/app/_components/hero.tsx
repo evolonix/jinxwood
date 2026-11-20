@@ -44,7 +44,7 @@ function writePaused(paused: boolean) {
  * under the transparent header.
  *
  * The middle of the art (the sunset behind the castle) is its brightest part,
- * where parchment text falls to about 2:1, so nothing is centred on it. On wide
+ * where parchment text falls to about 2:1, so nothing is centered on it. On wide
  * screens the words sit in a column at the left over a night scrim; on an
  * upright phone they split, the name and headline over the dark canopy at the
  * top and the buttons over a fade at the bottom, leaving the castle clear. The

@@ -11,7 +11,7 @@ interface EyebrowProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode;
 }
 
-/** The small capitalised label that sits above a heading. */
+/** The small capitalized label that sits above a heading. */
 export function Eyebrow({
   as = "p",
   children,

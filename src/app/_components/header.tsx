@@ -16,7 +16,7 @@ export function Header() {
   const scrolled = useScrolled();
   const { pathname } = useLocation();
   // GitHub Pages redirects a route's bare path to its trailing-slash form, so
-  // normalise before comparing.
+  // normalize before comparing.
   const path = pathname.replace(/\/+$/, "") || "/";
   // The home hero already shows the wordmark large, so the header's copy stays
   // out of the way until the hero has scrolled off.

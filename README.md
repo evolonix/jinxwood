@@ -37,7 +37,7 @@ npm run dev
 
 - `src/app/_lib/content.ts` holds every fact and string the site states: the studio, the games, the press kit, the policy dates.
 - `src/app/_lib/seo.ts` holds each route's search title and description.
-- `src/index.css` holds the design tokens: the four brand colours and the tones built from them, the fonts, and the motion.
+- `src/index.css` holds the design tokens: the four brand colors and the tones built from them, the fonts, and the motion.
 - `brand/source/` holds the source art. Everything under `public/img/`, the icons, `og.jpg` and `public/press/` is generated from it.
 - `src/app/games/pinochle/` holds the Pinochle pages, with their own components (`_components/`) and copy, routes and search metadata (`_lib/`). Their media is in `public/media/pinochle/`.
 
@@ -84,7 +84,7 @@ Two things to keep true:
 
 The site is built to WCAG 2.2 level AA. The rules that are easy to break:
 
-- **Text contrast.** Small text needs 4.5:1 and large text 3:1. The colour tokens in `src/index.css` note which pairs pass: ember and parchment on the night tones do, moss as text does not, and nothing light goes on ember. `night-edge` is the outline colour for form fields; `night-line` is too faint for that.
+- **Text contrast.** Small text needs 4.5:1 and large text 3:1. The color tokens in `src/index.css` note which pairs pass: ember and parchment on the night tones do, moss as text does not, and nothing light goes on ember. `night-edge` is the outline color for form fields; `night-line` is too faint for that.
 - **Words over the hero art.** Each scrim behind the hero's words is tied to where the words are, not to a share of the screen, so the contrast holds at every window shape. Check a short phone and a square window after changing the hero.
 - **Motion.** Anything that moves by itself for more than five seconds needs a way to stop it. The fireflies have the pause button in the hero; the peeking eyes blink twice and stop. Both are off under reduced motion.
 - **Bars that stick.** The header and a game's navigation are nearly opaque so text on them keeps its contrast over whatever scrolls underneath, and `scroll-padding` in `src/index.css` keeps focused elements clear of them and of the phone download bar.

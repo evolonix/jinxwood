@@ -7,7 +7,7 @@
 // The build step is what makes these pages indexable at all. GitHub Pages has
 // no server-side rewrite, so without a file at dist/press/index.html the URL
 // answers 404.html — a genuine HTTP 404, which crawlers treat as a missing
-// page no matter what the SPA fallback paints afterwards.
+// page no matter what the SPA fallback paints afterward.
 //
 // Node imports this .ts file directly (Node 24 strips types; the app's
 // erasableSyntaxOnly keeps it strip-safe), so the two copies cannot drift. That
@@ -65,7 +65,7 @@ const STATIC_PAGES: Record<string, PageSeo> = {
   "/press": {
     title: "Press and Brand Kit — Jinxwood",
     description:
-      "Jinxwood's press kit: studio facts, logo downloads, the colour palette and typography, and who to contact.",
+      "Jinxwood's press kit: studio facts, logo downloads, the color palette and typography, and who to contact.",
   },
   "/privacy": {
     title: "Privacy — Jinxwood",

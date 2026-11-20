@@ -3,7 +3,7 @@
 //   npm run build && npm run preview:pages
 //
 // `vite preview` falls back to index.html for any unknown path, which hides
-// exactly the behaviour worth testing. GitHub Pages does not: it serves a file,
+// exactly the behavior worth testing. GitHub Pages does not: it serves a file,
 // or a directory's index.html (redirecting the bare path to the trailing-slash
 // form), or 404.html with a real 404 status. This does the same, so the static
 // route pages and the 404.html redirect can be seen working.

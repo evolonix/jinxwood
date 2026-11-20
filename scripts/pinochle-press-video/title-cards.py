@@ -25,7 +25,7 @@ PORTRAIT = os.environ.get("PINOCHLE_FORMAT", "landscape") == "portrait"
 W, H, FPS = (1080, 1920, 30) if PORTRAIT else (1920, 1080, 30)
 
 # Every hand-placed position, per format. Landscape is the original 2.1 layout,
-# unchanged; portrait centres the same beats in a 9:16 frame.
+# unchanged; portrait centers the same beats in a 9:16 frame.
 LAY = dict(
     glow=(W / 2 - 480, 440, W / 2 + 480, 1340) if PORTRAIT else (W / 2 - 520, 120, W / 2 + 520, 760),
     fan_pivot=(W / 2, 1360) if PORTRAIT else (W / 2, 900), fan_r=600 if PORTRAIT else 560,
@@ -82,7 +82,7 @@ def _ign(x, y):
     f = 52.9829189 * ((0.06711056 * x + 0.00583715 * y) % 1)
     return f - math.floor(f) - 0.5
 
-# PIL's radial gradient (0 centre → 255 rim), scaled up as a float image so the
+# PIL's radial gradient (0 center → 255 rim), scaled up as a float image so the
 # resize interpolates between levels instead of repeating them.
 _M = Image.radial_gradient("L").convert("F").resize((W * 2, int(H * 2.4)), Image.BICUBIC)
 _M = _M.crop((W // 2, int(H * 0.7), W // 2 + W, int(H * 0.7) + H))
@@ -191,7 +191,7 @@ def text_size(f, s, tracking=0):
     return b[2] - b[0] + tracking * (len(s) - 1), b
 
 def draw_text(im, s, f, cx, y, color, alpha=1.0, tracking=0, dy=0):
-    """Centred text; `tracking` px between glyphs."""
+    """Centered text; `tracking` px between glyphs."""
     if alpha <= 0: return
     layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
@@ -275,7 +275,7 @@ def intro_frame(t):
         x += F_TITLE.getlength(c) + track
     im.alpha_composite(layer)
 
-    # gold rule grows from the centre
+    # gold rule grows from the center
     p = out_cubic(prog(t, 1.75, 0.55))
     if p > 0:
         d = ImageDraw.Draw(im)

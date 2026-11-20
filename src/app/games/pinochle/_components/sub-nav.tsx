@@ -27,7 +27,7 @@ const TRACKED = ITEMS.map((item) => item.hash).filter(
 export function SubNav() {
   const { pathname } = useLocation();
   // GitHub Pages redirects a route's bare path to its trailing-slash form, so
-  // normalise before comparing.
+  // normalize before comparing.
   const path = pathname.replace(/\/+$/, "");
   const onHome = path === PINOCHLE_BASE;
   // Other Pinochle pages have their own anchors (the rules page has an #faq

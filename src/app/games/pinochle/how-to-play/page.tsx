@@ -116,7 +116,7 @@ export default function HowToPlay() {
   return (
     <>
       {/* Intro, with the badge above the fold for a reader who arrived from
-          search and is one click from the store. It starts on the page colour
+          search and is one click from the store. It starts on the page color
           so it meets the navigation above without a seam. */}
       <section className="border-night-line from-night to-night-deep relative isolate overflow-hidden border-b bg-linear-to-b">
         <div

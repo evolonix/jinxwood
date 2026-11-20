@@ -14,7 +14,7 @@ export default function Press() {
       <Eyebrow className="mb-3">Press and brand kit</Eyebrow>
       <h1 className="text-4xl sm:text-5xl">Writing about {STUDIO.name}?</h1>
       <p className="text-parchment-muted mt-4 max-w-2xl text-lg">
-        Here is who we are, the logos and colours, and where to reach us.
+        Here is who we are, the logos and colors, and where to reach us.
         Everything on this page is free to use in coverage of the studio and its
         games.
       </p>
@@ -71,11 +71,11 @@ export default function Press() {
         </ul>
       </Block>
 
-      <Block title="Colours">
+      <Block title="Colors">
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {PALETTE.map((colour) => (
+          {PALETTE.map((color) => (
             <li
-              key={colour.hex}
+              key={color.hex}
               className="ring-night-line flex flex-col overflow-hidden rounded-2xl ring-1"
             >
               {/* The hex value sits on its own dark chip: parchment straight
@@ -83,17 +83,15 @@ export default function Press() {
                   needs. */}
               <div
                 className="flex h-28 items-end p-4"
-                style={{ backgroundColor: colour.hex }}
+                style={{ backgroundColor: color.hex }}
               >
                 <span className="bg-night-deep text-parchment rounded-md px-2 py-1 font-mono text-sm font-semibold">
-                  {colour.hex}
+                  {color.hex}
                 </span>
               </div>
               <div className="bg-night-raised flex-1 p-4">
-                <h3 className="text-lg">{colour.name}</h3>
-                <p className="text-parchment-muted mt-1 text-sm">
-                  {colour.use}
-                </p>
+                <h3 className="text-lg">{color.name}</h3>
+                <p className="text-parchment-muted mt-1 text-sm">{color.use}</p>
               </div>
             </li>
           ))}

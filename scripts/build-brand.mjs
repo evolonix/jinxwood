@@ -31,17 +31,17 @@ const PARCHMENT = "#F4EDE0";
 /**
  * Removes a flat background from RGB pixels and returns RGBA.
  *
- * The mask is a flood fill from the image border, never a global colour key.
+ * The mask is a flood fill from the image border, never a global color key.
  * A global key would also remove artwork that happens to share the background
- * colour: the eye pupils on the plum files and the sparkles on the cream one.
+ * color: the eye pupils on the plum files and the sparkles on the cream one.
  * Regions that are enclosed by artwork but really are background (the bowl of
  * the "d") are listed as `holes` and filled from those seed points.
  *
  * Anti-aliased edge pixels are a blend of artwork and the old background, so
- * leaving them as they are would draw a fringe of the old colour on any new
- * background. Each one is un-mixed instead: its colour becomes the nearest
- * solid artwork colour and its alpha becomes how far it sits between the
- * background and that colour.
+ * leaving them as they are would draw a fringe of the old color on any new
+ * background. Each one is un-mixed instead: its color becomes the nearest
+ * solid artwork color and its alpha becomes how far it sits between the
+ * background and that color.
  */
 function keyBackground(
   rgb,
@@ -320,7 +320,7 @@ const WEBP = { quality: 84, effort: 6 };
 
 const hero = sharp(source("hero.webp"));
 const heroMeta = await hero.metadata();
-// Portrait crop for phones: a 3:4 slice centred on the castle and the bridge.
+// Portrait crop for phones: a 3:4 slice centered on the castle and the bridge.
 const portrait = {
   left: Math.round(heroMeta.width * 0.35),
   top: 0,
@@ -365,12 +365,12 @@ for (const width of [640, 960, 1280]) {
 // want the art to run right to the edges so they can round it themselves.
 //
 // So: remove the white, fill what was white with the square's own plum, and
-// take the centre square. That is the full-bleed icon. The rounded versions
+// take the center square. That is the full-bleed icon. The rounded versions
 // are that same square with the corners masked off again.
 const iconArt = await cutOut("icon.webp", { tolerance: 24, lighterIsBg: true });
 
 /** The plum the drawn square is filled with, read from just inside its edge. */
-function edgeColour({ rgba, w, h }) {
+function edgeColor({ rgba, w, h }) {
   let inner = new Uint8Array(w * h);
   for (let i = 0; i < w * h; i++) inner[i] = rgba[i * 4 + 3] === 0 ? 1 : 0;
   for (let step = 0; step < 3; step++) inner = dilate(inner, w, h);
@@ -392,7 +392,7 @@ function edgeColour({ rgba, w, h }) {
 const iconFilled = await sharp(
   await trimmed(iconArt.rgba, iconArt.w, iconArt.h, 0),
 )
-  .flatten({ background: edgeColour(iconArt) })
+  .flatten({ background: edgeColor(iconArt) })
   .png()
   .toBuffer();
 const iconMeta = await sharp(iconFilled).metadata();

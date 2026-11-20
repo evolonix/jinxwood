@@ -187,9 +187,9 @@ export const PRESS = {
     note: "JPEG, 2560 × 1440",
   },
   rules: [
-    "Use the logo files as they are: no recolouring, stretching or redrawing.",
+    "Use the logo files as they are: no recoloring, stretching or redrawing.",
     "Give the logo room, at least the height of the “J” on every side.",
-    "Put the dark-background logo on Enchanted Night or another plain dark colour, not on a busy photo.",
+    "Put the dark-background logo on Enchanted Night or another plain dark color, not on a busy photo.",
   ],
 } as const;
 
