@@ -28,7 +28,7 @@ export const SITE_URL = "https://jinxwood.com";
  * them): a crawler that cannot fetch a page never sees its noindex, and a
  * blocked URL can still be listed, bare, if another site links to it.
  */
-export const INDEXABLE = false;
+export const INDEXABLE = true;
 
 /** The link-preview image every page shares (scripts/build-brand.mjs). */
 export const SOCIAL_IMAGE = `${SITE_URL}/og.jpg`;
