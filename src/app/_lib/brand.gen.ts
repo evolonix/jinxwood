@@ -3,15 +3,15 @@
 // reserve their space before the file arrives.
 export const IMAGE_SIZES = {
   "wordmark": {
-    "width": 1367,
-    "height": 551
+    "width": 1368,
+    "height": 552
   },
   "lockup": {
     "width": 1538,
     "height": 626
   },
   "emblem": {
-    "width": 669,
+    "width": 670,
     "height": 626
   },
   "lockup-light": {
@@ -19,8 +19,8 @@ export const IMAGE_SIZES = {
     "height": 626
   },
   "wordmark-light": {
-    "width": 979,
-    "height": 397
+    "width": 1368,
+    "height": 552
   },
   "hero": {
     "width": 3584,

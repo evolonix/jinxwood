@@ -17,7 +17,7 @@ const WIDTHS = {
   lockup: [640, 1280],
   emblem: [240, 480, 640],
   "lockup-light": [640, 1280],
-  "wordmark-light": [640, 960],
+  "wordmark-light": [640, 1280],
 } as const;
 
 interface LogoProps {
