@@ -73,8 +73,8 @@ export default function Home() {
             We&apos;d like to hear from you
           </h2>
           <p className="text-parchment-muted mt-4 max-w-xl text-lg">
-            Questions, press, or a kind word about a game: it all reaches a
-            person, and we read every message.
+            Questions, press requests, and kind words about a game are all
+            welcome. A person reads every message.
           </p>
           <Button href={`mailto:${STUDIO.email}`} size="lg" className="mt-8">
             {STUDIO.email}

@@ -13,11 +13,11 @@ export const STUDIO = {
   email: "hello@jinxwood.games",
   tagline: "Games with a little mischief and a little magic.",
   intro:
-    "Jinxwood is a small studio making warm, well-crafted games, starting with the classics people already love.",
+    "Jinxwood is a small studio making warm, well-crafted games, starting with the classics you love.",
   story: [
-    "Jinxwood makes games that feel like a good evening at the table: familiar rules, friendly rivals, and enough polish that nothing gets in the way of the play.",
-    "A black cat is supposed to be bad luck. Ours sits in the hollow of an old tree and brings the good kind. We like turning a superstition on its head, so here the jinx is the lucky charm.",
-    "We are small and independent. Classic card games come first, and the wood has room for whatever grows next.",
+    "We make games that feel like a good evening at the table. The rules are familiar, the rivals are friendly, and nothing gets between you and the cards.",
+    "A black cat is supposed to be bad luck. Ours sits in the hollow of an old tree and brings the good kind instead. Around here, the jinx is the lucky charm.",
+    "We're a small, independent studio. Classic card games come first, and the wood has room for whatever grows next. Whenever you'd like a game, pull up a chair.",
   ],
 } as const;
 
