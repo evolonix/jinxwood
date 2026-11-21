@@ -60,6 +60,9 @@ export function useWordmarkDock(active: boolean): DockPhase {
     let to = { left: 0, top: 0, width: 1 };
     let frame = 0;
 
+    // Runs on every frame that is drawn, not once: the hero's content is
+    // centered in its section, so its wordmark shifts when a font arrives or
+    // the copy rewraps, and neither of those resizes anything observable.
     const measure = () => {
       // Neither the hero's wordmark nor the slot is ever transformed, so
       // their boxes are their resting places.
@@ -78,6 +81,7 @@ export function useWordmarkDock(active: boolean): DockPhase {
 
     const apply = () => {
       frame = 0;
+      measure();
       let p = Math.min(1, Math.max(0, (window.scrollY - start) / span));
       if (still.matches) p = p < 1 ? 0 : 1;
       const now: DockPhase = p >= 1 ? "docked" : p > 0 ? "moving" : "rest";
@@ -104,25 +108,26 @@ export function useWordmarkDock(active: boolean): DockPhase {
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(apply);
     };
-    const onResize = () => {
-      measure();
-      apply();
-    };
 
-    measure();
     apply();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    still.addEventListener("change", onResize);
-    // The hero's wordmark is an image: its box is only final once it loads.
-    const sized = new ResizeObserver(onResize);
+    window.addEventListener("resize", apply);
+    still.addEventListener("change", apply);
+    // A page restored part-way down should settle without waiting for a
+    // scroll: redraw when the wordmark's image or the fonts arrive.
+    const sized = new ResizeObserver(apply);
     sized.observe(hero);
+    let live = true;
+    void document.fonts.ready.then(() => {
+      if (live) apply();
+    });
 
     return () => {
+      live = false;
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      still.removeEventListener("change", onResize);
+      window.removeEventListener("resize", apply);
+      still.removeEventListener("change", apply);
       sized.disconnect();
       markEl.style.transform = "";
       header.style.removeProperty(PROGRESS);
