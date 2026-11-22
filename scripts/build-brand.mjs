@@ -687,17 +687,82 @@ async function partsMatchedTo(png, reference, kind, [width, height]) {
     .toBuffer();
 }
 
+/**
+ * Moves a wordmark's branch to where the lockup has it under the letters.
+ *
+ * The wordmark and the lockup are separate drawings of the same lettering,
+ * and the branch is the same size in both once the letters are, but it is not
+ * drawn in quite the same spot. The lockup decides: the branch's place is
+ * measured from the lockup's letters, in proportion to their size, so the
+ * wordmark is the lockup without its emblem. The letters stay where they are
+ * and nothing is redrawn; the branch's pixels are only moved.
+ */
+async function branchPlacedAsIn(png, lockup) {
+  const from = await partsOf(png, "wordmark");
+  const to = await partsOf(lockup, "lockup");
+  const across = from.letters.width / to.letters.width;
+  const down = from.letters.height / to.letters.height;
+  const target = {
+    left: Math.round(
+      from.letters.left + (to.branch.left - to.letters.left) * across,
+    ),
+    top: Math.round(from.letters.top + (to.branch.top - to.letters.top) * down),
+    width: Math.round(to.branch.width * across),
+    height: Math.round(to.branch.height * down),
+  };
+  // A branch of another size would need redrawing, not moving: the art has
+  // changed, and whoever changed it should look.
+  for (const edge of ["width", "height"]) {
+    if (Math.abs(from.branch[edge] - target[edge]) > PART_TOLERANCE + 1) {
+      throw new Error(
+        `The wordmark's branch is ${from.branch[edge]} in ${edge}, but the lockup's comes to ${target[edge]}`,
+      );
+    }
+  }
+  const dx = target.left - from.branch.left;
+  const dy = target.top - from.branch.top;
+  if (dx === 0 && dy === 0) return png;
+  const { w, h } = from.branch;
+  const moved = Uint8Array.from(from.letters.rgba);
+  const branch = from.branch.rgba;
+  for (let y = from.branch.top; y < from.branch.top + from.branch.height; y++) {
+    for (
+      let x = from.branch.left;
+      x < from.branch.left + from.branch.width;
+      x++
+    ) {
+      const i = (y * w + x) * 4;
+      if (branch[i + 3] === 0) continue;
+      const xx = x + dx;
+      const yy = y + dy;
+      if (xx < 0 || xx >= w || yy < 0 || yy >= h) {
+        throw new Error("The wordmark's branch does not fit its canvas");
+      }
+      moved.set(branch.subarray(i, i + 4), (yy * w + xx) * 4);
+    }
+  }
+  return sharp(Buffer.from(moved), {
+    raw: { width: w, height: h, channels: 4 },
+  })
+    .png()
+    .toBuffer();
+}
+
 // For dark backgrounds — what the site itself uses. These are the reference:
 // each light version below is matched to the one here, part by part.
+const darkLockup = await onCanvas(
+  await trimmed(plumLockup.rgba, plumLockup.w, plumLockup.h),
+  LOCKUP,
+);
 const dark = {
-  wordmark: await onCanvas(
-    await trimmed(plumWordmark.rgba, plumWordmark.w, plumWordmark.h),
-    WORDMARK,
+  wordmark: await branchPlacedAsIn(
+    await onCanvas(
+      await trimmed(plumWordmark.rgba, plumWordmark.w, plumWordmark.h),
+      WORDMARK,
+    ),
+    darkLockup,
   ),
-  lockup: await onCanvas(
-    await trimmed(plumLockup.rgba, plumLockup.w, plumLockup.h),
-    LOCKUP,
-  ),
+  lockup: darkLockup,
   emblem: await onCanvas(
     await trimmed(emblemOnly(plumLockup), plumLockup.w, plumLockup.h),
     EMBLEM,
@@ -715,8 +780,8 @@ const cutOuts = {
   ),
   // There is no light wordmark drawn by itself, so this one is the lettering
   // lifted out of the light-background lockup. There the letters are drawn
-  // smaller and the branch sits a little further up and to the left, so the
-  // letters and the branch are each sized and placed from the dark wordmark.
+  // smaller, so the letters and the branch are each sized and placed from
+  // the dark wordmark.
   "wordmark-light": await partsMatchedTo(
     await trimmed(letteringOnly(creamLockup), creamLockup.w, creamLockup.h),
     dark.wordmark,
