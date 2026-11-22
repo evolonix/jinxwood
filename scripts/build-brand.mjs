@@ -10,6 +10,9 @@
 // The logos exist only as flat rasters on a solid background, so the first job
 // is cutting them out. The rest is resizing: hero sizes, icons, the social
 // image and press downloads.
+//
+// It also writes the YouTube channel's profile picture and banner to
+// brand/youtube/. The site does not serve those; they are uploaded by hand.
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -1116,6 +1119,101 @@ await hero
   .resize({ width: 2560 })
   .jpeg({ quality: 90, mozjpeg: true })
   .toFile(pub("press/jinxwood-forest.jpg"));
+
+// ---------------------------------------------------------------------------
+// YouTube channel
+// ---------------------------------------------------------------------------
+
+const youtube = (f) => join(root, "brand/youtube", f);
+await mkdir(join(root, "brand/youtube"), { recursive: true });
+
+// YouTube shows the profile picture as a circle, often only a few dozen pixels
+// across. The full-bleed icon fills that circle and keeps the cat large; the
+// circle trims nothing but leaf tips in the corners. It is also the drawing
+// the favicon uses, so the channel and the site match.
+await sharp(iconSquare)
+  .resize(800, 800)
+  .png(png)
+  .toFile(youtube("profile-800.png"));
+
+// The video watermark sits over the corner of every video and works as a
+// subscribe button. It is the emblem alone on a transparent square, at the
+// size YouTube asks for, so the video shows through around it.
+await sharp(cutOuts.emblem)
+  .resize(150, 150, {
+    fit: "contain",
+    background: { r: 0, g: 0, b: 0, alpha: 0 },
+  })
+  .png(png)
+  .toFile(youtube("watermark-150.png"));
+
+// The banner is uploaded whole, but only a TV shows all of it. A desktop shows
+// the middle band, 423 pixels tall, and a phone only the middle 1546 pixels of
+// that band. So the wordmark sits inside the phone's strip, on its left, where
+// it ends before the castle and has the darker sky behind it.
+const BANNER = { width: 2560, height: 1440 };
+const BANNER_SAFE = { width: 1546, height: 423 };
+const BANNER_WORDMARK_HEIGHT = 300;
+// Gap between the left edge of the phone's strip and the wordmark.
+const BANNER_INSET = 63;
+// How far the shadow spreads past the lettering, and how dark it gets.
+const BANNER_SHADOW = { reach: 90, blur: 24, strength: 0.7, drop: 6 };
+
+const bannerWordmark = await sharp(await withTrademark("wordmark"))
+  .resize({ height: BANNER_WORDMARK_HEIGHT })
+  .png()
+  .toBuffer();
+const bannerWordmarkWidth = (await sharp(bannerWordmark).metadata()).width;
+if (bannerWordmarkWidth + 2 * BANNER_INSET > BANNER_SAFE.width) {
+  throw new Error("The banner wordmark does not fit the strip a phone shows.");
+}
+
+// The clouds behind the lettering are pale in places, so it gets a soft dark
+// shadow in its own shape: the wordmark's opacity, blurred and tinted.
+const transparent = { r: 0, g: 0, b: 0, alpha: 0 };
+const shadowRoom = await sharp(bannerWordmark)
+  .extend({
+    top: BANNER_SHADOW.reach,
+    bottom: BANNER_SHADOW.reach,
+    left: BANNER_SHADOW.reach,
+    right: BANNER_SHADOW.reach,
+    background: transparent,
+  })
+  .png()
+  .toBuffer();
+const shadowAlpha = await sharp(shadowRoom)
+  .extractChannel(3)
+  .blur(BANNER_SHADOW.blur)
+  .linear(BANNER_SHADOW.strength, 0)
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+const shadowSize = {
+  width: shadowAlpha.info.width,
+  height: shadowAlpha.info.height,
+};
+const bannerShadow = await sharp({
+  create: { ...shadowSize, channels: 3, background: "#160d24" },
+})
+  .joinChannel(shadowAlpha.data, { raw: { ...shadowSize, channels: 1 } })
+  .png()
+  .toBuffer();
+
+const bannerLeft = (BANNER.width - BANNER_SAFE.width) / 2 + BANNER_INSET;
+const bannerTop = (BANNER.height - BANNER_WORDMARK_HEIGHT) / 2;
+// YouTube takes at most 6 MB; this comes to well under 1 MB.
+await hero
+  .clone()
+  .resize({ ...BANNER, fit: "cover" })
+  .composite([
+    {
+      input: bannerShadow,
+      left: bannerLeft - BANNER_SHADOW.reach,
+      top: bannerTop - BANNER_SHADOW.reach + BANNER_SHADOW.drop,
+    },
+    { input: bannerWordmark, left: bannerLeft, top: bannerTop },
+  ])
+  .jpeg({ quality: 92, chromaSubsampling: "4:4:4" })
+  .toFile(youtube("banner-2560x1440.jpg"));
 
 // ---------------------------------------------------------------------------
 // Generated sizes
