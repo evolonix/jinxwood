@@ -377,20 +377,14 @@ function dilate(mask, w, h) {
   return grown;
 }
 
-/**
- * Keeps only the connected pieces of artwork that pass `keep(bounds)`. Used to
- * lift the cat emblem out of the lockup: the emblem's leaves overlap the "J"
- * horizontally, so no straight vertical cut separates them, but every piece of
- * the emblem ends left of where the lettering's pieces end.
- */
-function keepPieces(rgba, w, h, keep) {
+/** Every connected piece of artwork, with its bounds and its pixels. */
+function piecesOf(rgba, w, h) {
   const n = w * h;
   const label = new Int32Array(n);
-  const result = new Uint8Array(rgba.length);
-  let id = 0;
+  const pieces = [];
   for (let start = 0; start < n; start++) {
     if (label[start] || rgba[start * 4 + 3] === 0) continue;
-    id++;
+    const id = pieces.length + 1;
     const pixels = [start];
     label[start] = id;
     const bounds = { x0: w, y0: h, x1: 0, y1: 0 };
@@ -415,10 +409,23 @@ function keepPieces(rgba, w, h, keep) {
         }
       }
     }
-    if (keep(bounds)) {
-      for (const i of pixels) {
-        result.set(rgba.subarray(i * 4, i * 4 + 4), i * 4);
-      }
+    pieces.push({ bounds, pixels });
+  }
+  return pieces;
+}
+
+/**
+ * Keeps only the connected pieces of artwork that pass `keep(bounds)`. Used to
+ * lift the cat emblem out of the lockup: the emblem's leaves overlap the "J"
+ * horizontally, so no straight vertical cut separates them, but every piece of
+ * the emblem ends left of where the lettering's pieces end.
+ */
+function keepPieces(rgba, w, h, keep) {
+  const result = new Uint8Array(rgba.length);
+  for (const { bounds, pixels } of piecesOf(rgba, w, h)) {
+    if (!keep(bounds)) continue;
+    for (const i of pixels) {
+      result.set(rgba.subarray(i * 4, i * 4 + 4), i * 4);
     }
   }
   return result;
@@ -496,21 +503,9 @@ const EMBLEM = [670, 626];
 
 /**
  * Centers a cut-out on a transparent canvas of exactly this size. Only empty
- * margin is added or trimmed; with `enlarge`, the artwork is first scaled up
- * until it fills the canvas to the same margin `trimmed` leaves.
+ * margin is added or trimmed.
  */
-async function onCanvas(png, [width, height], { enlarge = false } = {}) {
-  if (enlarge) {
-    const from = await sharp(png).metadata();
-    const factor = Math.min(
-      (width - 2 * TRIM_PAD) / (from.width - 2 * TRIM_PAD),
-      (height - 2 * TRIM_PAD) / (from.height - 2 * TRIM_PAD),
-    );
-    png = await sharp(png)
-      .resize({ width: Math.round(from.width * factor), kernel: "lanczos3" })
-      .png()
-      .toBuffer();
-  }
+async function onCanvas(png, [width, height]) {
   const meta = await sharp(png).metadata();
   const keepW = Math.min(meta.width, width);
   const keepH = Math.min(meta.height, height);
@@ -544,8 +539,157 @@ async function onCanvas(png, [width, height], { enlarge = false } = {}) {
     .toBuffer();
 }
 
-const cutOuts = {
-  // For dark backgrounds — what the site itself uses.
+/**
+ * Splits a logo into the parts that have to agree between its dark and light
+ * versions: the emblem, the letters, and the branch under the letters. Each
+ * comes back with its bounds and its pixels alone on a canvas of the same
+ * size.
+ *
+ * The emblem is its body, the largest piece by far, and everything that ends
+ * no further right than it does. Of what remains, the branch is the widest
+ * piece and the rest are letters.
+ */
+async function partsOf(png, kind) {
+  const { data, info } = await sharp(png)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  const pieces = piecesOf(data, w, h);
+  const groups = {};
+  let rest = pieces;
+  if (kind === "emblem") {
+    groups.emblem = pieces;
+    rest = [];
+  } else if (kind === "lockup") {
+    const body = pieces.reduce((a, b) =>
+      b.pixels.length > a.pixels.length ? b : a,
+    );
+    groups.emblem = pieces.filter((p) => p.bounds.x1 <= body.bounds.x1);
+    rest = pieces.filter((p) => p.bounds.x1 > body.bounds.x1);
+  }
+  if (rest.length) {
+    const span = (p) => p.bounds.x1 - p.bounds.x0;
+    const branch = rest.reduce((a, b) => (span(b) > span(a) ? b : a));
+    groups.letters = rest.filter((p) => p !== branch);
+    groups.branch = [branch];
+  }
+  const parts = {};
+  for (const [name, group] of Object.entries(groups)) {
+    const rgba = new Uint8Array(data.length);
+    const bounds = { x0: w, y0: h, x1: 0, y1: 0 };
+    for (const piece of group) {
+      bounds.x0 = Math.min(bounds.x0, piece.bounds.x0);
+      bounds.y0 = Math.min(bounds.y0, piece.bounds.y0);
+      bounds.x1 = Math.max(bounds.x1, piece.bounds.x1);
+      bounds.y1 = Math.max(bounds.y1, piece.bounds.y1);
+      for (const i of piece.pixels) {
+        rgba.set(data.subarray(i * 4, i * 4 + 4), i * 4);
+      }
+    }
+    parts[name] = {
+      rgba,
+      w,
+      h,
+      left: bounds.x0,
+      top: bounds.y0,
+      width: bounds.x1 - bounds.x0 + 1,
+      height: bounds.y1 - bounds.y0 + 1,
+    };
+  }
+  return parts;
+}
+
+/** How far two versions of a part may differ and still count as the same. */
+const PART_TOLERANCE = 1;
+
+/**
+ * Whether two logos have the same parts, each the same size and in the same
+ * place. Returns the first difference as a sentence when asked to explain.
+ */
+function partsAgree(a, b, explain = false) {
+  for (const part of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    for (const edge of ["left", "top", "width", "height"]) {
+      const gap = Math.abs((a[part]?.[edge] ?? NaN) - (b[part]?.[edge] ?? NaN));
+      if (!(gap <= PART_TOLERANCE)) {
+        return explain
+          ? `the ${part}'s ${edge} is ${a[part]?.[edge]} in one and ${b[part]?.[edge]} in the other`
+          : false;
+      }
+    }
+  }
+  return explain ? "" : true;
+}
+
+/**
+ * Rebuilds a logo so that each of its parts is the size of the same part in
+ * the reference, and sits in the same place, on a canvas of this size. Laid
+ * one over the other, the two then agree part for part.
+ *
+ * A part that is already the reference's size, give or take a pixel of soft
+ * edge, is only moved, so it stays as sharp as it was drawn. Otherwise it is
+ * resized to the reference's box. The two drawings never differ in shape by
+ * more than a fraction of a percent; a part that would have to be stretched
+ * further than that means the art has changed, and stops the build.
+ */
+async function partsMatchedTo(png, reference, kind, [width, height]) {
+  const to = await partsOf(reference, kind);
+  // Drawn to match already? Then it goes out exactly as drawn.
+  const asDrawn = await onCanvas(png, [width, height]);
+  if (partsAgree(to, await partsOf(asDrawn, kind))) return asDrawn;
+  const from = await partsOf(png, kind);
+  const layers = [];
+  for (const [name, part] of Object.entries(from)) {
+    const target = to[name];
+    if (!target) throw new Error(`The reference ${kind} has no ${name}`);
+    let layer = sharp(Buffer.from(part.rgba), {
+      raw: { width: part.w, height: part.h, channels: 4 },
+    }).extract({
+      left: part.left,
+      top: part.top,
+      width: part.width,
+      height: part.height,
+    });
+    const sameSize =
+      Math.abs(part.width - target.width) <= PART_TOLERANCE &&
+      Math.abs(part.height - target.height) <= PART_TOLERANCE;
+    if (!sameSize) {
+      const across = target.width / part.width;
+      const down = target.height / part.height;
+      if (Math.abs(across / down - 1) > 0.005) {
+        throw new Error(
+          `The ${name} of the ${kind} would be stretched ${across.toFixed(4)} across but ${down.toFixed(4)} down`,
+        );
+      }
+      layer = layer.resize({
+        width: target.width,
+        height: target.height,
+        fit: "fill",
+        kernel: "lanczos3",
+      });
+    }
+    layers.push({
+      input: await layer.png().toBuffer(),
+      left: target.left,
+      top: target.top,
+    });
+  }
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite(layers)
+    .png()
+    .toBuffer();
+}
+
+// For dark backgrounds — what the site itself uses. These are the reference:
+// each light version below is matched to the one here, part by part.
+const dark = {
   wordmark: await onCanvas(
     await trimmed(plumWordmark.rgba, plumWordmark.w, plumWordmark.h),
     WORDMARK,
@@ -558,25 +702,49 @@ const cutOuts = {
     await trimmed(emblemOnly(plumLockup), plumLockup.w, plumLockup.h),
     EMBLEM,
   ),
+};
+
+const cutOuts = {
+  ...dark,
   // For light backgrounds — press kit only.
-  "lockup-light": await onCanvas(
+  "lockup-light": await partsMatchedTo(
     await trimmed(creamLockup.rgba, creamLockup.w, creamLockup.h),
+    dark.lockup,
+    "lockup",
     LOCKUP,
   ),
-  // There is no dark wordmark drawn by itself, so this one is the lettering
-  // lifted out of the light-background lockup, where it is drawn smaller, and
-  // enlarged to the size of the other wordmark.
-  "wordmark-light": await onCanvas(
+  // There is no light wordmark drawn by itself, so this one is the lettering
+  // lifted out of the light-background lockup. There the letters are drawn
+  // smaller and the branch sits a little further up and to the left, so the
+  // letters and the branch are each sized and placed from the dark wordmark.
+  "wordmark-light": await partsMatchedTo(
     await trimmed(letteringOnly(creamLockup), creamLockup.w, creamLockup.h),
+    dark.wordmark,
+    "wordmark",
     WORDMARK,
-    { enlarge: true },
   ),
   // The emblem from the same lockup, whose edges were drawn against cream.
-  "emblem-light": await onCanvas(
+  "emblem-light": await partsMatchedTo(
     await trimmed(emblemOnly(creamLockup), creamLockup.w, creamLockup.h),
+    dark.emblem,
+    "emblem",
     EMBLEM,
   ),
 };
+
+// The promise the press kit makes is that a light file can stand in for its
+// dark one. Check it on what was just built, so a change to the art that
+// breaks it stops here and not on someone's page.
+for (const name of Object.keys(dark)) {
+  const difference = partsAgree(
+    await partsOf(cutOuts[name], name),
+    await partsOf(cutOuts[`${name}-light`], name),
+    true,
+  );
+  if (difference) {
+    throw new Error(`The dark and light ${name} differ: ${difference}`);
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Trademark symbol
@@ -618,7 +786,7 @@ const CREAM_INK = "#fef0d4";
 const PLUM_INK = "#2e1e37";
 const TRADEMARK_AT = {
   wordmark: { x: 1304, y: 34, height: 60, color: CREAM_INK },
-  "wordmark-light": { x: 1316, y: 35, height: 60, color: PLUM_INK },
+  "wordmark-light": { x: 1304, y: 34, height: 60, color: PLUM_INK },
   lockup: { x: 1498, y: 174, height: 44, color: CREAM_INK },
   "lockup-light": { x: 1498, y: 174, height: 44, color: PLUM_INK },
 };

@@ -50,8 +50,8 @@ export const TRADEMARK = {
       "color": "#fef0d4"
     },
     "wordmark-light": {
-      "x": 1316,
-      "y": 35,
+      "x": 1304,
+      "y": 34,
       "height": 60,
       "color": "#2e1e37"
     },
