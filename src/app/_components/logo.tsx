@@ -87,7 +87,10 @@ export function Logo({ name, sizes, alt = "Jinxwood", className }: LogoProps) {
       width={width}
       height={height}
       alt={alt}
-      decoding="async"
+      // Decoded in step with the page, not after it. A browser may otherwise
+      // draw a frame or two without the image while it decodes on the side,
+      // and the trademark symbol would be showing next to nothing.
+      decoding="sync"
       className={className}
     />
   );
