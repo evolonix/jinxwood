@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { AppLink } from "../_components/app-link";
 import { Eyebrow } from "../_components/eyebrow";
 import { DownloadIcon } from "../_components/icons";
-import { Logo, type LogoName } from "../_components/logo";
+import { Logo, TrademarkSymbol, type LogoName } from "../_components/logo";
+import { IMAGE_SIZES } from "../_lib/brand.gen";
 import {
   GAMES,
   liveStores,
@@ -94,26 +95,46 @@ export default function Press() {
 
       <Block title="Logos">
         <ul className="grid gap-6 sm:grid-cols-2">
-          {PRESS.downloads.map((item) => (
-            <li
-              key={item.file}
-              className="ring-night-line overflow-hidden rounded-2xl ring-1"
-            >
-              <div
-                className={`flex h-48 items-center justify-center p-8 ${
-                  item.on === "parchment" ? "bg-parchment" : "bg-night-deep"
-                }`}
+          {PRESS.downloads.map((item) => {
+            const name: LogoName = item.preview;
+            const { width, height } = IMAGE_SIZES[name];
+            return (
+              <li
+                key={item.file}
+                className="ring-night-line overflow-hidden rounded-2xl ring-1"
               >
-                <Logo
-                  name={item.preview as LogoName}
-                  sizes="20rem"
-                  alt=""
-                  className="max-h-full w-auto max-w-full object-contain"
+                <div
+                  className={`flex h-48 items-center justify-center p-8 ${
+                    item.on === "parchment" ? "bg-parchment" : "bg-night-deep"
+                  }`}
+                >
+                  {/* A box of exactly the logo's shape, as tall as the 8rem
+                      this tile leaves or as wide as it allows, so the
+                      trademark symbol lands where the download has it. */}
+                  <div
+                    className="relative"
+                    style={{
+                      width: `min(100%, ${(8 * width) / height}rem)`,
+                      aspectRatio: `${width} / ${height}`,
+                    }}
+                  >
+                    <Logo
+                      name={name}
+                      sizes="20rem"
+                      alt=""
+                      className="h-full w-full"
+                    />
+                    <TrademarkSymbol name={name} />
+                  </div>
+                </div>
+                <Download
+                  href={item.file}
+                  label={item.label}
+                  note={item.note}
                 />
-              </div>
-              <Download href={item.file} label={item.label} note={item.note} />
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
         <ul className="text-parchment-muted mt-8 max-w-3xl list-disc space-y-2 pl-5">
           {PRESS.rules.map((rule) => (

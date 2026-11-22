@@ -16,6 +16,7 @@ export function Footer() {
           <div className="text-parchment-muted text-sm">
             <p>{STUDIO.copyright}</p>
             <p>{STUDIO.legalLine}</p>
+            <p>{STUDIO.trademark}</p>
           </div>
         </div>
         <nav
