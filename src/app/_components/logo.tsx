@@ -41,10 +41,11 @@ const TRADEMARK_AT: Partial<
  * The images themselves stay unmarked, so the symbol can change without
  * redrawing them: build-brand decides which symbol it is and where it sits.
  *
- * Put it beside the <Logo> inside a positioned box that is exactly as wide as
- * the image. It is drawn in the image's own coordinates, so it grows and
- * shrinks with the logo, and it hangs past the box's right edge. An emblem
- * has no lettering and gets nothing.
+ * Put it straight after the <Logo>, inside a positioned box that is exactly
+ * as wide as the image. It is drawn in the image's own coordinates, so it
+ * grows and shrinks with the logo, and it hangs past the box's right edge. It
+ * stays hidden until that image has loaded (see index.css). An emblem has no
+ * lettering and gets nothing.
  */
 export function TrademarkSymbol({ name }: { name: LogoName }) {
   const { width, height } = IMAGE_SIZES[name];
@@ -52,6 +53,7 @@ export function TrademarkSymbol({ name }: { name: LogoName }) {
   if (!at) return null;
   return (
     <svg
+      data-trademark
       aria-hidden="true"
       viewBox={`0 0 ${width} ${height}`}
       className="pointer-events-none absolute top-0 left-0 w-full overflow-visible"
@@ -71,6 +73,14 @@ export function Logo({ name, sizes, alt = "Jinxwood", className }: LogoProps) {
   const widths = WIDTHS[name];
   return (
     <img
+      // The trademark symbol waits for this mark. The ref covers an image
+      // that had already loaded by the time it was put on the page.
+      ref={(img) => {
+        if (img?.complete && img.naturalWidth > 0) img.dataset.loaded = "";
+      }}
+      onLoad={(event) => {
+        event.currentTarget.dataset.loaded = "";
+      }}
       src={`/img/logo/${name}-${widths[0]}.webp`}
       srcSet={widths.map((w) => `/img/logo/${name}-${w}.webp ${w}w`).join(", ")}
       sizes={sizes}

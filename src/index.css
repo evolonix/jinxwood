@@ -155,6 +155,13 @@ html[data-wordmark-away] [data-hero-wordmark] {
   visibility: hidden;
 }
 
+/* The trademark symbol is drawn by the page, not loaded, so it would show
+   beside an empty box while its logo is still on the way. It waits for the
+   image, which Logo marks once it has arrived. */
+img:not([data-loaded]) + [data-trademark] {
+  visibility: hidden;
+}
+
 :root {
   /* Height of the sticky header; the home hero slides up underneath it. */
   --header-h: 4.5rem;
