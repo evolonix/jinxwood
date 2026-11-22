@@ -5,7 +5,7 @@ import { gamePath } from "../_lib/seo";
 import { ArrowRightIcon, PauseIcon, PlayIcon } from "./icons";
 import { Button } from "./button";
 import { Fireflies } from "./fireflies";
-import { Logo } from "./logo";
+import { Logo, TrademarkSymbol } from "./logo";
 
 // The sizes scripts/build-brand.mjs writes. index.html preloads the same AVIF
 // lists, so keep all three in step.
@@ -147,12 +147,16 @@ export function Hero() {
           />
           {/* The header takes this wordmark over as the page scrolls; the
               marker is how it finds it (see useWordmarkDock). */}
-          <div data-hero-wordmark className="relative w-fit">
+          <div
+            data-hero-wordmark
+            className="relative w-fit drop-shadow-[0_4px_24px_rgb(26_18_45/0.6)]"
+          >
             <Logo
               name="wordmark"
               sizes="(max-width: 30rem) 76vw, 22rem"
-              className="tall:w-[min(22rem,58vw)] h-auto w-[min(22rem,76vw)] drop-shadow-[0_4px_24px_rgb(26_18_45/0.6)]"
+              className="tall:w-[min(22rem,58vw)] h-auto w-[min(22rem,76vw)]"
             />
+            <TrademarkSymbol name="wordmark" />
           </div>
           <h1 className="relative mt-6 text-4xl leading-[1.08] [text-shadow:0_2px_20px_rgb(26_18_45/0.75)] sm:text-5xl lg:text-6xl">
             {STUDIO.tagline}

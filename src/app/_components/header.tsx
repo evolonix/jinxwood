@@ -4,7 +4,7 @@ import { STUDIO } from "../_lib/content";
 import { useScrolled } from "../_lib/use-scrolled";
 import { useWordmarkDock } from "../_lib/use-wordmark-dock";
 import { Button } from "./button";
-import { Logo } from "./logo";
+import { Logo, TrademarkSymbol } from "./logo";
 
 /**
  * Sticky site header. Transparent at the top of a page, so the home hero shows
@@ -59,7 +59,7 @@ export function Header() {
         >
           <span
             data-wordmark-mark
-            className={`block origin-top-left ${
+            className={`relative block origin-top-left ${
               dock === "moving" ? "will-change-transform" : ""
             }`}
           >
@@ -71,6 +71,7 @@ export function Header() {
               alt=""
               className="h-9 w-auto sm:h-11"
             />
+            <TrademarkSymbol name="wordmark" />
           </span>
         </Link>
         <nav

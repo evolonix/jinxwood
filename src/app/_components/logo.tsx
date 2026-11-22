@@ -1,4 +1,4 @@
-import { IMAGE_SIZES } from "../_lib/brand.gen";
+import { IMAGE_SIZES, TRADEMARK } from "../_lib/brand.gen";
 
 /**
  * The logo cut-outs made by scripts/build-brand.mjs:
@@ -29,6 +29,41 @@ interface LogoProps {
   /** Defaults to the studio name. Pass "" where the logo is decoration. */
   alt?: string;
   className?: string;
+}
+
+/** Where the symbol sits, for the logos that have lettering to carry it. */
+const TRADEMARK_AT: Partial<
+  Record<LogoName, { x: number; y: number; height: number; color: string }>
+> = TRADEMARK.at;
+
+/**
+ * The trademark symbol, drawn over a logo just past the end of its lettering.
+ * The images themselves stay unmarked, so the symbol can change without
+ * redrawing them: build-brand decides which symbol it is and where it sits.
+ *
+ * Put it beside the <Logo> inside a positioned box that is exactly as wide as
+ * the image. It is drawn in the image's own coordinates, so it grows and
+ * shrinks with the logo, and it hangs past the box's right edge. An emblem
+ * has no lettering and gets nothing.
+ */
+export function TrademarkSymbol({ name }: { name: LogoName }) {
+  const { width, height } = IMAGE_SIZES[name];
+  const at = TRADEMARK_AT[name];
+  if (!at) return null;
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox={`0 0 ${width} ${height}`}
+      className="pointer-events-none absolute top-0 left-0 w-full overflow-visible"
+    >
+      <path
+        d={TRADEMARK.path}
+        fill={at.color}
+        fillRule="evenodd"
+        transform={`translate(${at.x} ${at.y}) scale(${at.height / 100})`}
+      />
+    </svg>
+  );
 }
 
 export function Logo({ name, sizes, alt = "Jinxwood", className }: LogoProps) {
