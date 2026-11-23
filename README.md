@@ -22,16 +22,17 @@ npm install
 npm run dev
 ```
 
-| Script                   | What it does                                                     |
-| ------------------------ | ---------------------------------------------------------------- |
-| `npm run dev`            | Dev server                                                       |
-| `npm run build`          | Type-check, build, then write a static page per route            |
-| `npm run preview`        | Serve the production build                                       |
-| `npm run preview:pages`  | Serve the production build the way GitHub Pages does (real 404s) |
-| `npm run lint`           | ESLint                                                           |
-| `npm run format`         | Prettier, writing changes (`format:check` only reports)          |
-| `npm run build:brand`    | Regenerate every brand image from `brand/source/`                |
-| `npm run build:pinochle` | Regenerate the Pinochle screenshots and art from the app repo    |
+| Script                     | What it does                                                     |
+| -------------------------- | ---------------------------------------------------------------- |
+| `npm run dev`              | Dev server                                                       |
+| `npm run build`            | Type-check, build, then write a static page per route            |
+| `npm run preview`          | Serve the production build                                       |
+| `npm run preview:pages`    | Serve the production build the way GitHub Pages does (real 404s) |
+| `npm run lint`             | ESLint                                                           |
+| `npm run format`           | Prettier, writing changes (`format:check` only reports)          |
+| `npm run build:brand`      | Regenerate every brand image from `brand/source/`                |
+| `npm run build:wallpapers` | Regenerate the iPhone Duo wallpapers in `brand/wallpapers/`      |
+| `npm run build:pinochle`   | Regenerate the Pinochle screenshots and art from the app repo    |
 
 ## Where things are
 

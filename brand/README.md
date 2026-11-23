@@ -10,10 +10,11 @@ serves nothing from this folder directly.
   hand.
 - `facebook/`, `play/`: the Facebook page and Google Play developer profile
   art, made by hand.
-- `wallpapers/`: iPhone Duo wallpapers, made by hand, with the artwork dead
-  center: the emblem for the outer screen and for the inner screen held
-  upright, the logo for the inner screen held sideways. Each comes in dark and
-  light, on a flat brand color and on the forest art.
+- `wallpapers/`: iPhone Duo wallpapers, written by `npm run build:wallpapers`
+  from the press logos and the forest art, with the artwork dead center: the
+  emblem for the outer screen and for the inner screen held upright, the logo
+  for the inner screen held sideways. Each comes in dark and light, on a flat
+  brand color and on the forest art. They are set by hand on the phone.
 
 Everything else outside `source/` is uploaded by hand to the platform it is
 named for. Videos, captions, the original PNG masters and earlier logo attempts are
