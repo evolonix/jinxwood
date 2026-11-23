@@ -64,7 +64,7 @@ export const RULES_VIDEO = {
 // Docs/AndroidPlan.md, "Launch day").
 export const PLAY = {
   packageName: "games.jinxwood.pinochle",
-  live: false,
+  live: true,
 } as const;
 
 export const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY.packageName}`;

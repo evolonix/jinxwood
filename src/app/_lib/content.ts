@@ -93,7 +93,7 @@ export const GAMES: readonly Game[] = [
       "Online play through Game Center",
       "SharePlay over FaceTime",
     ],
-    platforms: ["iPhone", "iPad", "Mac", "Apple TV"],
+    platforms: ["iPhone", "iPad", "Mac", "Apple TV", "Android"],
     price: "Free to try for 14 days",
     priceNote: "One purchase after that. No subscription, no ads.",
     release: {
@@ -112,7 +112,7 @@ export const GAMES: readonly Game[] = [
       {
         kind: "google-play",
         url: "https://play.google.com/store/apps/details?id=games.jinxwood.pinochle",
-        live: false,
+        live: true,
       },
     ],
     links: {
@@ -190,7 +190,7 @@ export const PALETTE = [
 
 export const PRESS = {
   boilerplate:
-    "Jinxwood is an independent game studio and the gaming brand of Evolonix LLC. It makes warm, well-crafted games with a little mischief and a little magic, beginning with Pinochle: Two-Handed for iPhone, iPad, Mac, and Apple TV.",
+    "Jinxwood is an independent game studio and the gaming brand of Evolonix LLC. It makes warm, well-crafted games with a little mischief and a little magic, beginning with Pinochle: Two-Handed for iPhone, iPad, Mac, Apple TV, and Android.",
   downloads: [
     {
       label: "Logo for dark backgrounds",
