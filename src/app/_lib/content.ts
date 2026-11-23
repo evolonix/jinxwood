@@ -12,6 +12,7 @@ export const STUDIO = {
   trademark: "Jinxwood is a trademark of Evolonix LLC.",
   url: "https://jinxwood.com",
   email: "hello@jinxwood.games",
+  youtube: "https://www.youtube.com/@jinxwoodgames",
   tagline: "Games with a little mischief and a little magic.",
   intro:
     "Jinxwood is a small studio making warm, well-crafted games, starting with the classics you love.",
@@ -38,6 +39,14 @@ export interface GameImage {
   alt: string;
 }
 
+/** A video on the studio's YouTube channel. */
+export interface GameVideo {
+  title: string;
+  url: string;
+  /** Running time as a player shows it: "3:21". */
+  length: string;
+}
+
 export interface Game {
   /** URL segment: /games/<slug>. */
   slug: string;
@@ -60,6 +69,8 @@ export interface Game {
   /** Routes of the game's own support and policy pages on this site. */
   links: { support: string; privacy: string; terms: string };
   art: { icon: GameImage; shots: readonly GameImage[] };
+  /** The game's public videos on YouTube, for the press page. */
+  videos: readonly GameVideo[];
 }
 
 /**
@@ -125,6 +136,28 @@ export const GAMES: readonly Game[] = [
         },
       ],
     },
+    videos: [
+      {
+        title: "Version 2.0 gameplay",
+        url: "https://www.youtube.com/watch?v=sTu4v-9AmuM",
+        length: "0:33",
+      },
+      {
+        title: "How to play: the rules in three minutes",
+        url: "https://www.youtube.com/watch?v=KZ47CUTGEIk",
+        length: "3:21",
+      },
+      {
+        title: "The Daily Deal",
+        url: "https://www.youtube.com/watch?v=iOSe9AA31cA",
+        length: "0:33",
+      },
+      {
+        title: "On Apple TV and iPhone Duo",
+        url: "https://www.youtube.com/watch?v=r6DlMwoNE5k",
+        length: "0:34",
+      },
+    ],
   },
 ];
 

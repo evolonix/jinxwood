@@ -7,29 +7,42 @@ interface VideoFrameProps {
   label: string;
   /** CSS aspect-ratio of the footage, so the frame holds its size pre-load. */
   ratio?: string;
+  /**
+   * False for a video that is watched with its sound: it waits for the viewer
+   * to press play, plays once with sound, and never starts on its own.
+   */
+  ambient?: boolean;
+  /** A WebVTT captions file the viewer can turn on from the controls. */
+  captions?: { src: string; lang: string; label: string };
   className?: string;
 }
 
 /**
- * A gameplay clip in the same rounded, ringed surface as DeviceFrame. It plays
- * muted and looped while at least half of it is on screen and pauses when it
- * scrolls away, so it neither downloads nor burns battery for someone who
- * never reaches it (`preload="none"` + the poster until then). Native controls
- * stay on for unmuting and scrubbing; once the viewer pauses it themselves it
- * stays paused. Under prefers-reduced-motion it never starts on its own.
+ * A video in the same rounded, ringed surface as DeviceFrame. By default it
+ * is an ambient gameplay clip: it plays muted and looped while at least half
+ * of it is on screen and pauses when it scrolls away, so it neither downloads
+ * nor burns battery for someone who never reaches it (`preload="none"` + the
+ * poster until then). Native controls stay on for unmuting and scrubbing; once
+ * the viewer pauses it themselves it stays paused. Under
+ * prefers-reduced-motion it never starts on its own.
+ *
+ * With `ambient` off it is a video to sit down and watch, such as a narrated
+ * one: nothing downloads or plays until the viewer presses play.
  */
 export function VideoFrame({
   src,
   poster,
   label,
   ratio = "16 / 9",
+  ambient = true,
+  captions,
   className,
 }: VideoFrameProps) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = ref.current;
-    if (!video) return;
+    if (!video || !ambient) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     // Set when the viewer pauses by hand. Our own scroll-out pause doesn't
@@ -66,7 +79,7 @@ export function VideoFrame({
       video.removeEventListener("pause", onPause);
       video.removeEventListener("play", onPlay);
     };
-  }, []);
+  }, [ambient]);
 
   return (
     <div
@@ -82,14 +95,23 @@ export function VideoFrame({
         src={src}
         poster={poster}
         aria-label={label}
-        muted
-        loop
+        muted={ambient}
+        loop={ambient}
         playsInline
         controls
         preload="none"
         style={{ aspectRatio: ratio }}
         className="w-full rounded-xl bg-night-deep object-cover"
-      />
+      >
+        {captions && (
+          <track
+            kind="captions"
+            src={captions.src}
+            srcLang={captions.lang}
+            label={captions.label}
+          />
+        )}
+      </video>
     </div>
   );
 }

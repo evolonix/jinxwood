@@ -36,6 +36,24 @@ export function storeUrl(page?: StorePage): string {
   return page ? `${STORE_URL}?ppid=${STORE_PAGES[page]}` : STORE_URL;
 }
 
+/* -- How-to-play video ----------------------------------------------------- */
+// The narrated guided hand on the How to Play page. The site serves its own
+// copy, like every other file here, so playing it contacts nobody else; the
+// same video is on the studio's YouTube channel for anyone who would rather
+// watch or share it there. Paths are relative to public/media/pinochle/.
+export const RULES_VIDEO = {
+  title: "How to Play Two-Handed Pinochle: Rules in 3 Minutes",
+  description:
+    "One guided hand of two-handed pinochle against the computer, narrated: how trump is set, how the cards rank, what tricks and melds score, and how the playoff works.",
+  file: "video/pinochle-how-to-play.mp4",
+  poster: "video/pinochle-how-to-play-poster.webp",
+  captions: "video/pinochle-how-to-play.en.vtt",
+  youtube: "https://www.youtube.com/watch?v=KZ47CUTGEIk",
+  /** ISO 8601 length and publication date, for search engines. */
+  duration: "PT3M21S",
+  published: "2026-11-22",
+} as const;
+
 /* -- Google Play listing (2.0) --------------------------------------------- */
 // Everything Android on the site — the Google Play badge, "and Android" in the
 // platform list and the Android FAQs — waits on `live`. The privacy policy is
