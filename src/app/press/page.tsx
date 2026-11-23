@@ -43,6 +43,11 @@ export default function Press() {
           <Fact term="Website">
             <AppLink to="/">{STUDIO.url.replace("https://", "")}</AppLink>
           </Fact>
+          <Fact term="YouTube">
+            <AppLink href={STUDIO.youtube}>
+              {STUDIO.youtube.replace("https://www.", "")}
+            </AppLink>
+          </Fact>
           <Fact term="Contact">
             <AppLink href={`mailto:${STUDIO.email}`}>{STUDIO.email}</AppLink>
           </Fact>
@@ -78,6 +83,18 @@ export default function Press() {
                   </span>
                 ))}
               </Fact>
+              <Fact term="Videos">
+                <ul className="space-y-1">
+                  {game.videos.map((video) => (
+                    <li key={video.url}>
+                      <AppLink href={video.url}>{video.title}</AppLink>{" "}
+                      <span className="text-parchment-muted text-sm">
+                        ({video.length})
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Fact>
               <Fact term="Press contact">
                 <AppLink href={`mailto:${STUDIO.email}`}>
                   {STUDIO.email}
@@ -85,9 +102,9 @@ export default function Press() {
               </Fact>
             </dl>
             <p className="text-parchment-muted mt-6 max-w-3xl">
-              The screenshots and gameplay video on{" "}
+              The videos above, on YouTube, and the screenshots on{" "}
               <AppLink to={gamePath(game.slug)}>the game&apos;s page</AppLink>{" "}
-              are free to use in coverage.
+              are free to use in coverage. Link the videos or embed them.
             </p>
           </Block>
         );

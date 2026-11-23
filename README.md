@@ -63,6 +63,14 @@ Screenshots are resized in 16 bits, dithered back to 8 bits with the game's own 
 
 The gameplay clip on the game's home page, `public/media/pinochle/video/pinochle-2.0-preview.mp4` (about 20 MB, loaded only on play), is the 2.0 press clip, and `pinochle-2.0-preview-play.mp4` is the same clip with an end card that adds Google Play, played once `PLAY.live` is on. Neither is produced by `build:pinochle`. The app repo's `Docs/PressKit.md` describes how the clip is recorded and encoded; `scripts/pinochle-press-video/title-cards.py` renders its opening and closing cards.
 
+The narrated video on the How to Play page, `pinochle-how-to-play.mp4` in the same folder (about 16 MB, loaded only on play), is the how-to-play video from the YouTube channel, encoded smaller for the web. Its poster is the video's opening card (the frame at 3 seconds, at 1280 px) and `pinochle-how-to-play.en.vtt` holds its captions, timed to the narration. The full-size master is kept outside the repo with the other videos. To make the web copy from it:
+
+```bash
+ffmpeg -i 2-pinochle-how-to-play.mp4 -c:v libx264 -preset slow -crf 24 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart pinochle-how-to-play.mp4
+```
+
+The site serves its own copy instead of embedding YouTube because the privacy policy promises that loading a page contacts no third party. The press page links to the videos on YouTube.
+
 ## Brand images
 
 The logos exist only as flat images on a solid background, so `scripts/build-brand.mjs` cuts them out, then makes the hero sizes, the icons, the link-preview image and the press downloads. Its output is committed; run it only when the art changes:

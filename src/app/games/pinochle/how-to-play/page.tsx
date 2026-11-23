@@ -3,6 +3,7 @@ import { AppLink } from "../../../_components/app-link";
 import { StoreBadges } from "../_components/store-badges";
 import { Card } from "../_components/card";
 import { DeviceFrame } from "../_components/device-frame";
+import { VideoFrame } from "../_components/video-frame";
 import { Eyebrow } from "../../../_components/eyebrow";
 import { asset } from "../_lib/asset";
 import {
@@ -18,11 +19,12 @@ import {
   RULES_FACTS,
   RULES_FAQS,
   RULES_TIPS,
+  RULES_VIDEO,
   SHOTS,
   type MeldClass,
   OPERATING_SYSTEMS,
 } from "../_lib/content";
-import { canonicalUrl, PAGES } from "../../../_lib/seo";
+import { canonicalUrl, PAGES, SITE_URL } from "../../../_lib/seo";
 import { useActiveSection } from "../_lib/use-active-section";
 import { usePageMeta } from "../../../_lib/use-page-meta";
 import { route } from "../_lib/routes";
@@ -42,6 +44,7 @@ import { route } from "../_lib/routes";
 const PATH = route("/how-to-play");
 
 const SECTIONS = [
+  { id: "video", nav: "Video", title: "The rules in three minutes" },
   { id: "at-a-glance", nav: "At a glance", title: "The game at a glance" },
   { id: "the-cards", nav: "The cards", title: "The pinochle deck" },
   { id: "the-deal", nav: "The deal", title: "The deal" },
@@ -91,6 +94,17 @@ const SCHEMA = [
       legalName: "Evolonix LLC",
     },
     about: { "@type": "Thing", name: "Pinochle", alternateName: "Binocle" },
+    video: {
+      "@type": "VideoObject",
+      name: RULES_VIDEO.title,
+      description: RULES_VIDEO.description,
+      thumbnailUrl: SITE_URL + asset(RULES_VIDEO.poster),
+      contentUrl: SITE_URL + asset(RULES_VIDEO.file),
+      uploadDate: RULES_VIDEO.published,
+      duration: RULES_VIDEO.duration,
+      inLanguage: "en",
+      sameAs: RULES_VIDEO.youtube,
+    },
     mentions: {
       "@type": "SoftwareApplication",
       name: APP.name,
@@ -199,6 +213,38 @@ export default function HowToPlay() {
           </aside>
 
           <article className="max-w-3xl">
+            {/* For the reader who would rather watch first. The video is one
+                guided hand, so it comes before the rules, not instead of
+                them. Its closing card names the App Store only. */}
+            <RuleSection {...section("video")}>
+              <p>
+                Prefer to watch? This is one guided hand against the computer,
+                narrated from the deal to the final count: how trump is set, how
+                the cards rank, what tricks and melds score, and what changes in
+                the playoff. The written rules below cover the rest, with every
+                meld, the dix, and declaring out.
+              </p>
+              <VideoFrame
+                src={asset(RULES_VIDEO.file)}
+                poster={asset(RULES_VIDEO.poster)}
+                label="Video with narration: a guided hand of two-handed pinochle, from the deal through tricks and melds to the playoff and the score"
+                ambient={false}
+                captions={{
+                  src: asset(RULES_VIDEO.captions),
+                  lang: "en",
+                  label: "English",
+                }}
+                className="mt-6"
+              />
+              <p className="text-sm">
+                Three minutes, with sound and optional captions.{" "}
+                <AppLink href={RULES_VIDEO.youtube}>
+                  Watch it on YouTube
+                </AppLink>{" "}
+                instead.
+              </p>
+            </RuleSection>
+
             <RuleSection {...section("at-a-glance")}>
               <p>
                 Two-handed pinochle is a trick-taking game for exactly two

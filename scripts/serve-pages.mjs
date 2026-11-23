@@ -30,6 +30,8 @@ const TYPES = {
   ".webp": "image/webp",
   ".avif": "image/avif",
   ".woff2": "font/woff2",
+  ".mp4": "video/mp4",
+  ".vtt": "text/vtt; charset=utf-8",
 };
 
 const isFile = (path) => existsSync(path) && statSync(path).isFile();
