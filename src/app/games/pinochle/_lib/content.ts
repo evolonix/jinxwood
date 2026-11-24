@@ -58,13 +58,13 @@ export const RULES_VIDEO = {
 // Everything Android on the site — the Google Play badge, "and Android" in the
 // platform list and the Android FAQs — waits on `live`. The privacy policy is
 // the exception: it covers Android already, because the Play listing links to
-// it while Google reviews the app. 2.0
-// launches on the App Store first; Google Play follows once its closed test
-// clears, and that day this flips to true (see the app repo's
-// Docs/AndroidPlan.md, "Launch day").
+// it while Google reviews the app. 2.0 launched on the App Store first;
+// Google Play followed on November 24, 2026, and this went true that day (see
+// the app repo's Docs/AndroidPlan.md, "Launch day"). Setting it back to false
+// returns the site to Apple-only copy.
 export const PLAY = {
   packageName: "games.jinxwood.pinochle",
-  live: false,
+  live: true,
 } as const;
 
 export const PLAY_URL = `https://play.google.com/store/apps/details?id=${PLAY.packageName}`;
