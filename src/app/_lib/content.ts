@@ -252,6 +252,77 @@ export const PRESS = {
   ],
 } as const;
 
+export interface Wallpaper {
+  label: string;
+  /** The download, under public/wallpapers/. */
+  file: string;
+  /** The small picture of it shown on the page. */
+  preview: string;
+  note: string;
+}
+
+/**
+ * A device's four wallpapers. scripts/build-wallpapers.mjs writes the files
+ * and their previews under these names, `<name>-<dark|light>-<flat|forest>`.
+ */
+function wallpaperSet(name: string, size: string): Wallpaper[] {
+  const one = (label: string, variant: string, type: "png" | "jpg") => ({
+    label,
+    file: `/wallpapers/${name}-${variant}.${type}`,
+    preview: `/img/wallpapers/${name}-${variant}.webp`,
+    note: `${type === "png" ? "PNG" : "JPEG"}, ${size}`,
+  });
+  return [
+    one("Dark", "dark-flat", "png"),
+    one("Light", "light-flat", "png"),
+    one("Forest, dark", "dark-forest", "jpg"),
+    one("Forest, light", "light-forest", "jpg"),
+  ];
+}
+
+/** The wallpapers page: what it says, and the downloads by device. */
+export const WALLPAPERS = {
+  intro:
+    "The cat in the hollow, keeping an eye on your desktop or your phone. Each wallpaper comes dark or light, plain or over the forest, and all of them are free for your own screens.",
+  sets: [
+    {
+      device: "Phone",
+      about:
+        "The emblem in the middle of a tall screen, for iPhone and Android phones.",
+      /** The size of each preview picture, for the page's layout. */
+      preview: { width: 560, height: 1213 },
+      files: wallpaperSet("jinxwood-phone", "1440 × 3120"),
+    },
+    {
+      device: "Tablet",
+      about:
+        "The logo in the middle of a square image, so it fills the screen whichever way you hold the tablet.",
+      preview: { width: 640, height: 640 },
+      files: wallpaperSet("jinxwood-tablet", "2752 × 2752"),
+    },
+    {
+      device: "Desktop",
+      about: "The logo in the middle of a widescreen monitor, at 4K.",
+      preview: { width: 960, height: 540 },
+      files: wallpaperSet("jinxwood-desktop", "3840 × 2160"),
+    },
+    {
+      device: "MacBook Pro 16-inch",
+      about:
+        "The logo in the middle of the desktop, sized for the 16-inch MacBook Pro.",
+      preview: { width: 960, height: 621 },
+      files: wallpaperSet("jinxwood-macbook-pro-16", "3456 × 2234"),
+    },
+    {
+      device: "iPhone Duo",
+      about:
+        "One tall image holds all three views: the logo at the top for the open phone held sideways, and the emblem below it for the closed phone and the open phone held upright. Move each view over its part when you set the wallpaper.",
+      preview: { width: 560, height: 1209 },
+      files: wallpaperSet("jinxwood-duo", "2853 × 6158"),
+    },
+  ],
+} as const;
+
 /** Bump when the text of the policy pages changes. */
 export const PRIVACY = { updated: "November 20, 2026" } as const;
 export const TERMS = { updated: "November 24, 2026" } as const;

@@ -67,6 +67,11 @@ const STATIC_PAGES: Record<string, PageSeo> = {
     description:
       "Jinxwood's press kit: studio facts, logo downloads, the color palette and typography, and who to contact.",
   },
+  "/wallpapers": {
+    title: "Wallpapers for Phone, Tablet and Desktop — Jinxwood",
+    description:
+      "Free Jinxwood wallpapers for your own screens: the cat in the hollow for phones, tablets and desktops, dark or light, plain or over the forest.",
+  },
   "/privacy": {
     title: "Privacy — Jinxwood",
     description:

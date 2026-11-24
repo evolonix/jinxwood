@@ -1,11 +1,15 @@
-// Composes the wallpapers in brand/wallpapers/ from the published logo files
-// and the forest art: one set for the iPhone Duo and one for the 16-inch
-// MacBook Pro. Each comes in dark and light, on a flat brand color and on the
-// forest art, so four files per set.
+// Composes the downloads on the wallpapers page from the published logo
+// files and the forest art: a set each for phones, tablets and desktops in
+// general, and for the 16-inch MacBook Pro and the iPhone Duo. Each comes in
+// dark and light, on a flat brand color and on the forest art, so four files
+// per set.
 //
-// The site serves none of them; they are set by hand on the device. Output is
-// committed, so this only needs to run when the logos or the forest art
-// change, after `npm run build:brand`.
+//   public/wallpapers/      the wallpapers themselves
+//   public/img/wallpapers/  a small picture of each, shown beside its download
+//
+// The names and sizes are repeated in WALLPAPERS in src/app/_lib/content.ts,
+// which is what the page lists. Output is committed, so this only needs to run
+// when the logos or the forest art change, after `npm run build:brand`.
 //
 // Run with: npm run build:wallpapers
 //
@@ -34,10 +38,18 @@
 // shape, so the emblem is set halfway between their two middles, less than a
 // millimeter from center on either.
 //
-// MacBook Pro
+// The others
 //
-// One screen, 3456 x 2234, with the logo dead center on it at the size of the
-// published file, so it is not enlarged.
+// One screen each, with the artwork dead center on it:
+//
+//   phone        1440 x 3120  emblem  a tall phone screen, iPhone or Android
+//   tablet       2752 x 2752  logo    square, so it fills the screen whichever
+//                                     way the tablet is turned
+//   desktop      3840 x 2160  logo    a 16:9 monitor, at 4K
+//   MacBook Pro  3456 x 2234  logo    the 16-inch screen
+//
+// The logo is drawn at the size of the published file, so it is not enlarged.
+// The phone's emblem is enlarged a little to fill about half the width.
 
 import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -45,7 +57,8 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const out = join(root, "brand/wallpapers");
+const out = join(root, "public/wallpapers");
+const previews = join(root, "public/img/wallpapers");
 const press = (f) => join(root, "public/press", f);
 
 const NIGHT = "#2B1E3F";
@@ -76,7 +89,8 @@ const LOGOS = {
 // A wallpaper is a canvas, the parts of it that each get their own crop of
 // the forest art (top to bottom, `height` each), and the logos placed on it:
 // `artWidth` is how wide a logo's artwork is drawn and `middle` is the row its
-// artwork is centered on. Every logo is centered left to right.
+// artwork is centered on. Every logo is centered left to right. `preview` is
+// the width of the small picture of it on the wallpapers page.
 
 /** The Duo's one tall image, laid out as the note at the top describes. */
 function duo() {
@@ -101,6 +115,7 @@ function duo() {
     name: "jinxwood-duo",
     width,
     height,
+    preview: 560,
     parts: [logoPart, emblemPart],
     // The logo fills about two thirds of the sideways screen. The emblem
     // fills a little over half of an upright one, centered between the
@@ -118,17 +133,23 @@ function duo() {
   };
 }
 
-/** The 16-inch MacBook Pro's screen with the logo in the middle of it. */
-function macbookPro() {
-  const [width, height] = [3456, 2234];
-  return {
-    name: "jinxwood-macbook-pro-16",
-    width,
-    height,
-    parts: [height],
-    placed: [{ logo: "logo", artWidth: LOGOS.logo.art, middle: height / 2 }],
-  };
-}
+/** One screen with one logo in the middle of it. */
+const screen = (name, [width, height], logo, artWidth, preview) => ({
+  name,
+  width,
+  height,
+  preview,
+  parts: [height],
+  placed: [{ logo, artWidth, middle: height / 2 }],
+});
+
+// The screens in the note at the top, in the order the page lists them.
+const SCREENS = [
+  screen("jinxwood-phone", [1440, 3120], "emblem", 792, 560),
+  screen("jinxwood-tablet", [2752, 2752], "logo", LOGOS.logo.art, 640),
+  screen("jinxwood-desktop", [3840, 2160], "logo", LOGOS.logo.art, 960),
+  screen("jinxwood-macbook-pro-16", [3456, 2234], "logo", LOGOS.logo.art, 960),
+];
 
 /** The first row of a logo file that holds artwork, and the row after the last. */
 async function artRows(file) {
@@ -220,7 +241,16 @@ const wash = ({ width, height }, boxes, color, base, pool) =>
 const canvas = ({ width, height }, background) =>
   sharp({ create: { width, height, channels: 3, background } });
 
-/** Writes a wallpaper's four files. */
+/** Writes the small picture of a finished wallpaper file. */
+async function preview(wallpaper, file) {
+  const name = file.replace(/\.\w+$/, ".webp");
+  await sharp(join(out, file))
+    .resize({ width: wallpaper.preview })
+    .webp({ quality: 80 })
+    .toFile(join(previews, name));
+}
+
+/** Writes a wallpaper's four files, and a small picture of each. */
 async function build(wallpaper) {
   // Each part gets its own crop of the forest art, so each view shows the
   // castle and bridge whole. Where two crops meet is the edge of a part,
@@ -252,6 +282,7 @@ async function build(wallpaper) {
       .composite(layers)
       .png({ compressionLevel: 9 })
       .toFile(join(out, `${name}-flat.png`));
+    await preview(wallpaper, `${name}-flat.png`);
 
     const [base, tint] =
       mode === "dark"
@@ -261,6 +292,7 @@ async function build(wallpaper) {
       .composite([{ input: tint }, ...layers])
       .jpeg({ quality: 95, chromaSubsampling: "4:4:4", mozjpeg: true })
       .toFile(join(out, `${name}-forest.jpg`));
+    await preview(wallpaper, `${name}-forest.jpg`);
 
     console.log(
       `${name}: ${wallpaper.width}x${wallpaper.height}, flat and forest`,
@@ -269,4 +301,5 @@ async function build(wallpaper) {
 }
 
 await mkdir(out, { recursive: true });
-for (const wallpaper of [duo(), macbookPro()]) await build(wallpaper);
+await mkdir(previews, { recursive: true });
+for (const wallpaper of [...SCREENS, duo()]) await build(wallpaper);

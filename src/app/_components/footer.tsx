@@ -25,6 +25,7 @@ export function Footer() {
         >
           <AppLink to="/games">Games</AppLink>
           <AppLink to="/press">Press</AppLink>
+          <AppLink to="/wallpapers">Wallpapers</AppLink>
           <AppLink to="/privacy">Privacy</AppLink>
           <AppLink to="/terms">Terms</AppLink>
           <AppLink href={`mailto:${STUDIO.email}`}>{STUDIO.email}</AppLink>

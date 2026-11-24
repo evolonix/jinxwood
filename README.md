@@ -2,7 +2,7 @@
 
 The website for Jinxwood, the gaming brand of Evolonix LLC: <https://jinxwood.com>.
 
-A small static site: a home page, a games index, a press and brand kit page, and privacy and terms pages. Each game has its own set of pages under `/games/<slug>`; Pinochle: Two-Handed has a home page, the complete rules, support, a privacy policy and terms of use.
+A small static site: a home page, a games index, a press and brand kit page, a wallpapers page, and privacy and terms pages. Each game has its own set of pages under `/games/<slug>`; Pinochle: Two-Handed has a home page, the complete rules, support, a privacy policy and terms of use.
 
 ## Stack
 
@@ -31,7 +31,7 @@ npm run dev
 | `npm run lint`             | ESLint                                                           |
 | `npm run format`           | Prettier, writing changes (`format:check` only reports)          |
 | `npm run build:brand`      | Regenerate every brand image from `brand/source/`                |
-| `npm run build:wallpapers` | Regenerate the device wallpapers in `brand/wallpapers/`          |
+| `npm run build:wallpapers` | Regenerate the downloads on the wallpapers page                  |
 | `npm run build:pinochle`   | Regenerate the Pinochle screenshots and art from the app repo    |
 
 ## Where things are
@@ -39,7 +39,7 @@ npm run dev
 - `src/app/_lib/content.ts` holds every fact and string the site states: the studio, the games, the press kit, the policy dates.
 - `src/app/_lib/seo.ts` holds each route's search title and description.
 - `src/index.css` holds the design tokens: the four brand colors and the tones built from them, the fonts, and the motion.
-- `brand/source/` holds the source art. Everything under `public/img/`, the icons, `og.jpg` and `public/press/` is generated from it.
+- `brand/source/` holds the source art. Everything under `public/img/`, the icons, `og.jpg`, `public/press/` and `public/wallpapers/` is generated from it.
 - `src/app/games/pinochle/` holds the Pinochle pages, with their own components (`_components/`) and copy, routes and search metadata (`_lib/`). Their media is in `public/media/pinochle/`.
 
 ## Add a game
@@ -81,6 +81,8 @@ npm run build:brand -- --preview
 ```
 
 `--preview` also writes `brand/preview.png`, each cut-out shown over four backgrounds. Look at it for fringes around the edges, and look at the hero's sky for banding, before committing.
+
+The downloads on the wallpapers page are made from the press logos and the forest art by `scripts/build-wallpapers.mjs`, so run `npm run build:wallpapers` after `build:brand` when either changes. It writes each wallpaper to `public/wallpapers/` and a small picture of it to `public/img/wallpapers/`; `WALLPAPERS` in `content.ts` lists them for the page. The note at the top of the script explains how the iPhone Duo image is laid out for its three views.
 
 To replace the logo, put the new file in `brand/source/` under the same name. If the artwork moved, the seed point for the bowl of the "d" and the emblem's right edge near the top of the cut-out section will need adjusting. When vector logos exist, they can replace the cut-out step altogether.
 

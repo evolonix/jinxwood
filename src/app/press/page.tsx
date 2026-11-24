@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AppLink } from "../_components/app-link";
+import { Download } from "../_components/download";
 import { Eyebrow } from "../_components/eyebrow";
-import { DownloadIcon } from "../_components/icons";
 import { Logo, TrademarkSymbol, type LogoName } from "../_components/logo";
 import { IMAGE_SIZES } from "../_lib/brand.gen";
 import {
@@ -250,33 +250,5 @@ function Fact({ term, children }: { term: string; children: ReactNode }) {
       </dt>
       <dd>{children}</dd>
     </>
-  );
-}
-
-function Download({
-  href,
-  label,
-  note,
-}: {
-  href: string;
-  label: string;
-  note: string;
-}) {
-  return (
-    <div className="bg-night-raised flex items-center justify-between gap-4 p-4">
-      <div>
-        <p className="font-semibold">{label}</p>
-        <p className="text-parchment-muted text-sm">{note}</p>
-      </div>
-      <a
-        href={href}
-        download
-        aria-label={`Download: ${label}`}
-        className="bg-ember text-night hover:bg-ember-bright inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors"
-      >
-        <DownloadIcon />
-        Download
-      </a>
-    </div>
   );
 }
