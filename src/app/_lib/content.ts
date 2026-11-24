@@ -86,14 +86,14 @@ export const GAMES: readonly Game[] = [
     subtitle: "The classic two-handed duel",
     tagline: "One deck, two players, two hundred fifty points a deal.",
     description:
-      "Two-handed pinochle the way it is played at the kitchen table: one 48-card deck, melds, tricks, and a race to 1,000. Play against the computer, challenge a friend online, or deal a hand over FaceTime.",
+      "Two-handed pinochle the way it is played at the kitchen table: one 48-card deck, melds, tricks, and a race to 1,000. Play against the computer on Apple and Android devices, and on Apple devices challenge a friend online or deal a hand over FaceTime.",
     highlights: [
       "The complete two-handed rules",
       "Three AI opponents",
-      "Online play through Game Center",
-      "SharePlay over FaceTime",
+      "Achievements on Game Center and Google Play Games",
+      "Online play and SharePlay on Apple devices",
     ],
-    platforms: ["iPhone", "iPad", "Mac", "Apple TV"],
+    platforms: ["iPhone", "iPad", "Mac", "Apple TV", "Android"],
     price: "Free to try for 14 days",
     priceNote: "One purchase after that. No subscription, no ads.",
     release: {
@@ -112,7 +112,7 @@ export const GAMES: readonly Game[] = [
       {
         kind: "google-play",
         url: "https://play.google.com/store/apps/details?id=games.jinxwood.pinochle",
-        live: false,
+        live: true,
       },
     ],
     links: {
@@ -140,6 +140,11 @@ export const GAMES: readonly Game[] = [
       {
         title: "Version 2.0 gameplay",
         url: "https://www.youtube.com/watch?v=sTu4v-9AmuM",
+        length: "0:33",
+      },
+      {
+        title: "Now on Google Play",
+        url: "https://www.youtube.com/watch?v=fNI2BRRTUZ4",
         length: "0:33",
       },
       {
@@ -190,7 +195,7 @@ export const PALETTE = [
 
 export const PRESS = {
   boilerplate:
-    "Jinxwood is an independent game studio and the gaming brand of Evolonix LLC. It makes warm, well-crafted games with a little mischief and a little magic, beginning with Pinochle: Two-Handed for iPhone, iPad, Mac, and Apple TV.",
+    "Jinxwood is an independent game studio and the gaming brand of Evolonix LLC. It makes warm, well-crafted games with a little mischief and a little magic, beginning with Pinochle: Two-Handed for iPhone, iPad, Mac, Apple TV, and Android.",
   downloads: [
     {
       label: "Logo for dark backgrounds",
@@ -249,7 +254,7 @@ export const PRESS = {
 
 /** Bump when the text of the policy pages changes. */
 export const PRIVACY = { updated: "November 20, 2026" } as const;
-export const TERMS = { updated: "November 20, 2026" } as const;
+export const TERMS = { updated: "November 24, 2026" } as const;
 
 /** A list as a sentence would say it: "iPhone, iPad, Mac, and Apple TV". */
 export function sentenceList(items: readonly string[]): string {

@@ -47,7 +47,7 @@ export default function Terms() {
           Apple, iPhone, iPad, Mac, and Apple TV are trademarks of Apple Inc.
           App Store is a service mark of Apple Inc.
           {onGooglePlay &&
-            " Google Play and the Google Play logo are trademarks of Google LLC."}{" "}
+            " Android, Google Play, and the Google Play logo are trademarks of Google LLC."}{" "}
           Other names and marks belong to their owners.
         </p>
       </Clause>
