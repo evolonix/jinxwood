@@ -14,18 +14,19 @@ interface StoreBadgesProps {
 /**
  * The store badges, wherever the site asks for the download. The App Store
  * always; Google Play once the Play listing is live (PLAY.live). `single` picks
- * the one that fits the device — Google Play on Android, the App Store
- * everywhere else.
+ * the one that fits the device — Google Play on Android and Chromebooks (which
+ * install from Google Play), the App Store everywhere else.
  */
 export function StoreBadges({ className, single, page }: StoreBadgesProps) {
-  const [android] = useState(
+  const [playDevice] = useState(
     () =>
-      typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent),
+      typeof navigator !== "undefined" &&
+      /Android|CrOS/i.test(navigator.userAgent),
   );
 
   if (!PLAY.live) return <AppStoreBadge className={className} page={page} />;
   if (single)
-    return android ? (
+    return playDevice ? (
       <GooglePlayBadge className={className} />
     ) : (
       <AppStoreBadge className={className} page={page} />
