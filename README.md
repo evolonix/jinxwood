@@ -31,7 +31,7 @@ npm run dev
 | `npm run lint`             | ESLint                                                           |
 | `npm run format`           | Prettier, writing changes (`format:check` only reports)          |
 | `npm run build:brand`      | Regenerate every brand image from `brand/source/`                |
-| `npm run build:wallpapers` | Regenerate the iPhone Duo wallpapers in `brand/wallpapers/`      |
+| `npm run build:wallpapers` | Regenerate the device wallpapers in `brand/wallpapers/`          |
 | `npm run build:pinochle`   | Regenerate the Pinochle screenshots and art from the app repo    |
 
 ## Where things are
