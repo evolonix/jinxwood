@@ -539,6 +539,185 @@ function withBranchMoved(lettering, [dx, dy]) {
   return { rgba: out, w, h };
 }
 
+// The colors the lettering is drawn in for dark backgrounds, and what each
+// becomes on a light one.
+const CREAM = [254, 240, 212];
+const INK = [37, 14, 43];
+const RING_TAN = [202, 148, 103];
+const BRANCH_PALE = [246, 195, 128];
+const BROWN = [109, 54, 59];
+
+// The wordmark is drawn with its "d" touching the ring of the second eye.
+// The "d" begins at this column of the drawing, and is moved this far right
+// to leave a little space between the two: ten pixels of space, and two more
+// for what is filled back onto the letter's edge.
+const D_BEGINS = 1334;
+const D_MOVED = 12;
+
+/**
+ * Some lettering with its "d" moved right, away from the eye it touches.
+ *
+ * Everything in the letters from `D_BEGINS` on is the "d". Where the two
+ * touch, the pixels on the line between them are a blend of the ring's tan
+ * and the letter's cream; each is split into its share of ring, which stays,
+ * and its share of letter, which moves, so both come away with a soft edge.
+ *
+ * The ring was drawn over the edge of the "d", so with the ring gone from it
+ * the letter's curve has a shallow flat where the ring was. The curve is
+ * carried through from the edge above and below, and the flat filled out to
+ * it.
+ */
+function withDMoved(lettering, tan, cream) {
+  const { rgba, w, h } = lettering;
+  const inBranch = new Uint8Array(w * h);
+  for (const i of letteringPieces(lettering).branch.pixels) inBranch[i] = 1;
+  // How far a color sits from the ring's tan (0) toward the letter's cream
+  // (1), and how far off the line between them it is.
+  const between = (i) => {
+    const ab = cream.map((v, k) => v - tan[k]);
+    const ap = [0, 1, 2].map((k) => rgba[i * 4 + k] - tan[k]);
+    const t =
+      (ab[0] * ap[0] + ab[1] * ap[1] + ab[2] * ap[2]) /
+      (ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2);
+    const off = Math.hypot(...ap.map((v, k) => v - t * ab[k]));
+    return { t, off };
+  };
+
+  const out = Uint8Array.from(rgba);
+  const moved = []; // [index, r, g, b, a], to be written `D_MOVED` to the right
+  // Around where they meet, color says which a pixel belongs to, and a soft
+  // edge is only ever one pixel wide: anything further from its shape than
+  // that is a trace of the other one and goes.
+  const MEET = [D_BEGINS - 6, D_BEGINS + 5];
+  const solid = (i, isLetter) => {
+    if (rgba[i * 4 + 3] !== 255 || inBranch[i]) return false;
+    const { t, off } = between(i);
+    return off < 40 && (isLetter ? t > 0.9 : t < 0.1);
+  };
+  const touching = []; // the rows where the ring and the letter meet
+  for (let y = 0; y < h; y++) {
+    // Where the ring ends and the letter begins in this row.
+    let ringEnds = -Infinity;
+    for (let x = MEET[1]; x > D_BEGINS - 60; x--) {
+      if (solid(y * w + x, false)) {
+        ringEnds = x;
+        break;
+      }
+    }
+    let letterBegins = Infinity;
+    for (let x = MEET[0]; x < D_BEGINS + 60; x++) {
+      if (solid(y * w + x, true)) {
+        letterBegins = x;
+        break;
+      }
+    }
+    if (letterBegins - ringEnds <= 3) touching.push(y);
+    for (let x = MEET[0]; x < w; x++) {
+      const i = y * w + x;
+      if (!rgba[i * 4 + 3] || inBranch[i]) continue;
+      const pixel = [...rgba.subarray(i * 4, i * 4 + 4)];
+      out.fill(0, i * 4, i * 4 + 4);
+      if (x >= MEET[1]) {
+        moved.push([i, ...pixel]);
+        continue;
+      }
+      const { t, off } = between(i);
+      // Neither tan nor cream: a fleck of the drawing's background caught
+      // between the two.
+      if (off >= 40) continue;
+      const byRing = x <= ringEnds + 1;
+      const byLetter = x >= letterBegins - 1;
+      if (pixel[3] === 255 && t > 0.1 && t < 0.9) {
+        // On the line between them. Its share of ring stays, in the color
+        // of the ring beside it; its share of letter moves.
+        if (byRing) {
+          out.set(
+            rgba.subarray((y * w + ringEnds) * 4, (y * w + ringEnds) * 4 + 3),
+            i * 4,
+          );
+          out[i * 4 + 3] = Math.round(255 * (1 - t));
+        }
+        if (byLetter) moved.push([i, ...cream, Math.round(255 * t)]);
+      } else if (t >= 0.5) {
+        if (byLetter) moved.push([i, ...pixel]);
+      } else if (byRing) {
+        out.set(pixel, i * 4);
+      }
+    }
+  }
+  for (const [i, r, g, b, a] of moved) {
+    const to = i + D_MOVED;
+    if (to % w < D_MOVED) throw new Error('The "d" does not fit its canvas');
+    // A split pixel's share of letter lands on empty canvas; anything else
+    // lands where the "d" already was.
+    out.set([r, g, b, a], to * 4);
+  }
+
+  // The letter's edge in a row, to a fraction of a pixel: where its solid
+  // cream begins, less however much of the pixel before that is covered.
+  const edgeAt = (y) => {
+    for (let x = D_BEGINS; x < D_BEGINS + D_MOVED + 60; x++) {
+      const i = y * w + x;
+      if (out[i * 4 + 3] === 255 && out[i * 4] > 235 && out[i * 4 + 2] > 190) {
+        return x - out[(i - 1) * 4 + 3] / 255;
+      }
+    }
+    return null;
+  };
+  // A curve through the edge above and below where they touched: a cubic,
+  // fitted by least squares to the rows just clear of it on either side.
+  const CLEAR = 6;
+  const REACH = 45;
+  const [first, last] = [touching[0], touching.at(-1)];
+  const middle = (first + last) / 2;
+  const points = [];
+  for (let y = first - REACH; y <= last + REACH; y++) {
+    if (y >= first - CLEAR && y <= last + CLEAR) continue;
+    const x = edgeAt(y);
+    if (x !== null) points.push([y - middle, x]);
+  }
+  const N = 4;
+  const m = Array.from({ length: N }, () => new Array(N + 1).fill(0));
+  for (const [u, x] of points) {
+    for (let r = 0; r < N; r++) {
+      for (let c = 0; c < N; c++) m[r][c] += u ** (r + c);
+      m[r][N] += x * u ** r;
+    }
+  }
+  for (let c = 0; c < N; c++) {
+    let pivot = c;
+    for (let r = c + 1; r < N; r++) {
+      if (Math.abs(m[r][c]) > Math.abs(m[pivot][c])) pivot = r;
+    }
+    [m[c], m[pivot]] = [m[pivot], m[c]];
+    for (let r = 0; r < N; r++) {
+      if (r === c) continue;
+      const f = m[r][c] / m[c][c];
+      for (let k = c; k <= N; k++) m[r][k] -= f * m[c][k];
+    }
+  }
+  const curve = (y) =>
+    m.reduce((sum, row, r) => sum + (row[N] / row[r]) * (y - middle) ** r, 0);
+  // Fill out to the curve. Only ever adds, and never more than a few pixels:
+  // more than that would mean the curve has run away from the letter.
+  for (let y = first - CLEAR; y <= last + CLEAR; y++) {
+    const now = edgeAt(y);
+    const edge = curve(y);
+    if (now === null || edge >= now) continue;
+    if (now - edge > 4) throw new Error('The edge of the "d" did not fit');
+    // In the letter's own color in this row, taken from just inside it.
+    const inside = (y * w + Math.ceil(now) + 3) * 4;
+    const color = out.subarray(inside, inside + 3);
+    for (let x = Math.floor(edge); x < now; x++) {
+      const i = y * w + x;
+      const cover = Math.round(255 * Math.min(1, x + 1 - edge));
+      if (cover <= out[i * 4 + 3]) continue;
+      out.set([...color, cover], i * 4);
+    }
+  }
+  return { rgba: out, w, h };
+}
+
 const isLeaf = (rgba, i) =>
   rgba[i * 4 + 1] > rgba[i * 4] + 8 && rgba[i * 4 + 1] > rgba[i * 4 + 2] + 15;
 
@@ -571,14 +750,6 @@ function withLeaves(lettering, to) {
   }
   return { rgba: out, w, h };
 }
-
-// The colors the lettering is drawn in for dark backgrounds, and what each
-// becomes on a light one.
-const CREAM = [254, 240, 212];
-const INK = [37, 14, 43];
-const RING_TAN = [202, 148, 103];
-const BRANCH_PALE = [246, 195, 128];
-const BROWN = [109, 54, 59];
 
 /**
  * The lettering for light backgrounds, made from the lettering for dark ones
@@ -698,7 +869,7 @@ const emblemArt = {
   h: creamLockup.h,
 };
 const plumLettering = withLeaves(
-  withBranchMoved(plumWordmark, BRANCH_MOVED),
+  withBranchMoved(withDMoved(plumWordmark, RING_TAN, CREAM), BRANCH_MOVED),
   leafColor(emblemArt),
 );
 const creamLettering = forLightBackgrounds(plumLettering);
@@ -1126,10 +1297,10 @@ const trademarkGlyph = TRADEMARK_GLYPHS[TRADEMARK];
 const CREAM_INK = "#fef0d4";
 const PLUM_INK = "#2e1e37";
 const TRADEMARK_AT = {
-  wordmark: { x: 1310, y: 37, height: 60, color: CREAM_INK },
-  "wordmark-light": { x: 1310, y: 37, height: 60, color: PLUM_INK },
-  lockup: { x: 1498, y: 173, height: 44, color: CREAM_INK },
-  "lockup-light": { x: 1498, y: 173, height: 44, color: PLUM_INK },
+  wordmark: { x: 1322, y: 37, height: 60, color: CREAM_INK },
+  "wordmark-light": { x: 1322, y: 37, height: 60, color: PLUM_INK },
+  lockup: { x: 1506, y: 173, height: 44, color: CREAM_INK },
+  "lockup-light": { x: 1506, y: 173, height: 44, color: PLUM_INK },
 };
 
 /** The dark and light versions of a logo, which share one canvas size. */

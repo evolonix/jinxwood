@@ -83,7 +83,7 @@ const LOGOS = {
   },
   logo: {
     file: (mode) => press(`jinxwood-logo-for-${mode}.png`),
-    size: [1592, 626],
+    size: [1600, 626],
     axis: 769,
     art: 1522,
   },
