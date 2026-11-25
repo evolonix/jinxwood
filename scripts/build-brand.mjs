@@ -7,10 +7,11 @@
 //                                    sheet of each cut-out over night, parchment,
 //                                    the hero art and magenta, for fringe review
 //
-// The logo exists only as a flat raster on a solid background, drawn for light
-// backgrounds, so the first job is cutting it out, and the second is making
-// the version for dark backgrounds from it. The rest is resizing: hero sizes,
-// icons, the social image and press downloads.
+// The logo exists only as flat rasters on solid backgrounds: the emblem, in a
+// drawing of the whole logo, and the lettering, in a drawing of the wordmark by
+// itself. So the first job is cutting those out, and the second is putting the
+// logo together from them, for dark backgrounds and for light. The rest is
+// resizing: hero sizes, icons, the social image and press downloads.
 //
 // It also writes the transparent masters to brand/masters/, and the YouTube
 // channel's profile picture and banner to brand/youtube/. The site does not
@@ -475,46 +476,119 @@ async function cutOut(file, options) {
   };
 }
 
-// The one drawing of the logo, on its cream background. The seed point sits in
-// the bowl of the "d", the one enclosed region that is background rather than
-// artwork.
+// The emblem comes from the drawing of the whole logo, on its cream
+// background. Only the emblem is taken from it: its lettering is the same
+// design as the wordmark's, drawn smaller. The seed point sits in the bowl of
+// the "d", the one enclosed region that is background rather than artwork.
 const creamLockup = await cutOut("lockup-cream.webp", {
   tolerance: 12,
   holes: [[1462, 479]],
   lighterIsBg: true,
 });
+// The lettering comes from the wordmark drawn by itself, for dark backgrounds:
+// the largest and sharpest drawing of it there is.
+const plumWordmark = await cutOut("wordmark-plum.webp", {
+  tolerance: 12,
+  holes: [[1402, 429]],
+});
 
-// Every piece of the emblem ends before x = 760; every piece of the lettering
-// (the "J" included) ends after it.
+// In the logo drawing, every piece of the emblem ends before x = 760; every
+// piece of its lettering (the "J" included) ends after it.
 const EMBLEM_EDGE = 760;
 const emblemOnly = (lockup) =>
   keepPieces(lockup.rgba, lockup.w, lockup.h, (b) => b.x1 < EMBLEM_EDGE);
-const letteringOnly = (lockup) =>
-  keepPieces(lockup.rgba, lockup.w, lockup.h, (b) => b.x1 >= EMBLEM_EDGE);
 
-// The colors the lettering is drawn in, and what each becomes on a dark
-// background.
-const INK = [37, 14, 43];
-const CREAM = [254, 240, 212];
-const BROWN = [109, 54, 59];
-const RING_TAN = [202, 148, 103];
-const BRANCH_PALE = [246, 195, 128];
-// The two eyes in the "oo", in the drawing's own pixels. Their pupils are
-// ink-colored but stay dark.
-const EYES = { x0: 1222, x1: 1414, y0: 415, y1: 525 };
+/** The box around some pieces of artwork. */
+const boxAround = (pieces) => ({
+  x0: Math.min(...pieces.map((p) => p.bounds.x0)),
+  y0: Math.min(...pieces.map((p) => p.bounds.y0)),
+  x1: Math.max(...pieces.map((p) => p.bounds.x1)),
+  y1: Math.max(...pieces.map((p) => p.bounds.y1)),
+});
 
 /**
- * The lockup for dark backgrounds, made from the cut-out of the one for light
- * backgrounds.
- *
- * The emblem is kept exactly as it is, so both share its wood and leaf
- * colors. The lettering is recolored: the letters from dark ink to cream, the
- * eye rings from brown to tan, the branch from brown to pale wood. Leaves, the
- * yellow of the eyes and their pupils stay as they are. A pixel on the line
- * between two of those is a blend of the two, and comes out as the same blend
- * of what each becomes.
+ * The pieces of some lettering: the branch under the letters, which is the
+ * widest piece, and the letters, which are the rest.
  */
-function forDarkBackgrounds({ rgba, w, h }) {
+function letteringPieces({ rgba, w, h }, keep = () => true) {
+  const pieces = piecesOf(rgba, w, h).filter((p) => keep(p.bounds));
+  const span = (p) => p.bounds.x1 - p.bounds.x0;
+  const branch = pieces.reduce((a, b) => (span(b) > span(a) ? b : a));
+  return { branch, letters: pieces.filter((p) => p !== branch) };
+}
+
+// The wordmark's branch is not drawn in quite the same spot under the letters
+// as the logo's is. The logo decides, so that the wordmark is the logo without
+// its emblem: the branch is moved this far, in the wordmark drawing's pixels.
+const BRANCH_MOVED = [-14, -5];
+
+/** Some lettering with its branch moved; the letters stay where they are. */
+function withBranchMoved(lettering, [dx, dy]) {
+  const { rgba, w, h } = lettering;
+  const { branch } = letteringPieces(lettering);
+  const out = Uint8Array.from(rgba);
+  for (const i of branch.pixels) out.fill(0, i * 4, i * 4 + 4);
+  for (const i of branch.pixels) {
+    const x = (i % w) + dx;
+    const y = ((i / w) | 0) + dy;
+    if (x < 0 || x >= w || y < 0 || y >= h) {
+      throw new Error("The wordmark's branch does not fit its canvas");
+    }
+    out.set(rgba.subarray(i * 4, i * 4 + 4), (y * w + x) * 4);
+  }
+  return { rgba: out, w, h };
+}
+
+const isLeaf = (rgba, i) =>
+  rgba[i * 4 + 1] > rgba[i * 4] + 8 && rgba[i * 4 + 1] > rgba[i * 4 + 2] + 15;
+
+/** The middle green of the leaves in a cut-out. */
+function leafColor({ rgba, w, h }) {
+  const channels = [[], [], []];
+  for (let i = 0; i < w * h; i++) {
+    if (rgba[i * 4 + 3] !== 255 || !isLeaf(rgba, i)) continue;
+    for (let c = 0; c < 3; c++) channels[c].push(rgba[i * 4 + c]);
+  }
+  return channels.map((v) => v.sort((a, b) => a - b)[v.length >> 1]);
+}
+
+/**
+ * Some lettering with its leaves tinted so that their middle green is `to`.
+ * The two drawings give their leaves different greens; the emblem's decide.
+ */
+function withLeaves(lettering, to) {
+  const { rgba, w, h } = lettering;
+  const from = leafColor(lettering);
+  const out = Uint8Array.from(rgba);
+  for (let i = 0; i < w * h; i++) {
+    if (!rgba[i * 4 + 3] || !isLeaf(rgba, i)) continue;
+    for (let c = 0; c < 3; c++) {
+      out[i * 4 + c] = Math.min(
+        255,
+        Math.round((rgba[i * 4 + c] * to[c]) / from[c]),
+      );
+    }
+  }
+  return { rgba: out, w, h };
+}
+
+// The colors the lettering is drawn in for dark backgrounds, and what each
+// becomes on a light one.
+const CREAM = [254, 240, 212];
+const INK = [37, 14, 43];
+const RING_TAN = [202, 148, 103];
+const BRANCH_PALE = [246, 195, 128];
+const BROWN = [109, 54, 59];
+
+/**
+ * The lettering for light backgrounds, made from the lettering for dark ones
+ * by recoloring it: the letters from cream to dark ink, the eye rings from tan
+ * to brown, the branch from pale wood to brown. Leaves, the yellow of the eyes
+ * and their pupils stay as they are. A pixel on the line between two of those
+ * is a blend of the two, and comes out as the same blend of what each becomes.
+ */
+function forLightBackgrounds(lettering) {
+  const { rgba, w, h } = lettering;
   const n = w * h;
   const dist = (i, c) =>
     Math.hypot(
@@ -522,109 +596,34 @@ function forDarkBackgrounds({ rgba, w, h }) {
       rgba[i * 4 + 1] - c[1],
       rgba[i * 4 + 2] - c[2],
     );
+  const inBranch = new Uint8Array(n);
+  for (const i of letteringPieces(lettering).branch.pixels) inBranch[i] = 1;
 
-  // Which pixels are lettering, and which of those are the branch: the
-  // widest piece of the lettering, as partsOf has it.
-  const lettering = new Uint8Array(n); // 1 lettering, 2 the branch
-  const pieces = piecesOf(rgba, w, h).filter((p) => p.bounds.x1 >= EMBLEM_EDGE);
-  const span = (p) => p.bounds.x1 - p.bounds.x0;
-  const widest = pieces.reduce((a, b) => (span(b) > span(a) ? b : a));
-  for (const piece of pieces) {
-    for (const i of piece.pixels) lettering[i] = piece === widest ? 2 : 1;
-  }
-  const inEyes = (i) => {
-    const x = i % w;
-    const y = (i / w) | 0;
-    return x >= EYES.x0 && x <= EYES.x1 && y >= EYES.y0 && y <= EYES.y1;
-  };
-
-  // What each pixel of the lettering is: 1 ink, 2 brown, 3 something that
-  // stays (a leaf, an eye, a pupil), 0 a blend on the line between two.
+  // What each pixel is: 1 a letter, 2 wood (a ring or the branch), 3
+  // something that stays (a leaf, an eye, anything dark), 0 a blend on the
+  // line between two of those.
   const kind = new Uint8Array(n);
   for (let i = 0; i < n; i++) {
-    if (!lettering[i]) continue;
+    if (!rgba[i * 4 + 3]) continue;
     const r = rgba[i * 4];
     const g = rgba[i * 4 + 1];
     const b = rgba[i * 4 + 2];
-    if (g > r + 8 && g > b + 15) kind[i] = 3;
-    else if (inEyes(i) && r > 200 && g > 140 && b < 140) kind[i] = 3;
-    else if (dist(i, INK) < 34) kind[i] = 1;
-    // Brown, in light or in shade. Inside the eyes only the ring's own brown
-    // counts, which has more blue in it than a blend of pupil and yellow.
-    else if (
-      inEyes(i)
-        ? dist(i, BROWN) < 34 && b > 46
-        : dist(i, BROWN) < 34 ||
-          (r - b > 22 && r - g > 25 && r < 190 && g < 120)
-    ) {
-      kind[i] = 2;
-    }
-  }
-  // Pupils: ink wholly surrounded by an eye's yellow. Found by spreading from
-  // the ink outside the eyes; ink it cannot reach is a pupil.
-  {
-    const reached = new Uint8Array(n);
-    const stack = [];
-    for (let i = 0; i < n; i++) {
-      if (kind[i] === 1 && !inEyes(i)) {
-        reached[i] = 1;
-        stack.push(i);
-      }
-    }
-    while (stack.length) {
-      const i = stack.pop();
-      for (const j of [i - 1, i + 1, i - w, i + w]) {
-        if (j < 0 || j >= n || reached[j]) continue;
-        if (
-          kind[j] === 1 ||
-          (kind[j] === 0 && lettering[j] && dist(j, INK) < 70)
-        ) {
-          reached[j] = 1;
-          stack.push(j);
-        }
-      }
-    }
-    for (let i = 0; i < n; i++) {
-      if (
-        inEyes(i) &&
-        lettering[i] &&
-        !reached[i] &&
-        kind[i] !== 2 &&
-        dist(i, INK) < 60
-      ) {
-        kind[i] = 3;
-      }
-    }
-  }
-  // Each eye has a thin dark line where it meets its ring. Against the brown
-  // ring that line is a soft shadow; left as it is it would be a hard black
-  // arc against the tan one. So it counts as ring in shade, and lightens with
-  // it.
-  {
-    const before = kind.slice();
-    for (let i = 0; i < n; i++) {
-      if (before[i] !== 3 || !inEyes(i) || rgba[i * 4] > 120) continue;
-      const x = i % w;
-      const y = (i / w) | 0;
-      let byRing = false;
-      for (let dy = -2; dy <= 2 && !byRing; dy++) {
-        for (let dx = -2; dx <= 2 && !byRing; dx++) {
-          byRing = before[(y + dy) * w + x + dx] === 2;
-        }
-      }
-      if (byRing) kind[i] = 2;
-    }
+    if (isLeaf(rgba, i)) kind[i] = 3;
+    else if (r > 200 && g > 140 && b < 45) kind[i] = 3;
+    else if (r + g + b < 200) kind[i] = 3;
+    else if (inBranch[i]) kind[i] = r > 150 ? 2 : 0;
+    else if (dist(i, CREAM) < 40) kind[i] = 1;
+    else if (dist(i, RING_TAN) < 45) kind[i] = 2;
   }
 
   const own = (i) => [rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2]];
   const became = (i) => {
-    if (kind[i] === 1) return CREAM;
+    if (kind[i] === 1) return INK;
     if (kind[i] === 2) {
-      // Brown keeps some of its own light and shade around the new color.
-      const to = lettering[i] === 2 ? BRANCH_PALE : RING_TAN;
-      const keep = lettering[i] === 2 ? 0.12 : 0.6;
+      // Wood keeps some of its own light and shade around the new color.
+      const from = inBranch[i] ? BRANCH_PALE : RING_TAN;
       return own(i).map((v, k) =>
-        Math.max(0, Math.min(255, to[k] + keep * (v - BROWN[k]))),
+        Math.max(0, Math.min(255, BROWN[k] + 0.6 * (v - from[k]))),
       );
     }
     return own(i);
@@ -632,7 +631,7 @@ function forDarkBackgrounds({ rgba, w, h }) {
 
   const out = Uint8Array.from(rgba);
   for (let i = 0; i < n; i++) {
-    if (!lettering[i]) continue;
+    if (!rgba[i * 4 + 3]) continue;
     let color;
     if (kind[i]) color = became(i);
     else {
@@ -653,14 +652,8 @@ function forDarkBackgrounds({ rgba, w, h }) {
         }
       }
       const found = near.filter((j) => j !== null);
-      if (found.length === 0) {
-        color =
-          lettering[i] === 2
-            ? BRANCH_PALE
-            : dist(i, INK) < dist(i, BROWN)
-              ? CREAM
-              : own(i);
-      } else if (found.length === 1) {
+      if (found.length === 0) color = inBranch[i] ? BROWN : own(i);
+      else if (found.length === 1) {
         // Between two things that both stay (a pupil and its eye, a leaf and
         // its vein), the blend stays too.
         color = kind[found[0]] === 3 ? own(i) : became(found[0]);
@@ -697,7 +690,18 @@ function forDarkBackgrounds({ rgba, w, h }) {
   return { rgba: out, w, h };
 }
 
-const plumLockup = forDarkBackgrounds(creamLockup);
+// The lettering, for dark backgrounds and for light: the wordmark as drawn,
+// its branch where the logo has it and its leaves the green of the emblem's.
+const emblemArt = {
+  rgba: emblemOnly(creamLockup),
+  w: creamLockup.w,
+  h: creamLockup.h,
+};
+const plumLettering = withLeaves(
+  withBranchMoved(plumWordmark, BRANCH_MOVED),
+  leafColor(emblemArt),
+);
+const creamLettering = forLightBackgrounds(plumLettering);
 
 // The files come in pairs, one for dark backgrounds and one for light, and
 // each pair shares a size so one can stand in for the other. Sizes are even,
@@ -901,17 +905,14 @@ async function fitOf(png, [width, height]) {
   );
 }
 
-/**
- * A trimmed cut-out with its artwork enlarged, and the same empty margin
- * around it as before. The logo is drawn a little smaller than its files are,
- * and the wordmark is the lockup's lettering by itself, drawn larger.
- */
-async function enlarged(png, factor) {
-  const meta = await sharp(png).metadata();
-  const width = meta.width - 2 * TRIM_PAD;
-  const height = meta.height - 2 * TRIM_PAD;
-  const { data, info } = await sharp(png)
-    .extract({ left: TRIM_PAD, top: TRIM_PAD, width, height })
+/** Part of a cut-out, resized, as raw pixels with their size. */
+async function resized({ rgba, w, h }, box, factor) {
+  const width = box.x1 - box.x0 + 1;
+  const height = box.y1 - box.y0 + 1;
+  const { data, info } = await sharp(Buffer.from(rgba), {
+    raw: { width: w, height: h, channels: 4 },
+  })
+    .extract({ left: box.x0, top: box.y0, width, height })
     .resize({
       width: Math.round(width * factor),
       height: Math.round(height * factor),
@@ -920,9 +921,88 @@ async function enlarged(png, factor) {
     })
     .raw()
     .toBuffer({ resolveWithObject: true });
-  // Enlarging leaves a trace of opacity just outside the artwork, too faint
+  // Resizing leaves a trace of opacity just outside the artwork, too faint
   // to see but enough to join two pieces that do not touch.
   for (let i = 3; i < data.length; i += 4) if (data[i] < 4) data[i] = 0;
+  return { data, info };
+}
+
+// Where the lettering goes beside the emblem: where the logo drawing has its
+// own letters, and at their height.
+const lettersInLogo = boxAround(
+  letteringPieces(creamLockup, (b) => b.x1 >= EMBLEM_EDGE).letters,
+);
+
+/**
+ * The logo: the emblem with some lettering beside it, as a trimmed cut-out.
+ * At a `scale` of 1 the emblem is as drawn, and nothing is enlarged; the
+ * lettering, drawn larger, is brought down to fit.
+ */
+async function logoOf(lettering, scale) {
+  const emblemBox = boxAround(
+    piecesOf(emblemArt.rgba, emblemArt.w, emblemArt.h),
+  );
+  const pieces = letteringPieces(lettering);
+  const lettersBox = boxAround(pieces.letters);
+  const wholeBox = boxAround([...pieces.letters, pieces.branch]);
+  const fit =
+    (lettersInLogo.y1 - lettersInLogo.y0 + 1) /
+    (lettersBox.y1 - lettersBox.y0 + 1);
+  const emblem = await resized(emblemArt, emblemBox, scale);
+  const letters = await resized(lettering, wholeBox, fit * scale);
+  // Positions in the logo drawing's own pixels, times the scale.
+  const at = {
+    emblem: [emblemBox.x0 * scale, emblemBox.y0 * scale],
+    letters: [
+      (lettersInLogo.x0 - (lettersBox.x0 - wholeBox.x0) * fit) * scale,
+      (lettersInLogo.y0 - (lettersBox.y0 - wholeBox.y0) * fit) * scale,
+    ],
+  };
+  const left = Math.min(at.emblem[0], at.letters[0]);
+  const top = Math.min(at.emblem[1], at.letters[1]);
+  const width = Math.ceil(
+    Math.max(
+      at.emblem[0] + emblem.info.width,
+      at.letters[0] + letters.info.width,
+    ) - left,
+  );
+  const height = Math.ceil(
+    Math.max(
+      at.emblem[1] + emblem.info.height,
+      at.letters[1] + letters.info.height,
+    ) - top,
+  );
+  const { data, info } = await sharp({
+    create: {
+      width: width + 2 * TRIM_PAD,
+      height: height + 2 * TRIM_PAD,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([
+      {
+        input: emblem.data,
+        raw: emblem.info,
+        left: Math.round(at.emblem[0] - left) + TRIM_PAD,
+        top: Math.round(at.emblem[1] - top) + TRIM_PAD,
+      },
+      {
+        input: letters.data,
+        raw: letters.info,
+        left: Math.round(at.letters[0] - left) + TRIM_PAD,
+        top: Math.round(at.letters[1] - top) + TRIM_PAD,
+      },
+    ])
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return trimmed(data, info.width, info.height);
+}
+
+/** The emblem by itself at this scale, as a trimmed cut-out. */
+async function emblemOf(scale) {
+  const box = boxAround(piecesOf(emblemArt.rgba, emblemArt.w, emblemArt.h));
+  const { data, info } = await resized(emblemArt, box, scale);
   return sharp(data, { raw: info })
     .extend({
       top: TRIM_PAD,
@@ -936,69 +1016,57 @@ async function enlarged(png, factor) {
 }
 
 const cutOutOf = ({ rgba, w, h }) => trimmed(rgba, w, h);
-const partOf = (lockup, pick) => trimmed(pick(lockup), lockup.w, lockup.h);
 
-// The lockup sets the scale, and the emblem by itself is drawn at the same
-// one. The wordmark is the lockup's lettering, as large as its file allows.
-const LOCKUP_SCALE = await fitOf(await cutOutOf(plumLockup), LOCKUP);
-const WORDMARK_SCALE = await fitOf(
-  await partOf(plumLockup, letteringOnly),
-  WORDMARK,
-);
+// The logo is drawn a little smaller than its files are, so it is enlarged to
+// fill them; the emblem by itself goes out at the same scale. The wordmark is
+// the lettering as drawn.
+const LOCKUP_SCALE = await fitOf(await logoOf(plumLettering, 1), LOCKUP);
 
 // For dark backgrounds — what the site itself uses. These are the reference:
 // each light version below is checked against the one here, part by part.
 const dark = {
-  wordmark: await onCanvas(
-    await enlarged(await partOf(plumLockup, letteringOnly), WORDMARK_SCALE),
-    WORDMARK,
-  ),
-  lockup: await onCanvas(
-    await enlarged(await cutOutOf(plumLockup), LOCKUP_SCALE),
-    LOCKUP,
-  ),
-  emblem: await onCanvas(
-    await enlarged(await partOf(plumLockup, emblemOnly), LOCKUP_SCALE),
-    EMBLEM,
-  ),
+  wordmark: await onCanvas(await cutOutOf(plumLettering), WORDMARK),
+  lockup: await onCanvas(await logoOf(plumLettering, LOCKUP_SCALE), LOCKUP),
+  emblem: await onCanvas(await emblemOf(LOCKUP_SCALE), EMBLEM),
 };
 
 const cutOuts = {
   ...dark,
-  // For light backgrounds — press kit only. The same drawing at the same
+  // For light backgrounds — press kit only. The same drawings at the same
   // sizes, so each should match its dark version as it stands; anything that
   // does not is moved or resized until it does.
   "lockup-light": await partsMatchedTo(
-    await enlarged(await cutOutOf(creamLockup), LOCKUP_SCALE),
+    await logoOf(creamLettering, LOCKUP_SCALE),
     dark.lockup,
     "lockup",
     LOCKUP,
   ),
   "wordmark-light": await partsMatchedTo(
-    await enlarged(await partOf(creamLockup, letteringOnly), WORDMARK_SCALE),
+    await cutOutOf(creamLettering),
     dark.wordmark,
     "wordmark",
     WORDMARK,
   ),
   "emblem-light": await partsMatchedTo(
-    await enlarged(await partOf(creamLockup, emblemOnly), LOCKUP_SCALE),
+    await emblemOf(LOCKUP_SCALE),
     dark.emblem,
     "emblem",
     EMBLEM,
   ),
 };
 
-// The masters: each cut-out exactly as drawn, at the drawing's own size and
-// with nothing added, for any other artwork to start from. Everything else
-// this script writes is one of these resized.
+// The masters: each cut-out with nothing enlarged and nothing added, for any
+// other artwork to start from. The wordmark and the emblem are exactly as
+// drawn; the logo is the emblem as drawn with the lettering brought down to
+// fit beside it.
 const master = (f) => join(root, "brand/masters", f);
 await mkdir(master(""), { recursive: true });
 for (const [name, png] of Object.entries({
-  "logo-for-light": await cutOutOf(creamLockup),
-  "logo-for-dark": await cutOutOf(plumLockup),
-  "wordmark-for-light": await partOf(creamLockup, letteringOnly),
-  "wordmark-for-dark": await partOf(plumLockup, letteringOnly),
-  emblem: await partOf(creamLockup, emblemOnly),
+  "logo-for-light": await logoOf(creamLettering, 1),
+  "logo-for-dark": await logoOf(plumLettering, 1),
+  "wordmark-for-light": await cutOutOf(creamLettering),
+  "wordmark-for-dark": await cutOutOf(plumLettering),
+  emblem: await emblemOf(1),
 })) {
   await sharp(png)
     .png({ compressionLevel: 9 })
@@ -1058,10 +1126,10 @@ const trademarkGlyph = TRADEMARK_GLYPHS[TRADEMARK];
 const CREAM_INK = "#fef0d4";
 const PLUM_INK = "#2e1e37";
 const TRADEMARK_AT = {
-  wordmark: { x: 1310, y: 38, height: 60, color: CREAM_INK },
-  "wordmark-light": { x: 1310, y: 38, height: 60, color: PLUM_INK },
-  lockup: { x: 1498, y: 177, height: 44, color: CREAM_INK },
-  "lockup-light": { x: 1498, y: 177, height: 44, color: PLUM_INK },
+  wordmark: { x: 1310, y: 37, height: 60, color: CREAM_INK },
+  "wordmark-light": { x: 1310, y: 37, height: 60, color: PLUM_INK },
+  lockup: { x: 1498, y: 173, height: 44, color: CREAM_INK },
+  "lockup-light": { x: 1498, y: 173, height: 44, color: PLUM_INK },
 };
 
 /** The dark and light versions of a logo, which share one canvas size. */

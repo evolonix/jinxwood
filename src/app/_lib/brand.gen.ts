@@ -45,25 +45,25 @@ export const TRADEMARK = {
   "at": {
     "wordmark": {
       "x": 1310,
-      "y": 38,
+      "y": 37,
       "height": 60,
       "color": "#fef0d4"
     },
     "wordmark-light": {
       "x": 1310,
-      "y": 38,
+      "y": 37,
       "height": 60,
       "color": "#2e1e37"
     },
     "lockup": {
       "x": 1498,
-      "y": 177,
+      "y": 173,
       "height": 44,
       "color": "#fef0d4"
     },
     "lockup-light": {
       "x": 1498,
-      "y": 177,
+      "y": 173,
       "height": 44,
       "color": "#2e1e37"
     }
