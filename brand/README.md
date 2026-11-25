@@ -14,3 +14,8 @@ serves nothing from this folder directly.
 Everything outside `source/` is uploaded by hand to the platform it is named
 for. Videos, captions, the original PNG masters and earlier logo attempts are
 kept outside the repo.
+
+The emblem art once had a brown tuft standing in the hollow beside the cat. It
+was painted out of the three files in `source/` that show the emblem, and out
+of the Facebook and Google Play profile pictures. The PNG masters outside the
+repo still have it, so a logo rebuilt from those needs the same retouch.
