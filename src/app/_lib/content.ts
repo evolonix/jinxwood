@@ -262,10 +262,16 @@ export interface Wallpaper {
 }
 
 /**
- * A device's four wallpapers. scripts/build-wallpapers.mjs writes the files
- * and their previews under these names, `<name>-<dark|light>-<flat|forest>`.
+ * A device's wallpapers. scripts/build-wallpapers.mjs writes the files and
+ * their previews under these names: four with the logo or emblem,
+ * `<name>-<dark|light>-<flat|forest>`, and for a device that has one, the
+ * picture of Jinx in the tree, `<name>-tree`.
  */
-function wallpaperSet(name: string, size: string): Wallpaper[] {
+function wallpaperSet(
+  name: string,
+  size: string,
+  { tree = false } = {},
+): Wallpaper[] {
   const one = (label: string, variant: string, type: "png" | "jpg") => ({
     label,
     file: `/wallpapers/${name}-${variant}.${type}`,
@@ -277,13 +283,14 @@ function wallpaperSet(name: string, size: string): Wallpaper[] {
     one("Light", "light-flat", "png"),
     one("Forest, dark", "dark-forest", "jpg"),
     one("Forest, light", "light-forest", "jpg"),
+    ...(tree ? [one("Jinx in the tree", "tree", "jpg")] : []),
   ];
 }
 
 /** The wallpapers page: what it says, and the downloads by device. */
 export const WALLPAPERS = {
   intro:
-    "The cat in the hollow, keeping an eye on your desktop or your phone. Each wallpaper comes dark or light, plain or over the forest, and all of them are free for your own screens.",
+    "The cat in the hollow, keeping an eye on your desktop or your phone. Each wallpaper comes dark or light, plain or over the forest, and the desktop and the iPhone Duo also have Jinx in the tree. All of them are free for your own screens.",
   sets: [
     {
       device: "Phone",
@@ -302,9 +309,10 @@ export const WALLPAPERS = {
     },
     {
       device: "Desktop",
-      about: "The logo in the middle of a widescreen monitor, at 4K.",
+      about:
+        "The logo in the middle of a widescreen monitor, at 4K. Or Jinx in the hollow of the old tree, with the castle beyond.",
       preview: { width: 960, height: 540 },
-      files: wallpaperSet("jinxwood-desktop", "3840 × 2160"),
+      files: wallpaperSet("jinxwood-desktop", "3840 × 2160", { tree: true }),
     },
     {
       device: "MacBook Pro 16-inch",
@@ -318,7 +326,7 @@ export const WALLPAPERS = {
       about:
         "One tall image holds all three views: the logo at the top for the open phone held sideways, and the emblem below it for the closed phone and the open phone held upright. Move each view over its part when you set the wallpaper.",
       preview: { width: 560, height: 1209 },
-      files: wallpaperSet("jinxwood-duo", "2853 × 6158"),
+      files: wallpaperSet("jinxwood-duo", "2853 × 6158", { tree: true }),
     },
   ],
 } as const;

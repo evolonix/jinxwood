@@ -6,7 +6,8 @@ serves nothing from this folder directly.
 - `source/`: the lossless source art: a drawing of the whole logo
   (`lockup-cream.webp`), from which the emblem is taken; a drawing of the
   wordmark by itself (`wordmark-plum.webp`), from which the lettering is
-  taken; the icon; and the forest illustration. `npm run build:brand` cuts
+  taken; the icon; the forest illustration; and the picture of Jinx in the
+  tree (`jinx-in-the-tree.webp`), which the wallpapers use. `npm run build:brand` cuts
   these out, puts the logo together for dark and for light backgrounds, and
   writes every image the site serves into `public/`.
 - `masters/`: the transparent masters, written by `npm run build:brand`: the

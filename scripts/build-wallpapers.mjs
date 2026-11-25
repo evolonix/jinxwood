@@ -2,7 +2,8 @@
 // files and the forest art: a set each for phones, tablets and desktops in
 // general, and for the 16-inch MacBook Pro and the iPhone Duo. Each comes in
 // dark and light, on a flat brand color and on the forest art, so four files
-// per set.
+// per set. The desktop and the Duo have a fifth: the picture of Jinx in the
+// tree, with the wordmark beside the hollow.
 //
 //   public/wallpapers/      the wallpapers themselves
 //   public/img/wallpapers/  a small picture of each, shown beside its download
@@ -302,6 +303,107 @@ async function build(wallpaper) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Jinx in the tree
+// ---------------------------------------------------------------------------
+
+// The picture of Jinx sitting in the hollow of the big tree, as a wallpaper,
+// with the wordmark set beside the hollow the way the logo sets it beside the
+// emblem. The picture is 1920 x 1080 and is enlarged to fill each screen, so
+// these are softer than the others.
+const TREE = join(root, "brand/source/jinx-in-the-tree.webp");
+// The wordmark with its trademark symbol, as the press kit has it. Its
+// artwork starts 15 pixels in and is 1338 wide without the symbol; its
+// letters are centered on row 248.
+const WORDMARK = {
+  file: press("jinxwood-wordmark-for-dark.png"),
+  left: 15,
+  art: 1338,
+  middle: 248,
+};
+// In the picture's own pixels: the row the hollow is centered on, where the
+// trunk ends beside it, and where the castle's first tower begins. The
+// wordmark goes between the two, so it covers neither.
+const HOLLOW_ROW = 560;
+const TRUNK_ENDS = 588;
+
+/**
+ * Part of the tree picture, enlarged to `width` by `height`, with the
+ * wordmark beside the hollow. `from` is the picture's column the part starts
+ * at, and `artWidth` is how wide the wordmark's artwork is, in the picture's
+ * pixels.
+ */
+async function treePart({ from, width, height, artWidth }) {
+  const scale = height / 1080;
+  const columns = Math.round(width / scale);
+  const picture = await sharp(TREE)
+    .extract({ left: from, top: 0, width: columns, height: 1080 })
+    .resize({ width, height, fit: "fill", kernel: "lanczos3" })
+    .png()
+    .toBuffer();
+  const meta = await sharp(WORDMARK.file).metadata();
+  const k = (artWidth / WORDMARK.art) * scale; // wordmark file to image pixels
+  const wordmark = await sharp(WORDMARK.file)
+    .resize({ width: Math.round(meta.width * k), kernel: "lanczos3" })
+    .png()
+    .toBuffer();
+  const left = Math.round((TRUNK_ENDS - from) * scale - WORDMARK.left * k);
+  const top = Math.round(HOLLOW_ROW * scale - WORDMARK.middle * k);
+  // A soft pool of night behind the wordmark, so it reads against the sky.
+  const cx = left + (meta.width * k) / 2;
+  const cy = top + (meta.height * k) / 2;
+  const pool =
+    Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+  <defs><radialGradient id="g">${[0, 0.2, 0.4, 0.6, 0.8, 1].map((at) => `<stop offset="${at}" stop-color="${NIGHT_DEEP}" stop-opacity="${(0.6 * (1 - at) ** 1.6).toFixed(4)}"/>`).join("")}</radialGradient></defs>
+  <ellipse cx="${cx}" cy="${cy}" rx="${meta.width * k * 0.78}" ry="${meta.height * k * 1.05}" fill="url(#g)"/>
+</svg>`);
+  return sharp(picture)
+    .composite([{ input: pool }, { input: wordmark, left, top }])
+    .png()
+    .toBuffer();
+}
+
+/** Writes a tree wallpaper from its parts, top to bottom, and its preview. */
+async function buildTree(name, parts, previewWidth) {
+  const width = parts[0].width;
+  const layers = [];
+  let top = 0;
+  for (const part of parts) {
+    layers.push({ input: await treePart(part), left: 0, top });
+    top += part.height;
+  }
+  await sharp({
+    create: { width, height: top, channels: 3, background: NIGHT },
+  })
+    .composite(layers)
+    .jpeg({ quality: 95, chromaSubsampling: "4:4:4", mozjpeg: true })
+    .toFile(join(out, `${name}.jpg`));
+  await preview({ preview: previewWidth }, `${name}.jpg`);
+  console.log(`${name}: ${width}x${top}`);
+}
+
 await mkdir(out, { recursive: true });
 await mkdir(previews, { recursive: true });
 for (const wallpaper of [...SCREENS, duo()]) await build(wallpaper);
+
+// A 16:9 monitor: the whole picture.
+await buildTree(
+  "jinxwood-desktop-tree",
+  [{ from: 0, width: 3840, height: 2160, artWidth: 410 }],
+  960,
+);
+// The Duo, laid out as its other wallpapers are. The top part, for the inner
+// screen held sideways, is the picture from its left edge to just past the
+// castle. The bottom part, for the two upright views, is the tree and the
+// forest beside it, with a smaller wordmark to fit.
+{
+  const { width, parts } = duo();
+  await buildTree(
+    "jinxwood-duo-tree",
+    [
+      { from: 0, width, height: parts[0], artWidth: 410 },
+      { from: 195, width, height: parts[1], artWidth: 295 },
+    ],
+    560,
+  );
+}

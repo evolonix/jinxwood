@@ -48,7 +48,7 @@ export default function Wallpapers() {
                 <Download
                   href={item.file}
                   label={item.label}
-                  name={`${set.device} wallpaper, ${item.label.toLowerCase()}`}
+                  name={`${set.device} wallpaper: ${item.label}`}
                   note={item.note}
                   wrap
                 />
