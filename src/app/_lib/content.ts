@@ -290,7 +290,7 @@ function wallpaperSet(
 /** The wallpapers page: what it says, and the downloads by device. */
 export const WALLPAPERS = {
   intro:
-    "The cat in the hollow, keeping an eye on your desktop or your phone. Each wallpaper comes dark or light, plain or over the forest, and the desktop and the iPhone Duo also have Jinx in the tree. All of them are free for your own screens.",
+    "The cat in the hollow, keeping an eye on your desktop or your phone. Each wallpaper comes dark or light, plain or over the forest, and the desktop, the MacBook Pro and the iPhone Duo also have Jinx in the tree. All of them are free for your own screens.",
   sets: [
     {
       device: "Phone",
@@ -319,7 +319,9 @@ export const WALLPAPERS = {
       about:
         "The logo in the middle of the desktop, sized for the 16-inch MacBook Pro.",
       preview: { width: 960, height: 621 },
-      files: wallpaperSet("jinxwood-macbook-pro-16", "3456 × 2234"),
+      files: wallpaperSet("jinxwood-macbook-pro-16", "3456 × 2234", {
+        tree: true,
+      }),
     },
     {
       device: "iPhone Duo",
