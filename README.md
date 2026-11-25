@@ -74,7 +74,7 @@ The site serves its own copy instead of embedding YouTube because the privacy po
 
 ## Brand images
 
-The logos exist only as flat images on a solid background, so `scripts/build-brand.mjs` cuts them out, then makes the hero sizes, the icons, the link-preview image and the press downloads. Its output is committed; run it only when the art changes:
+The logo exists only as a flat image on a solid background, drawn for light backgrounds. `scripts/build-brand.mjs` cuts it out, makes the version for dark backgrounds from it by recoloring the lettering, and then makes the hero sizes, the icons, the link-preview image and the press downloads. It also writes each cut-out at the drawing's own size to `brand/masters/`, as transparent masters for other artwork. Its output is committed; run it only when the art changes:
 
 ```bash
 npm run build:brand -- --preview
@@ -82,9 +82,9 @@ npm run build:brand -- --preview
 
 `--preview` also writes `brand/preview.png`, each cut-out shown over four backgrounds. Look at it for fringes around the edges, and look at the hero's sky for banding, before committing.
 
-The downloads on the wallpapers page are made from the press logos and the forest art by `scripts/build-wallpapers.mjs`, so run `npm run build:wallpapers` after `build:brand` when either changes. It writes each wallpaper to `public/wallpapers/` and a small picture of it to `public/img/wallpapers/`; `WALLPAPERS` in `content.ts` lists them for the page. The note at the top of the script explains how the iPhone Duo image is laid out for its three views.
+The downloads on the wallpapers page are made from the emblem master, the press logos and the forest art by `scripts/build-wallpapers.mjs`, so run `npm run build:wallpapers` after `build:brand` when either changes. It writes each wallpaper to `public/wallpapers/` and a small picture of it to `public/img/wallpapers/`; `WALLPAPERS` in `content.ts` lists them for the page. The note at the top of the script explains how the iPhone Duo image is laid out for its three views.
 
-To replace the logo, put the new file in `brand/source/` under the same name. If the artwork moved, the seed point for the bowl of the "d" and the emblem's right edge near the top of the cut-out section will need adjusting. When vector logos exist, they can replace the cut-out step altogether.
+To replace the logo, put the new file in `brand/source/` as `lockup-cream.webp`: the logo for light backgrounds, on its cream background. If the artwork moved, a few measurements near the top of the cut-out section will need taking again: the seed point for the bowl of the "d", the emblem's right edge, the box around the two eyes, and where the trademark symbol sits. The wallpaper script and its emblem measurements follow. When vector logos exist, they can replace the cut-out step altogether.
 
 Two things to keep true:
 

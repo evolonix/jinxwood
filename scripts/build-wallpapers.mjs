@@ -65,24 +65,26 @@ const NIGHT = "#2B1E3F";
 const NIGHT_DEEP = "#1A122D";
 const PARCHMENT = "#F4EDE0";
 
-// The published logo files, as build-brand.mjs writes them. `axis` is the
-// middle of the artwork left to right, in the file's own pixels, and `art` is
-// the artwork's width. Both leave out the trademark symbol: it hangs past the
-// lettering on the logo, so centering the whole canvas would sit the artwork
-// left of center. `size` is the canvas those two were measured on; if a file
-// stops matching it, they need measuring again.
+// The logo files, as build-brand.mjs writes them. The emblem is the master,
+// which is the same for dark and light. The logo is the press download, which
+// carries the trademark symbol. `axis` is the middle of the artwork left to
+// right, in the file's own pixels, and `art` is the artwork's width. Both
+// leave out the trademark symbol: it hangs past the lettering on the logo, so
+// centering the whole canvas would sit the artwork left of center. `size` is
+// the canvas those two were measured on; if a file stops matching it, they
+// need measuring again.
 const LOGOS = {
   emblem: {
-    file: (mode) => press(`jinxwood-emblem-for-${mode}.png`),
-    size: [670, 626],
-    axis: 334.5,
-    art: 653,
+    file: () => join(root, "brand/masters/jinxwood-emblem.png"),
+    size: [629, 583],
+    axis: 314.5,
+    art: 613,
   },
   logo: {
     file: (mode) => press(`jinxwood-logo-for-${mode}.png`),
     size: [1592, 626],
     axis: 769,
-    art: 1521,
+    art: 1522,
   },
 };
 

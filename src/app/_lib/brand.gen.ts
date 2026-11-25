@@ -44,26 +44,26 @@ export const TRADEMARK = {
   "path": "M0 0H78V16H47V100H31V16H0ZM90 0H110L142 62L174 0H194V100H178V30L149 86H135L106 30V100H90Z",
   "at": {
     "wordmark": {
-      "x": 1304,
-      "y": 34,
+      "x": 1310,
+      "y": 38,
       "height": 60,
       "color": "#fef0d4"
     },
     "wordmark-light": {
-      "x": 1304,
-      "y": 34,
+      "x": 1310,
+      "y": 38,
       "height": 60,
       "color": "#2e1e37"
     },
     "lockup": {
       "x": 1498,
-      "y": 174,
+      "y": 177,
       "height": 44,
       "color": "#fef0d4"
     },
     "lockup-light": {
       "x": 1498,
-      "y": 174,
+      "y": 177,
       "height": 44,
       "color": "#2e1e37"
     }
