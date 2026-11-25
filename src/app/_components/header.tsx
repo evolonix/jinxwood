@@ -47,7 +47,9 @@ export function Header() {
     >
       <div className="px-safe-lg mx-auto flex h-(--header-h) max-w-6xl items-center gap-2 sm:gap-3">
         {/* No fade on the wordmark: on the home page it has to appear in the
-            same instant the hero's copy disappears. */}
+            same instant the hero's copy disappears. The class hides it until
+            useWordmarkDock is running; from then the hook shows and hides it
+            itself, frame by frame. */}
         <Link
           data-wordmark-slot
           to="/"

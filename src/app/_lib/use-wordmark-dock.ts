@@ -29,8 +29,9 @@ const PROGRESS = "--dock";
  * fades its bar in over the same stretch, from the `--dock` property this
  * sets on it. Scrolling back reverses it all.
  *
- * The position and `--dock` are written straight to the elements' styles on
- * each frame; React only hears about a change of phase. Under reduced motion
+ * The position, `--dock` and whether the header's wordmark shows are written
+ * straight to the elements' styles on each frame; React only hears about a
+ * change of phase, for what can wait a frame. Under reduced motion
  * nothing travels or fades: the hero's wordmark scrolls away, and the bar and
  * the header's wordmark appear together once it has gone.
  *
@@ -100,8 +101,11 @@ export function useWordmarkDock(active: boolean): DockPhase {
         markEl.style.transform = "";
       }
       // The hero's wordmark steps aside for as long as the header's stands in
-      // for it.
+      // for it. The header's is shown and hidden here, in the same frame:
+      // React draws a change of phase a frame late, and for that frame both
+      // wordmarks would show, or neither.
       root.toggleAttribute(AWAY, now !== "rest");
+      slotEl.style.visibility = now === "rest" ? "hidden" : "visible";
       setPhase(now);
     };
 
@@ -130,6 +134,7 @@ export function useWordmarkDock(active: boolean): DockPhase {
       still.removeEventListener("change", apply);
       sized.disconnect();
       markEl.style.transform = "";
+      slotEl.style.visibility = "";
       header.style.removeProperty(PROGRESS);
       root.removeAttribute(AWAY);
       setPhase("rest");
