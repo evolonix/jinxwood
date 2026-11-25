@@ -22,10 +22,6 @@ export const IMAGE_SIZES = {
     "width": 1368,
     "height": 552
   },
-  "emblem-light": {
-    "width": 670,
-    "height": 626
-  },
   "hero": {
     "width": 3584,
     "height": 2016

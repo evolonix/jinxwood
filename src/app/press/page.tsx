@@ -212,22 +212,26 @@ export default function Press() {
       </Block>
 
       <Block title="Artwork">
-        <div className="ring-night-line max-w-3xl overflow-hidden rounded-2xl ring-1">
-          <img
-            src="/img/hero/hero-1280.webp"
-            width={1280}
-            height={720}
-            alt="The Jinxwood forest illustration: a castle at twilight, seen through the trees."
-            loading="lazy"
-            decoding="async"
-            className="h-auto w-full"
-          />
-          <Download
-            href={PRESS.art.file}
-            label={PRESS.art.label}
-            note={PRESS.art.note}
-          />
-        </div>
+        <ul className="grid gap-6 sm:grid-cols-2">
+          {PRESS.art.map((item) => (
+            <li
+              key={item.file}
+              className="ring-night-line overflow-hidden rounded-2xl ring-1"
+            >
+              {/* Both pictures are 16:9, shown from a copy 1280 wide. */}
+              <img
+                src={item.preview}
+                width={1280}
+                height={720}
+                alt={item.alt}
+                loading="lazy"
+                decoding="async"
+                className="h-auto w-full"
+              />
+              <Download href={item.file} label={item.label} note={item.note} />
+            </li>
+          ))}
+        </ul>
       </Block>
     </div>
   );

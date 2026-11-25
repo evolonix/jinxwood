@@ -74,7 +74,7 @@ The site serves its own copy instead of embedding YouTube because the privacy po
 
 ## Brand images
 
-The logo exists only as flat images on solid backgrounds: the emblem in a drawing of the whole logo, and the lettering in a drawing of the wordmark by itself. `scripts/build-brand.mjs` cuts both out, puts the logo together from them for dark backgrounds and for light (the light lettering is the dark lettering recolored), and then makes the hero sizes, the icons, the link-preview image and the press downloads. It also writes each cut-out with nothing enlarged to `brand/masters/`, as transparent masters for other artwork. Its output is committed; run it only when the art changes:
+The logo exists only as flat images on solid backgrounds: the emblem in a drawing of the whole logo, and the lettering in a drawing of the wordmark by itself. `scripts/build-brand.mjs` cuts both out, puts the logo together from them for dark backgrounds and for light (the light lettering is the dark lettering recolored), and then makes the hero sizes, the icons, the link-preview image and the press downloads. It also writes each cut-out with nothing enlarged to `brand/masters/`, as transparent masters for other artwork. One press download is not its work: the picture of Jinx in the tree, `public/press/jinx-in-the-tree.jpg`, is placed by hand, and the script makes only the smaller copy the press page shows. Its output is committed; run it only when the art changes:
 
 ```bash
 npm run build:brand -- --preview

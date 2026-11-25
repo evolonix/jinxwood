@@ -15,6 +15,8 @@ serves nothing from this folder directly.
   icon, with nothing enlarged and no trademark symbol. The wordmark, emblem
   and icon are exactly as drawn; the logo is the emblem as drawn with the
   lettering brought down to fit beside it. Start any other artwork from these.
+  The forest illustration and the picture of Jinx in the tree sit beside them
+  as the JPEGs the press page offers, copied in by hand.
 - `youtube/`: the channel's profile picture, banner and video watermark are
   written by `npm run build:brand`. The numbered video thumbnails are made by
   hand.

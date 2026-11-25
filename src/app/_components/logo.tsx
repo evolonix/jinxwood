@@ -8,7 +8,8 @@ import { IMAGE_SIZES, TRADEMARK } from "../_lib/brand.gen";
  *   lockup        emblem and wordmark together
  *   lockup-light  the lockup drawn for light backgrounds (press kit only)
  *   wordmark-light  the lettering from that lockup, by itself (press kit only)
- *   emblem-light  the emblem from that lockup, by itself (press kit only)
+ *
+ * The emblem has no lettering, so it is the same on any background.
  */
 export type LogoName = keyof typeof WIDTHS;
 
@@ -19,7 +20,6 @@ const WIDTHS = {
   emblem: [240, 480, 640],
   "lockup-light": [640, 1280],
   "wordmark-light": [640, 1280],
-  "emblem-light": [240, 480, 640],
 } as const;
 
 interface LogoProps {

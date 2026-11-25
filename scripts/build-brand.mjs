@@ -938,10 +938,7 @@ async function partsOf(png, kind) {
   const pieces = piecesOf(data, w, h);
   const groups = {};
   let rest = pieces;
-  if (kind === "emblem") {
-    groups.emblem = pieces;
-    rest = [];
-  } else if (kind === "lockup") {
+  if (kind === "lockup") {
     const body = pieces.reduce((a, b) =>
       b.pixels.length > a.pixels.length ? b : a,
     );
@@ -1198,11 +1195,13 @@ const LOCKUP_SCALE = await fitOf(await logoOf(plumLettering, 1), LOCKUP);
 const dark = {
   wordmark: await onCanvas(await cutOutOf(plumLettering), WORDMARK),
   lockup: await onCanvas(await logoOf(plumLettering, LOCKUP_SCALE), LOCKUP),
-  emblem: await onCanvas(await emblemOf(LOCKUP_SCALE), EMBLEM),
 };
 
 const cutOuts = {
   ...dark,
+  // The emblem has no lettering to recolor, so the one drawing serves dark
+  // and light backgrounds alike.
+  emblem: await onCanvas(await emblemOf(LOCKUP_SCALE), EMBLEM),
   // For light backgrounds — press kit only. The same drawings at the same
   // sizes, so each should match its dark version as it stands; anything that
   // does not is moved or resized until it does.
@@ -1217,12 +1216,6 @@ const cutOuts = {
     dark.wordmark,
     "wordmark",
     WORDMARK,
-  ),
-  "emblem-light": await partsMatchedTo(
-    await emblemOf(LOCKUP_SCALE),
-    dark.emblem,
-    "emblem",
-    EMBLEM,
   ),
 };
 
@@ -1352,7 +1345,6 @@ const LOGO_WIDTHS = {
   emblem: [240, 480, 640],
   "lockup-light": [640, 1280],
   "wordmark-light": [640, 1280],
-  "emblem-light": [240, 480, 640],
 };
 for (const [name, png] of Object.entries(cutOuts)) {
   const meta = await sharp(png).metadata();
@@ -1542,7 +1534,7 @@ await hero
 // ---------------------------------------------------------------------------
 
 // The logos and wordmarks go out with the trademark symbol drawn in. The
-// emblems go out as they are.
+// emblem goes out as it is, one file for any background.
 await mkdir(pub("press"), { recursive: true });
 const png = { compressionLevel: 9, palette: false };
 await sharp(await withTrademark("lockup"))
@@ -1557,17 +1549,21 @@ await sharp(await withTrademark("wordmark"))
 await sharp(await withTrademark("wordmark-light"))
   .png(png)
   .toFile(pub("press/jinxwood-wordmark-for-light.png"));
-await sharp(cutOuts.emblem)
-  .png(png)
-  .toFile(pub("press/jinxwood-emblem-for-dark.png"));
-await sharp(cutOuts["emblem-light"])
-  .png(png)
-  .toFile(pub("press/jinxwood-emblem-for-light.png"));
+await sharp(cutOuts.emblem).png(png).toFile(pub("press/jinxwood-emblem.png"));
 await hero
   .clone()
   .resize({ width: 2560 })
   .jpeg({ quality: 90, mozjpeg: true })
   .toFile(pub("press/jinxwood-forest.jpg"));
+
+// The picture of Jinx in the tree is offered as it was drawn: its download,
+// public/press/jinx-in-the-tree.jpg, is placed by hand and left alone here.
+// Only the smaller picture the press page shows of it is made.
+await mkdir(pub("img/press"), { recursive: true });
+await sharp(source("jinx-in-the-tree.webp"))
+  .resize({ width: 1280 })
+  .webp(WEBP)
+  .toFile(pub("img/press/jinx-in-the-tree-1280.webp"));
 
 // ---------------------------------------------------------------------------
 // YouTube channel
