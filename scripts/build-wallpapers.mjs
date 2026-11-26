@@ -50,7 +50,7 @@
 //   MacBook Pro  3456 x 2234  logo    the 16-inch screen
 //
 // The logo is drawn at the size of the published file, so it is not enlarged.
-// The phone's emblem is enlarged a little to fill about half the width.
+// The phone's emblem fills about half the width, smaller than its master.
 
 import { mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -77,9 +77,9 @@ const PARCHMENT = "#F4EDE0";
 const LOGOS = {
   emblem: {
     file: () => join(root, "brand/masters/jinxwood-emblem.png"),
-    size: [629, 583],
-    axis: 314.5,
-    art: 613,
+    size: [1279, 1197],
+    axis: 639.5,
+    art: 1263,
   },
   logo: {
     file: (mode) => press(`jinxwood-logo-for-${mode}.png`),
@@ -123,8 +123,9 @@ function duo() {
     // The logo fills about two thirds of the sideways screen. The emblem
     // fills a little over half of an upright one, centered between the
     // middles of the two unzoomed upright views, which both end at the bottom
-    // of the image. Both are drawn larger than the published files, so they
-    // are slightly soft at full zoom.
+    // of the image. Both are drawn larger than their files, the logo by nearly
+    // a third and the emblem by about a quarter, so they are slightly soft at
+    // full zoom.
     placed: [
       { logo: "logo", artWidth: 1977, middle: logoPart / 2 },
       {

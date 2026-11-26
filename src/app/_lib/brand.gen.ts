@@ -11,7 +11,7 @@ export const IMAGE_SIZES = {
     "height": 626
   },
   "emblem": {
-    "width": 670,
+    "width": 668,
     "height": 626
   },
   "lockup-light": {
@@ -52,15 +52,15 @@ export const TRADEMARK = {
       "color": "#2e1e37"
     },
     "lockup": {
-      "x": 1506,
+      "x": 1508,
       "y": 173,
-      "height": 44,
+      "height": 43,
       "color": "#fef0d4"
     },
     "lockup-light": {
-      "x": 1506,
+      "x": 1508,
       "y": 173,
-      "height": 44,
+      "height": 43,
       "color": "#2e1e37"
     }
   }

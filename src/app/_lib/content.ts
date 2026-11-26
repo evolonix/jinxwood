@@ -230,7 +230,7 @@ export const PRESS = {
       file: "/press/jinxwood-emblem.png",
       preview: "emblem",
       on: "night",
-      note: "Transparent PNG, 670 × 626",
+      note: "Transparent PNG, 668 × 626",
     },
   ],
   art: [

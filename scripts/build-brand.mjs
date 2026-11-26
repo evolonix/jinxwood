@@ -7,17 +7,19 @@
 //                                    sheet of each cut-out over night, parchment,
 //                                    the hero art and magenta, for fringe review
 //
-// The logo exists only as flat rasters on solid backgrounds: the emblem, in a
-// drawing of the whole logo, and the lettering, in a drawing of the wordmark by
-// itself. So the first job is cutting those out, and the second is putting the
-// logo together from them, for dark backgrounds and for light. The rest is
-// resizing: hero sizes, icons, the social image and press downloads.
+// The emblem is its own drawing on a transparent background. The lettering
+// exists only as a flat raster on a solid background, in a drawing of the
+// wordmark by itself, and where it sits beside the emblem only in a drawing of
+// the whole logo. So the first job is cutting the lettering out, and the
+// second is putting the logo together, for dark backgrounds and for light.
+// The rest is resizing: hero sizes, icons, the social image and press
+// downloads.
 //
-// It also writes the transparent masters to brand/masters/, and the YouTube
-// channel's profile picture and banner to brand/youtube/. The site does not
-// serve those; the YouTube art is uploaded by hand.
+// It also writes the transparent masters to brand/masters/, and the profile
+// pictures and the YouTube banner to brand/youtube/, brand/facebook/ and
+// brand/play/. The site does not serve those; they are uploaded by hand.
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -476,10 +478,12 @@ async function cutOut(file, options) {
   };
 }
 
-// The emblem comes from the drawing of the whole logo, on its cream
-// background. Only the emblem is taken from it: its lettering is the same
-// design as the wordmark's, drawn smaller. The seed point sits in the bowl of
-// the "d", the one enclosed region that is background rather than artwork.
+// The drawing of the whole logo, on its cream background, says where the
+// lettering goes beside the emblem. Nothing in it is used as it stands: its
+// lettering is the same design as the wordmark's, drawn smaller, and its
+// emblem is the earlier drawing of the one below. The seed point sits in the
+// bowl of the "d", the one enclosed region that is background rather than
+// artwork.
 const creamLockup = await cutOut("lockup-cream.webp", {
   tolerance: 12,
   holes: [[1462, 479]],
@@ -505,6 +509,62 @@ const boxAround = (pieces) => ({
   x1: Math.max(...pieces.map((p) => p.bounds.x1)),
   y1: Math.max(...pieces.map((p) => p.bounds.y1)),
 });
+
+// The emblem: its own drawing, on a transparent background. It is the logo
+// drawing's emblem, cut out with TRIM_PAD around it, enlarged until that box
+// is the drawing's size, and retouched. So it goes back into the logo over
+// that same box, and the lettering stays where the logo drawing has it.
+const emblemFile = await sharp(source("emblem.png"))
+  .ensureAlpha()
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+
+/**
+ * The emblem drawing, made ready to use. Its solid parts were saved at 253 of
+ * 255 opacity, which would let the background show through faintly, so every
+ * pixel's opacity is scaled back up by that much. The background around it
+ * keeps a faint trace of what was there before, at an opacity of 1 or 2: that
+ * is cleared, along with any loose speck it leaves.
+ */
+function emblemDrawing({ data, info }) {
+  const { width: w, height: h } = info;
+  const rgba = Uint8Array.from(data);
+  for (let i = 3; i < rgba.length; i += 4) {
+    rgba[i] =
+      rgba[i] < 8 ? 0 : Math.min(255, Math.round((rgba[i] * 255) / 253));
+  }
+  for (const { pixels } of piecesOf(rgba, w, h)) {
+    if (pixels.length < SPECK) for (const i of pixels) rgba[i * 4 + 3] = 0;
+  }
+  return { rgba, w, h };
+}
+const emblemArt = emblemDrawing(emblemFile);
+const emblemBox = boxAround(piecesOf(emblemArt.rgba, emblemArt.w, emblemArt.h));
+
+// Where the emblem drawing sits in the logo drawing: the box its file covers
+// there, from `x` and `y`, and how many of its pixels make one of the logo
+// drawing's. Both ways it must have been enlarged by the same amount, or it is
+// not the drawing this expects.
+const EMBLEM_AT = (() => {
+  const was = boxAround(
+    piecesOf(emblemOnly(creamLockup), creamLockup.w, creamLockup.h),
+  );
+  const width = was.x1 - was.x0 + 1 + 2 * TRIM_PAD;
+  const height = was.y1 - was.y0 + 1 + 2 * TRIM_PAD;
+  const across = emblemArt.w / width;
+  const down = emblemArt.h / height;
+  if (Math.abs(across / down - 1) > 0.005) {
+    throw new Error(
+      `The emblem drawing (${emblemArt.w}x${emblemArt.h}) is not the logo's ` +
+        `emblem box (${width}x${height}) enlarged: redo EMBLEM_AT`,
+    );
+  }
+  return {
+    x: was.x0 - TRIM_PAD,
+    y: was.y0 - TRIM_PAD,
+    per: (across + down) / 2,
+  };
+})();
 
 /**
  * The pieces of some lettering: the branch under the letters, which is the
@@ -863,23 +923,18 @@ function forLightBackgrounds(lettering) {
 
 // The lettering, for dark backgrounds and for light: the wordmark as drawn,
 // its branch where the logo has it and its leaves the green of the emblem's.
-const emblemArt = {
-  rgba: emblemOnly(creamLockup),
-  w: creamLockup.w,
-  h: creamLockup.h,
-};
 const plumLettering = withLeaves(
   withBranchMoved(withDMoved(plumWordmark, RING_TAN, CREAM), BRANCH_MOVED),
   leafColor(emblemArt),
 );
 const creamLettering = forLightBackgrounds(plumLettering);
 
-// The files come in pairs, one for dark backgrounds and one for light, and
-// each pair shares a size so one can stand in for the other. Sizes are even,
-// so the half-size images come out whole.
+// The logo and wordmark files come in pairs, one for dark backgrounds and one
+// for light, and each pair shares a size so one can stand in for the other.
+// Sizes are even, so the half-size images come out whole. The emblem's file,
+// the same on any background, is sized to fit it below.
 const LOCKUP = [1538, 626];
 const WORDMARK = [1368, 552];
-const EMBLEM = [670, 626];
 
 /**
  * Centers a cut-out on a transparent canvas of exactly this size. Only empty
@@ -1102,25 +1157,36 @@ const lettersInLogo = boxAround(
 );
 
 /**
+ * How much some lettering is resized to take the place of the logo drawing's
+ * own, at a scale of 1.
+ */
+function letteringFit(lettering) {
+  const lettersBox = boxAround(letteringPieces(lettering).letters);
+  return (
+    (lettersInLogo.y1 - lettersInLogo.y0 + 1) /
+    (lettersBox.y1 - lettersBox.y0 + 1)
+  );
+}
+
+/**
  * The logo: the emblem with some lettering beside it, as a trimmed cut-out.
- * At a `scale` of 1 the emblem is as drawn, and nothing is enlarged; the
- * lettering, drawn larger, is brought down to fit.
+ * `scale` is in the logo drawing's pixels: at 1 the logo is the size that
+ * drawing has it. The emblem and the lettering are each drawn larger than
+ * that, so both are brought down to fit.
  */
 async function logoOf(lettering, scale) {
-  const emblemBox = boxAround(
-    piecesOf(emblemArt.rgba, emblemArt.w, emblemArt.h),
-  );
   const pieces = letteringPieces(lettering);
   const lettersBox = boxAround(pieces.letters);
   const wholeBox = boxAround([...pieces.letters, pieces.branch]);
-  const fit =
-    (lettersInLogo.y1 - lettersInLogo.y0 + 1) /
-    (lettersBox.y1 - lettersBox.y0 + 1);
-  const emblem = await resized(emblemArt, emblemBox, scale);
+  const fit = letteringFit(lettering);
+  const emblem = await resized(emblemArt, emblemBox, scale / EMBLEM_AT.per);
   const letters = await resized(lettering, wholeBox, fit * scale);
   // Positions in the logo drawing's own pixels, times the scale.
   const at = {
-    emblem: [emblemBox.x0 * scale, emblemBox.y0 * scale],
+    emblem: [
+      (EMBLEM_AT.x + emblemBox.x0 / EMBLEM_AT.per) * scale,
+      (EMBLEM_AT.y + emblemBox.y0 / EMBLEM_AT.per) * scale,
+    ],
     letters: [
       (lettersInLogo.x0 - (lettersBox.x0 - wholeBox.x0) * fit) * scale,
       (lettersInLogo.y0 - (lettersBox.y0 - wholeBox.y0) * fit) * scale,
@@ -1167,10 +1233,16 @@ async function logoOf(lettering, scale) {
   return trimmed(data, info.width, info.height);
 }
 
-/** The emblem by itself at this scale, as a trimmed cut-out. */
+/**
+ * The emblem by itself at this scale, in the logo drawing's pixels as for
+ * logoOf, as a trimmed cut-out.
+ */
 async function emblemOf(scale) {
-  const box = boxAround(piecesOf(emblemArt.rgba, emblemArt.w, emblemArt.h));
-  const { data, info } = await resized(emblemArt, box, scale);
+  const { data, info } = await resized(
+    emblemArt,
+    emblemBox,
+    scale / EMBLEM_AT.per,
+  );
   return sharp(data, { raw: info })
     .extend({
       top: TRIM_PAD,
@@ -1185,10 +1257,17 @@ async function emblemOf(scale) {
 
 const cutOutOf = ({ rgba, w, h }) => trimmed(rgba, w, h);
 
-// The logo is drawn a little smaller than its files are, so it is enlarged to
-// fill them; the emblem by itself goes out at the same scale. The wordmark is
-// the lettering as drawn.
+// The logo files are a little larger than the logo drawing has it, so the
+// logo is sized to fill them; the emblem by itself goes out at the same
+// scale. Both are still smaller than their drawings. The wordmark is the
+// lettering as drawn.
 const LOCKUP_SCALE = await fitOf(await logoOf(plumLettering, 1), LOCKUP);
+const emblemAlone = await emblemOf(LOCKUP_SCALE);
+const EMBLEM = await sharp(emblemAlone)
+  .metadata()
+  .then(({ width, height }) =>
+    [width, height].map((v) => 2 * Math.ceil(v / 2)),
+  );
 
 // For dark backgrounds — what the site itself uses. These are the reference:
 // each light version below is checked against the one here, part by part.
@@ -1201,7 +1280,7 @@ const cutOuts = {
   ...dark,
   // The emblem has no lettering to recolor, so the one drawing serves dark
   // and light backgrounds alike.
-  emblem: await onCanvas(await emblemOf(LOCKUP_SCALE), EMBLEM),
+  emblem: await onCanvas(emblemAlone, EMBLEM),
   // For light backgrounds — press kit only. The same drawings at the same
   // sizes, so each should match its dark version as it stands; anything that
   // does not is moved or resized until it does.
@@ -1221,16 +1300,22 @@ const cutOuts = {
 
 // The masters: each cut-out with nothing enlarged and nothing added, for any
 // other artwork to start from. The wordmark and the emblem are exactly as
-// drawn; the logo is the emblem as drawn with the lettering brought down to
-// fit beside it.
+// drawn. The logo is as large as it can be with neither enlarged: whichever
+// of the two is drawn smaller for its place in the logo is as drawn, and the
+// other is brought down to match.
+const EMBLEM_SCALE = EMBLEM_AT.per;
+const LOGO_MASTER_SCALE = Math.min(
+  EMBLEM_SCALE,
+  1 / letteringFit(plumLettering),
+);
 const master = (f) => join(root, "brand/masters", f);
 await mkdir(master(""), { recursive: true });
 for (const [name, png] of Object.entries({
-  "logo-for-light": await logoOf(creamLettering, 1),
-  "logo-for-dark": await logoOf(plumLettering, 1),
+  "logo-for-light": await logoOf(creamLettering, LOGO_MASTER_SCALE),
+  "logo-for-dark": await logoOf(plumLettering, LOGO_MASTER_SCALE),
   "wordmark-for-light": await cutOutOf(creamLettering),
   "wordmark-for-dark": await cutOutOf(plumLettering),
-  emblem: await emblemOf(1),
+  emblem: await emblemOf(EMBLEM_SCALE),
 })) {
   await sharp(png)
     .png({ compressionLevel: 9 })
@@ -1286,14 +1371,47 @@ const trademarkGlyph = TRADEMARK_GLYPHS[TRADEMARK];
 
 // Where the symbol sits in each cut-out, in that cut-out's own pixels: its
 // left and top edges and its height, placed just past the top of the "d", in
-// the color of the lettering. The emblem carries none.
+// the color of the lettering. The emblem carries none. It was placed by eye
+// on the wordmark; the logo's is worked out from that, so it stays put
+// against the "d" wherever the logo's lettering lands.
 const CREAM_INK = "#fef0d4";
 const PLUM_INK = "#2e1e37";
+const ON_WORDMARK = { x: 1322, y: 37, height: 60 };
+
+/**
+ * The bounds of the "d" in a cut-out with lettering: of the pieces that end
+ * near the right edge of the artwork, the one that reaches highest, which is
+ * the d's ascender. The branch under the letters may end further right, but
+ * not as high.
+ */
+async function boundsOfD(png) {
+  const { data, info } = await sharp(png)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const pieces = piecesOf(data, info.width, info.height);
+  const right = Math.max(...pieces.map((p) => p.bounds.x1));
+  return pieces
+    .filter((p) => p.bounds.x1 > right - info.width / 10)
+    .reduce((a, b) => (b.bounds.y0 < a.bounds.y0 ? b : a)).bounds;
+}
+
+const ON_LOCKUP = await (async () => {
+  const from = await boundsOfD(cutOuts.wordmark);
+  const to = await boundsOfD(cutOuts.lockup);
+  const k = (to.y1 - to.y0 + 1) / (from.y1 - from.y0 + 1);
+  return {
+    x: Math.round(to.x1 + (ON_WORDMARK.x - from.x1) * k),
+    y: Math.round(to.y0 + (ON_WORDMARK.y - from.y0) * k),
+    height: Math.round(ON_WORDMARK.height * k),
+  };
+})();
+
 const TRADEMARK_AT = {
-  wordmark: { x: 1322, y: 37, height: 60, color: CREAM_INK },
-  "wordmark-light": { x: 1322, y: 37, height: 60, color: PLUM_INK },
-  lockup: { x: 1506, y: 173, height: 44, color: CREAM_INK },
-  "lockup-light": { x: 1506, y: 173, height: 44, color: PLUM_INK },
+  wordmark: { ...ON_WORDMARK, color: CREAM_INK },
+  "wordmark-light": { ...ON_WORDMARK, color: PLUM_INK },
+  lockup: { ...ON_LOCKUP, color: CREAM_INK },
+  "lockup-light": { ...ON_LOCKUP, color: PLUM_INK },
 };
 
 /** The dark and light versions of a logo, which share one canvas size. */
@@ -1407,89 +1525,130 @@ for (const width of [640, 960, 1280]) {
 // Icons
 // ---------------------------------------------------------------------------
 
-// The favicon and every app icon come from one drawing: the cat in the hollow
-// on a plum rounded square, supplied on a white background. The drawn square is
-// a little taller than it is wide and its corners are rounded, so it cannot be
-// used as it stands: an icon file has to be exactly square, and some platforms
-// want the art to run right to the edges so they can round it themselves.
+// The favicon, the app icons and the profile pictures are all the emblem on a
+// square of night, drawn from the emblem drawing at each size that is needed.
 //
-// So: remove the white, fill what was white with the square's own plum, and
-// take the center square. That is the full-bleed icon. The rounded versions
-// are that same square with the corners masked off again.
-const iconArt = await cutOut("icon.webp", { tolerance: 24, lighterIsBg: true });
+// They come in two layouts. An icon is shown as a rounded square, which cuts
+// off little, and at 32 pixels every one counts, so its emblem is large: the
+// emblem's box fills ICON_FILL of the square. A profile picture is shown as a
+// circle, so there the emblem sits inside the circle with PROFILE_MARGIN of
+// the circle's radius to spare all round: no part of it is further from the
+// middle than the rest of the radius. That layout also suits a maskable app
+// icon, which a launcher may crop to a circle 80% as wide as the icon.
+const ICON_FILL = 0.84;
+const PROFILE_MARGIN = 0.2;
 
-/** The plum the drawn square is filled with, read from just inside its edge. */
-function edgeColor({ rgba, w, h }) {
-  let inner = new Uint8Array(w * h);
-  for (let i = 0; i < w * h; i++) inner[i] = rgba[i * 4 + 3] === 0 ? 1 : 0;
-  for (let step = 0; step < 3; step++) inner = dilate(inner, w, h);
-  let outer = inner;
-  for (let step = 0; step < 4; step++) outer = dilate(outer, w, h);
-  // The band between the two is mostly plain plum, with a few leaf tips. The
-  // median ignores those.
-  const channels = [[], [], []];
-  for (let i = 0; i < w * h; i++) {
-    if (!outer[i] || inner[i]) continue;
-    for (let c = 0; c < 3; c++) channels[c].push(rgba[i * 4 + c]);
+// How far the emblem reaches from the middle of its box, in the drawing's
+// pixels: what has to fit inside a profile picture's circle. Faint edge
+// pixels are left out; nobody sees them cross the line.
+const emblemReach = (() => {
+  const { rgba, w } = emblemArt;
+  const cx = (emblemBox.x0 + emblemBox.x1 + 1) / 2;
+  const cy = (emblemBox.y0 + emblemBox.y1 + 1) / 2;
+  let reach = 0;
+  for (let y = emblemBox.y0; y <= emblemBox.y1; y++) {
+    for (let x = emblemBox.x0; x <= emblemBox.x1; x++) {
+      if (rgba[(y * w + x) * 4 + 3] < 32) continue;
+      reach = Math.max(reach, Math.hypot(x + 0.5 - cx, y + 0.5 - cy));
+    }
   }
-  const [r, g, b] = channels.map(
-    (values) => values.sort((x, y) => x - y)[values.length >> 1],
-  );
-  return { r, g, b };
+  return reach;
+})();
+const emblemSide = Math.max(
+  emblemBox.x1 - emblemBox.x0 + 1,
+  emblemBox.y1 - emblemBox.y0 + 1,
+);
+
+/** How much the drawing is resized for each layout, on a square `size` wide. */
+const layouts = {
+  icon: (size) => (ICON_FILL * size) / emblemSide,
+  profile: (size) => ((1 - PROFILE_MARGIN) * size) / 2 / emblemReach,
+};
+
+/** The emblem in the middle of a square of night, `size` pixels across. */
+async function emblemOnNight(size, layout) {
+  // Laid out at the drawing's own size and only then brought down. Shrinking
+  // the transparent emblem by itself leaves stray colors in the nearly clear
+  // pixels around its edge, which show as specks on the plain background of
+  // a small icon; shrinking the finished square does not.
+  const side = Math.round(size / layouts[layout](size));
+  const width = emblemBox.x1 - emblemBox.x0 + 1;
+  const height = emblemBox.y1 - emblemBox.y0 + 1;
+  const emblem = await sharp(Buffer.from(emblemArt.rgba), {
+    raw: { width: emblemArt.w, height: emblemArt.h, channels: 4 },
+  })
+    .extract({ left: emblemBox.x0, top: emblemBox.y0, width, height })
+    .png()
+    .toBuffer();
+  const square = await sharp({
+    create: { width: side, height: side, channels: 4, background: NIGHT },
+  })
+    .composite([
+      {
+        input: emblem,
+        left: Math.round((side - width) / 2),
+        top: Math.round((side - height) / 2),
+      },
+    ])
+    .removeAlpha()
+    .png()
+    .toBuffer();
+  return sharp(square)
+    .resize(size, size, { kernel: "lanczos3" })
+    .png()
+    .toBuffer();
 }
 
-// Its master: the rounded square as drawn, with the white around it gone.
-await sharp(await trimmed(iconArt.rgba, iconArt.w, iconArt.h))
-  .png({ compressionLevel: 9 })
-  .toFile(master("jinxwood-icon.png"));
-
-const iconFilled = await sharp(
-  await trimmed(iconArt.rgba, iconArt.w, iconArt.h, 0),
-)
-  .flatten({ background: edgeColor(iconArt) })
-  .png()
-  .toBuffer();
-const iconMeta = await sharp(iconFilled).metadata();
-const iconSide = Math.min(iconMeta.width, iconMeta.height);
-const iconSquare = await sharp(iconFilled)
-  .extract({
-    left: (iconMeta.width - iconSide) >> 1,
-    top: (iconMeta.height - iconSide) >> 1,
-    width: iconSide,
-    height: iconSide,
-  })
-  .png()
-  .toBuffer();
-
-/** The icon with rounded, transparent corners, for places that show it as is. */
-function roundedIcon(size) {
+/** An icon with rounded, transparent corners, for places that show it as is. */
+async function roundedIcon(size) {
   const radius = Math.round(size * 0.225);
   const mask = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
       <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}"/>
     </svg>`,
   );
-  return sharp(iconSquare)
-    .resize(size, size)
+  return sharp(await emblemOnNight(size, "icon"))
     .ensureAlpha()
     .composite([{ input: mask, blend: "dest-in" }])
-    .png();
+    .png()
+    .toBuffer();
 }
 
-await roundedIcon(32).toFile(pub("favicon-32.png"));
-await roundedIcon(192).toFile(pub("icon-192.png"));
-await roundedIcon(512).toFile(pub("icon-512.png"));
-// iOS rounds the home-screen icon itself and paints transparency black, and a
-// maskable icon is cropped to whatever shape the launcher uses. Both get the
-// full-bleed square; the cat sits well inside the central safe zone.
-await sharp(iconSquare)
-  .resize(180, 180)
-  .png()
-  .toFile(pub("apple-touch-icon.png"));
-await sharp(iconSquare)
-  .resize(512, 512)
-  .png()
-  .toFile(pub("icon-maskable-512.png"));
+// Their masters, with the emblem as drawn: the rounded icon, and the profile
+// picture's square for any other place that wants one.
+const asDrawn = (layout) => 2 * Math.round(1 / layouts[layout](1) / 2);
+await sharp(await roundedIcon(asDrawn("icon")))
+  .png({ compressionLevel: 9 })
+  .toFile(master("jinxwood-icon.png"));
+await sharp(await emblemOnNight(asDrawn("profile"), "profile"))
+  .png({ compressionLevel: 9 })
+  .toFile(master("jinxwood-profile.png"));
+
+await sharp(await roundedIcon(32)).toFile(pub("favicon-32.png"));
+await sharp(await roundedIcon(192)).toFile(pub("icon-192.png"));
+await sharp(await roundedIcon(512)).toFile(pub("icon-512.png"));
+// iOS rounds the home-screen icon itself and paints transparency black, so it
+// gets the full square. A maskable icon is cropped to whatever shape the
+// launcher uses, so it gets the profile picture's layout.
+await sharp(await emblemOnNight(180, "icon")).toFile(
+  pub("apple-touch-icon.png"),
+);
+await sharp(await emblemOnNight(512, "profile")).toFile(
+  pub("icon-maskable-512.png"),
+);
+
+// The profile pictures, each at the size its platform asks for. All three are
+// shown as circles. They are uploaded by hand.
+for (const [folder, file, size] of [
+  ["youtube", "profile-800.png", 800],
+  ["facebook", "page-profile.png", 1024],
+  ["play", "developer-icon.png", 512],
+]) {
+  await mkdir(join(root, "brand", folder), { recursive: true });
+  await sharp(await emblemOnNight(size, "profile"))
+    .png({ compressionLevel: 9 })
+    .toFile(join(root, "brand", folder, file));
+}
 
 // ---------------------------------------------------------------------------
 // Social image
@@ -1556,14 +1715,22 @@ await hero
   .jpeg({ quality: 90, mozjpeg: true })
   .toFile(pub("press/jinxwood-forest.jpg"));
 
-// The picture of Jinx in the tree is offered as it was drawn: its download,
-// public/press/jinx-in-the-tree.jpg, is placed by hand and left alone here.
-// Only the smaller picture the press page shows of it is made.
+// The picture of Jinx in the tree is offered at the size it was drawn, with
+// the smaller picture the press page shows of it.
+await sharp(source("jinx-in-the-tree.webp"))
+  .jpeg({ quality: 90, mozjpeg: true })
+  .toFile(pub("press/jinx-in-the-tree.jpg"));
 await mkdir(pub("img/press"), { recursive: true });
 await sharp(source("jinx-in-the-tree.webp"))
   .resize({ width: 1280 })
   .webp(WEBP)
   .toFile(pub("img/press/jinx-in-the-tree-1280.webp"));
+
+// Both pictures are kept beside the masters too, as the press page offers
+// them.
+for (const file of ["jinxwood-forest.jpg", "jinx-in-the-tree.jpg"]) {
+  await copyFile(pub(`press/${file}`), master(file));
+}
 
 // ---------------------------------------------------------------------------
 // YouTube channel
@@ -1572,14 +1739,7 @@ await sharp(source("jinx-in-the-tree.webp"))
 const youtube = (f) => join(root, "brand/youtube", f);
 await mkdir(join(root, "brand/youtube"), { recursive: true });
 
-// YouTube shows the profile picture as a circle, often only a few dozen pixels
-// across. The full-bleed icon fills that circle and keeps the cat large; the
-// circle trims nothing but leaf tips in the corners. It is also the drawing
-// the favicon uses, so the channel and the site match.
-await sharp(iconSquare)
-  .resize(800, 800)
-  .png(png)
-  .toFile(youtube("profile-800.png"));
+// The channel's profile picture is made with the others, under Icons.
 
 // The video watermark sits over the corner of every video and works as a
 // subscribe button. It is the emblem alone on a transparent square, at the
