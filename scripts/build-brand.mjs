@@ -888,13 +888,56 @@ function inColors(lettering, letters) {
     Math.sqrt(
       branchWood.reduce((s, v) => s + (v - mean) ** 2, 0) / branchWood.length,
     ) || 1;
+  // The branch is shaded from its lightness smoothed over a few pixels: its
+  // broad light and shade carry over, but not the fine grain of the drawing,
+  // which in the wood's stronger colors would read as blotches. The dark
+  // lines drawn along it are left out of the smoothing and kept as they are.
+  const SMOOTH = 4;
+  const sums = new Float64Array((w + 1) * (h + 1));
+  const counts = new Float64Array((w + 1) * (h + 1));
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = y * w + x;
+      const take =
+        kind[i] === 2 && inBranch[i] && lightness(i) > mean - 1.2 * spread;
+      const at = (y + 1) * (w + 1) + x + 1;
+      sums[at] =
+        (take ? lightness(i) : 0) +
+        sums[at - 1] +
+        sums[at - (w + 1)] -
+        sums[at - (w + 2)];
+      counts[at] =
+        (take ? 1 : 0) +
+        counts[at - 1] +
+        counts[at - (w + 1)] -
+        counts[at - (w + 2)];
+    }
+  }
+  const smoothed = (i) => {
+    const x = i % w;
+    const y = (i / w) | 0;
+    const x0 = Math.max(0, x - SMOOTH),
+      x1 = Math.min(w, x + SMOOTH + 1);
+    const y0 = Math.max(0, y - SMOOTH),
+      y1 = Math.min(h, y + SMOOTH + 1);
+    const box = (a) =>
+      a[y1 * (w + 1) + x1] -
+      a[y0 * (w + 1) + x1] -
+      a[y1 * (w + 1) + x0] +
+      a[y0 * (w + 1) + x0];
+    const c = box(counts);
+    return c ? box(sums) / c : lightness(i);
+  };
   const became = (i) => {
     if (kind[i] === 1) return letters ?? own(i);
     if (kind[i] === 2) {
       if (!inBranch[i]) return woodAt(WOOD_SHADE);
-      return woodAt(
-        WOOD_SHADE + ((lightness(i) - mean) / spread) * WOOD_SPREAD,
-      );
+      // How much darker this pixel is than the wood around it: a drawn line
+      // if clearly darker, grain if only a little.
+      const base = smoothed(i);
+      const darker = base - lightness(i);
+      const line = darker * Math.max(0, Math.min(1, (darker - 8) / 12));
+      return woodAt(WOOD_SHADE + ((base - line - mean) / spread) * WOOD_SPREAD);
     }
     return own(i);
   };
