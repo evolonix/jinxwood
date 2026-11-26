@@ -599,13 +599,12 @@ function withBranchMoved(lettering, [dx, dy]) {
   return { rgba: out, w, h };
 }
 
-// The colors the lettering is drawn in for dark backgrounds, and what each
-// becomes on a light one.
+// The colors the lettering is drawn in: cream letters, for dark backgrounds,
+// which become dark ink on light ones, and tan eye rings and a pale branch,
+// which become the emblem's wood on both.
 const CREAM = [254, 240, 212];
 const INK = [37, 14, 43];
 const RING_TAN = [202, 148, 103];
-const BRANCH_PALE = [246, 195, 128];
-const BROWN = [109, 54, 59];
 
 // The wordmark is drawn with its "d" touching the ring of the second eye.
 // The "d" begins at this column of the drawing, and is moved this far right
@@ -811,14 +810,44 @@ function withLeaves(lettering, to) {
   return { rgba: out, w, h };
 }
 
+// The emblem's wood, from its darkest to its lightest, so the lettering's
+// wood can be painted in it. WOOD_SHADE is where along it the eye rings sit,
+// and the middle of the branch; WOOD_SPREAD is how far the branch's own light
+// and shade reach along it, per standard deviation of its lightness.
+const WOOD_SHADE = 0.66;
+const WOOD_SPREAD = 0.22;
+const woodRamp = (() => {
+  const { rgba, w, h } = emblemArt;
+  const wood = [];
+  for (let i = 0; i < w * h; i++) {
+    const [r, g, b, a] = rgba.subarray(i * 4, i * 4 + 4);
+    // Wood is red, opaque, and neither leaf nor the glow of the hollow.
+    if (a < 255 || g > r || r - g < 40 || (r > 225 && g > 140)) continue;
+    wood.push([0.3 * r + 0.59 * g + 0.11 * b, r, g, b]);
+  }
+  wood.sort((p, q) => p[0] - q[0]);
+  const steps = 256;
+  return Array.from({ length: steps }, (_, k) => {
+    const a = Math.floor((k * wood.length) / steps);
+    const b = Math.max(a + 1, Math.floor(((k + 1) * wood.length) / steps));
+    const sum = [0, 0, 0];
+    for (let j = a; j < b; j++)
+      for (let c = 0; c < 3; c++) sum[c] += wood[j][c + 1];
+    return sum.map((v) => v / (b - a));
+  });
+})();
+const woodAt = (t) =>
+  woodRamp[Math.round(Math.max(0, Math.min(1, t)) * (woodRamp.length - 1))];
+
 /**
- * The lettering for light backgrounds, made from the lettering for dark ones
- * by recoloring it: the letters from cream to dark ink, the eye rings from tan
- * to brown, the branch from pale wood to brown. Leaves, the yellow of the eyes
- * and their pupils stay as they are. A pixel on the line between two of those
- * is a blend of the two, and comes out as the same blend of what each becomes.
+ * The lettering in its final colors: the letters cream, or `letters` if it is
+ * given, and the eye rings and the branch in the emblem's wood. The rings are
+ * flat; the branch keeps its own light and shade. Leaves, the yellow of the
+ * eyes, their pupils and anything dark stay as they are. A pixel on the line
+ * between two of those is a blend of the two, and comes out as the same blend
+ * of what each becomes.
  */
-function forLightBackgrounds(lettering) {
+function inColors(lettering, letters) {
   const { rgba, w, h } = lettering;
   const n = w * h;
   const dist = (i, c) =>
@@ -848,13 +877,23 @@ function forLightBackgrounds(lettering) {
   }
 
   const own = (i) => [rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2]];
+  const lightness = (i) =>
+    0.3 * rgba[i * 4] + 0.59 * rgba[i * 4 + 1] + 0.11 * rgba[i * 4 + 2];
+  // How light the branch's wood is, on average and how much it varies.
+  const branchWood = [];
+  for (let i = 0; i < n; i++)
+    if (kind[i] === 2 && inBranch[i]) branchWood.push(lightness(i));
+  const mean = branchWood.reduce((s, v) => s + v, 0) / branchWood.length;
+  const spread =
+    Math.sqrt(
+      branchWood.reduce((s, v) => s + (v - mean) ** 2, 0) / branchWood.length,
+    ) || 1;
   const became = (i) => {
-    if (kind[i] === 1) return INK;
+    if (kind[i] === 1) return letters ?? own(i);
     if (kind[i] === 2) {
-      // Wood keeps some of its own light and shade around the new color.
-      const from = inBranch[i] ? BRANCH_PALE : RING_TAN;
-      return own(i).map((v, k) =>
-        Math.max(0, Math.min(255, BROWN[k] + 0.6 * (v - from[k]))),
+      if (!inBranch[i]) return woodAt(WOOD_SHADE);
+      return woodAt(
+        WOOD_SHADE + ((lightness(i) - mean) / spread) * WOOD_SPREAD,
       );
     }
     return own(i);
@@ -883,7 +922,7 @@ function forLightBackgrounds(lettering) {
         }
       }
       const found = near.filter((j) => j !== null);
-      if (found.length === 0) color = inBranch[i] ? BROWN : own(i);
+      if (found.length === 0) color = inBranch[i] ? woodAt(WOOD_SHADE) : own(i);
       else if (found.length === 1) {
         // Between two things that both stay (a pupil and its eye, a leaf and
         // its vein), the blend stays too.
@@ -922,12 +961,14 @@ function forLightBackgrounds(lettering) {
 }
 
 // The lettering, for dark backgrounds and for light: the wordmark as drawn,
-// its branch where the logo has it and its leaves the green of the emblem's.
-const plumLettering = withLeaves(
+// its branch where the logo has it, its leaves the green of the emblem's and
+// its eye rings and branch the emblem's wood.
+const drawnLettering = withLeaves(
   withBranchMoved(withDMoved(plumWordmark, RING_TAN, CREAM), BRANCH_MOVED),
   leafColor(emblemArt),
 );
-const creamLettering = forLightBackgrounds(plumLettering);
+const plumLettering = inColors(drawnLettering);
+const creamLettering = inColors(drawnLettering, INK);
 
 // The logo and wordmark files come in pairs, one for dark backgrounds and one
 // for light, and each pair shares a size so one can stand in for the other.
