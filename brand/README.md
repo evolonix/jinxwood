@@ -5,10 +5,10 @@ serves nothing from this folder directly.
 
 - `source/`: the lossless source art: the emblem (`emblem.png`), on a
   transparent background, from which the emblem, the icons and the profile
-  pictures are all made; a drawing of the wordmark by itself
-  (`wordmark-plum.webp`), from which the lettering is taken; a drawing of the
-  whole logo (`lockup-cream.webp`), which says where the lettering sits beside
-  the emblem; the forest illustration; and the picture of Jinx in the tree
+  pictures are all made; the wordmark (`wordmark.png`), drawn for dark
+  backgrounds on a transparent background, from which both versions of the
+  lettering are made; a drawing of the whole logo (`lockup-cream.webp`), which
+  says where the lettering sits beside the emblem; the forest illustration; and the picture of Jinx in the tree
   (`jinx-in-the-tree.webp`), which the wallpapers use. `npm run build:brand`
   puts the logo together for dark and for light backgrounds and writes every
   image the site serves into `public/`.
@@ -20,8 +20,8 @@ serves nothing from this folder directly.
   emblem are exactly as drawn; the logo is as large as it can be without
   enlarging either. Start any other artwork from these. The forest
   illustration and the picture of Jinx in the tree sit beside them as the
-  JPEGs the press page offers, also written by `npm run build:brand`. `originals/` keeps earlier
-  masters for reference; nothing is made from it.
+  JPEGs the press page offers, also written by `npm run build:brand`.
+  `originals/` keeps earlier masters for reference; nothing is made from it.
 - `youtube/`: the channel's profile picture, banner and video watermark are
   written by `npm run build:brand`. The numbered video thumbnails are made by
   hand.
