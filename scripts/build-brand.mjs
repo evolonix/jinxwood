@@ -459,8 +459,17 @@ function trimmed(rgba, w, h, pad = TRIM_PAD) {
   const top = Math.max(0, y0 - pad);
   const width = Math.min(w, x1 + pad + 1) - left;
   const height = Math.min(h, y1 + pad + 1) - top;
+  // Artwork drawn closer than `pad` to its canvas edge gets the rest of its
+  // margin added.
   return sharp(Buffer.from(rgba), { raw: { width: w, height: h, channels: 4 } })
     .extract({ left, top, width, height })
+    .extend({
+      left: left - (x0 - pad),
+      top: top - (y0 - pad),
+      right: x1 + pad + 1 - (left + width),
+      bottom: y1 + pad + 1 - (top + height),
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
     .png()
     .toBuffer();
 }
@@ -589,9 +598,10 @@ const INK = [37, 14, 43];
  * The lettering for light backgrounds, made from the lettering for dark ones:
  * the letters go from cream to dark ink, and the eyes, the branch and the
  * leaves stay as drawn. Each letter is a piece of its own and changes whole,
- * keeping the transparency of its edges. Where a letter touches something
- * else (the dot of the "i" and its leaf), a pixel on the line between the two
- * is a blend of them, and comes out as the same blend of ink and the other.
+ * keeping the transparency of its edges. Where a letter meets its dark
+ * outline, or touches something else (the dot of the "i" and its leaf), a
+ * pixel on the line between the two is a blend of them, and comes out as the
+ * same blend of ink and the other.
  */
 function forLightBackgrounds({ rgba, w, h }) {
   const out = Uint8Array.from(rgba);
@@ -613,32 +623,65 @@ function forLightBackgrounds({ rgba, w, h }) {
       continue;
     }
     if (share <= 0.05) continue;
-    // A letter touching something else: what the something else is.
-    const others = solid.filter((i) => dist(i, CREAM) > 90);
-    const other = [0, 1, 2].map(
-      (c) =>
-        others.reduce((sum, i) => sum + rgba[i * 4 + c], 0) / others.length,
-    );
-    const line = CREAM.map((v, c) => v - other[c]);
-    const length = line.reduce((sum, v) => sum + v * v, 0);
+    // A letter outlined, or touching something else. A pixel on the edge
+    // between the cream and what it meets is a blend of the two, and comes out
+    // as the same blend of ink and that. What it meets is either the dark
+    // outline drawn around the letters or, where a letter touches artwork of
+    // another color, the average of the piece's other light pixels; each takes
+    // whichever of the two it lies closer to a blend with.
+    const mean = (list) =>
+      [0, 1, 2].map(
+        (c) => list.reduce((sum, i) => sum + rgba[i * 4 + c], 0) / list.length,
+      );
+    const dark = (i) =>
+      Math.max(rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2]) < 80;
+    const darks = solid.filter(dark);
+    const others = solid.filter((i) => dist(i, CREAM) > 90 && !dark(i));
+    const meets = [others, darks].filter((list) => list.length).map(mean);
+    // Only pixels within a few of the cream are on its edge: light parts of
+    // a leaf further off can pass for a blend of cream and outline.
+    const cream = new Set(pixels.filter(creamy));
+    const byCream = (i) => {
+      const x = i % w;
+      for (let dy = -3; dy <= 3; dy++)
+        for (let dx = -3; dx <= 3; dx++)
+          if (x + dx >= 0 && x + dx < w && cream.has(i + dy * w + dx))
+            return true;
+      return false;
+    };
     for (const i of pixels) {
-      if (creamy(i)) {
+      if (cream.has(i)) {
         out.set(INK, i * 4);
         continue;
       }
-      if (dist(i, CREAM) > 110) continue;
-      const t = Math.max(
-        0,
-        Math.min(
-          1,
-          line.reduce(
-            (sum, v, c) => sum + v * (rgba[i * 4 + c] - other[c]),
-            0,
-          ) / length,
-        ),
-      );
+      if (!byCream(i)) continue;
+      let best = null;
+      for (const other of meets) {
+        const line = CREAM.map((v, c) => v - other[c]);
+        const length = line.reduce((sum, v) => sum + v * v, 0);
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            line.reduce(
+              (sum, v, c) => sum + v * (rgba[i * 4 + c] - other[c]),
+              0,
+            ) / length,
+          ),
+        );
+        // How far the pixel is from that blend.
+        const off = Math.hypot(
+          ...[0, 1, 2].map((c) => rgba[i * 4 + c] - (other[c] + t * line[c])),
+        );
+        if (!best || off < best.off) best = { t, off };
+      }
+      if (!best || best.off > 45) continue;
       for (let c = 0; c < 3; c++) {
-        out[i * 4 + c] = Math.round(rgba[i * 4 + c] + t * (INK[c] - CREAM[c]));
+        // Clamped: a Uint8Array wraps a value below 0 round to bright color.
+        out[i * 4 + c] = Math.max(
+          0,
+          Math.round(rgba[i * 4 + c] + best.t * (INK[c] - CREAM[c])),
+        );
       }
     }
   }
