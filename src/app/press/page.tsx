@@ -4,8 +4,10 @@ import { Download } from "../_components/download";
 import { Enlarge, LargeBox, LargeImage } from "../_components/enlarge";
 import { Eyebrow } from "../_components/eyebrow";
 import { Logo, TrademarkSymbol, type LogoName } from "../_components/logo";
+import { VideoFrame } from "../_components/video-frame";
 import { IMAGE_SIZES } from "../_lib/brand.gen";
 import {
+  BRAND_VIDEO,
   GAMES,
   liveStores,
   PALETTE,
@@ -276,6 +278,20 @@ export default function Press() {
               <Download href={item.file} label={item.label} note={item.note} />
             </li>
           ))}
+          <li className="ring-night-line overflow-hidden rounded-2xl ring-1">
+            <VideoFrame
+              src={BRAND_VIDEO.src}
+              poster={BRAND_VIDEO.walkingPoster}
+              label={BRAND_VIDEO.label}
+              ambient={false}
+              framed={false}
+            />
+            <Download
+              href={BRAND_VIDEO.src}
+              label={`${BRAND_VIDEO.title} (video)`}
+              note={BRAND_VIDEO.note}
+            />
+          </li>
         </ul>
       </Block>
     </div>

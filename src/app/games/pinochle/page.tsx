@@ -16,7 +16,7 @@ import {
 } from "./_components/icons";
 import { ScreenshotGallery } from "./_components/screenshot-gallery";
 import { StickyGetBar } from "./_components/sticky-get-bar";
-import { VideoFrame } from "./_components/video-frame";
+import { VideoFrame } from "../../_components/video-frame";
 import { asset } from "./_lib/asset";
 import {
   ACHIEVEMENTS,

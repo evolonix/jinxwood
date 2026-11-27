@@ -25,7 +25,9 @@ serves nothing from this folder directly.
   Two drawings of Jinx walking, `jinx.png` (flat) and `jinx-stylized.png`
   (shaded), sit there too, on transparent backgrounds; they are placed by
   hand, and nothing is made from them. So does the brand video,
-  `jinx-in-the-twilight-forest.mp4`, kept as made. Jinx's eyes on their own
+  `jinx-in-the-twilight-forest.mp4`, kept as made; the smaller copies the
+  home and press pages play are made from it by hand, as the main README
+  describes. Jinx's eyes on their own
   are drawn by hand too: `eyes.png`, from which `npm run build:brand` makes
   the eyes the site shows on the not-found page, the games page and the
   loading screen; and `eyes-with-sparkles.png` and `eyes-peeking.png`, which

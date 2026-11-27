@@ -2,9 +2,9 @@ import { Button } from "./_components/button";
 import { Eyebrow } from "./_components/eyebrow";
 import { GameCard } from "./_components/game-card";
 import { Hero } from "./_components/hero";
-import { Logo } from "./_components/logo";
 import { Section } from "./_components/section";
-import { GAMES, STUDIO } from "./_lib/content";
+import { VideoFrame } from "./_components/video-frame";
+import { BRAND_VIDEO, GAMES, STUDIO } from "./_lib/content";
 import { SITE_URL, SOCIAL_IMAGE } from "./_lib/seo";
 import { usePageMeta } from "./_lib/use-page-meta";
 
@@ -47,13 +47,22 @@ export default function Home() {
       </Section>
 
       <section id="studio" className="border-night-line bg-night-deep border-y">
-        <div className="px-safe-lg mx-auto grid max-w-6xl items-center gap-10 py-16 sm:py-20 md:grid-cols-[auto_1fr] md:gap-16">
-          <Logo
-            name="emblem"
-            sizes="(max-width: 48rem) 11rem, 18rem"
-            alt="The Jinxwood emblem: a black cat sitting in the hollow of a tree, its tail curling into the letter J."
-            className="mx-auto h-auto w-44 md:w-72"
-          />
+        <div className="px-safe-lg mx-auto grid max-w-6xl items-center gap-10 py-16 sm:py-20 md:grid-cols-2 md:gap-12 lg:gap-16">
+          {/* The brand video tells the emblem's story: Jinx walks through
+              the forest, over the bridge and into the hollow of the tree,
+              and ends as the emblem. It waits for a press of play. */}
+          <figure>
+            <VideoFrame
+              src={BRAND_VIDEO.src}
+              smaller={BRAND_VIDEO.smaller}
+              poster={BRAND_VIDEO.poster}
+              label={BRAND_VIDEO.label}
+              ambient={false}
+            />
+            <figcaption className="text-parchment-muted mt-3 text-center text-sm">
+              {BRAND_VIDEO.title} · {BRAND_VIDEO.length}
+            </figcaption>
+          </figure>
           <div>
             <Eyebrow className="mb-3">The studio</Eyebrow>
             <h2 className="text-3xl sm:text-4xl">A lucky kind of jinx</h2>

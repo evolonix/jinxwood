@@ -2,6 +2,11 @@ import { useEffect, useRef } from "react";
 
 interface VideoFrameProps {
   src: string;
+  /**
+   * Smaller copies for narrower screens, tried in order before `src`, each
+   * with the media query it suits, so a phone doesn't fetch the largest file.
+   */
+  smaller?: readonly { src: string; media: string }[];
   poster: string;
   /** Accessible name for the video — what it shows, as an alt would. */
   label: string;
@@ -14,6 +19,11 @@ interface VideoFrameProps {
   ambient?: boolean;
   /** A WebVTT captions file the viewer can turn on from the controls. */
   captions?: { src: string; lang: string; label: string };
+  /**
+   * False drops the rounded, ringed surface, for a video that sits inside a
+   * tile of its own.
+   */
+  framed?: boolean;
   className?: string;
 }
 
@@ -31,11 +41,13 @@ interface VideoFrameProps {
  */
 export function VideoFrame({
   src,
+  smaller = [],
   poster,
   label,
   ratio = "16 / 9",
   ambient = true,
   captions,
+  framed = true,
   className,
 }: VideoFrameProps) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -84,7 +96,8 @@ export function VideoFrame({
   return (
     <div
       className={[
-        "overflow-hidden rounded-2xl bg-night-deep p-1.5 shadow-lg ring-1 ring-night-line",
+        framed &&
+          "overflow-hidden rounded-2xl bg-night-deep p-1.5 shadow-lg ring-1 ring-night-line",
         className,
       ]
         .filter(Boolean)
@@ -92,7 +105,7 @@ export function VideoFrame({
     >
       <video
         ref={ref}
-        src={src}
+        src={smaller.length ? undefined : src}
         poster={poster}
         aria-label={label}
         muted={ambient}
@@ -101,8 +114,12 @@ export function VideoFrame({
         controls
         preload="none"
         style={{ aspectRatio: ratio }}
-        className="w-full rounded-xl bg-night-deep object-cover"
+        className={`w-full bg-night-deep object-cover ${framed ? "rounded-xl" : "block"}`}
       >
+        {smaller.map((copy) => (
+          <source key={copy.src} src={copy.src} media={copy.media} />
+        ))}
+        {smaller.length > 0 && <source src={src} />}
         {captions && (
           <track
             kind="captions"

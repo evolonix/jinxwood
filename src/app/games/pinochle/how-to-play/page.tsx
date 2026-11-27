@@ -3,7 +3,7 @@ import { AppLink } from "../../../_components/app-link";
 import { StoreBadges } from "../_components/store-badges";
 import { Card } from "../_components/card";
 import { DeviceFrame } from "../_components/device-frame";
-import { VideoFrame } from "../_components/video-frame";
+import { VideoFrame } from "../../../_components/video-frame";
 import { Eyebrow } from "../../../_components/eyebrow";
 import { asset } from "../_lib/asset";
 import {

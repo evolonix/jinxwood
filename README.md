@@ -72,6 +72,30 @@ ffmpeg -i 2-pinochle-how-to-play.mp4 -c:v libx264 -preset slow -crf 24 -pix_fmt 
 
 The site serves its own copy instead of embedding YouTube because the privacy policy promises that loading a page contacts no third party. The press page links to the videos on YouTube.
 
+## Brand video
+
+The brand video, Jinx in the Twilight Forest, plays on the home page and is offered on the press page. Its master is `brand/masters/jinx-in-the-twilight-forest.mp4` (1920 × 1080, 15 seconds, 7.6 MB). The site serves two smaller copies from `public/video/`, loaded only on play: `jinx-in-the-twilight-forest-1080.mp4` (about 3.6 MB, also the press download) and `jinx-in-the-twilight-forest-720.mp4` (about 1.9 MB), which screens up to 48rem wide get instead. Its two posters are the last frame (`-poster.webp`, for the home page) and the frame at 3 seconds (`-walking.webp`, for the press page), both at 1280 px. To make them again from the master, from the repo root (then delete the two PNGs):
+
+```bash
+ffmpeg -i brand/masters/jinx-in-the-twilight-forest.mp4 -vf scale=-2:1080 -c:v libx264 -preset slow -crf 28 -pix_fmt yuv420p -profile:v high -c:a aac -b:a 96k -movflags +faststart public/video/jinx-in-the-twilight-forest-1080.mp4
+```
+
+```bash
+ffmpeg -i brand/masters/jinx-in-the-twilight-forest.mp4 -vf scale=-2:720 -c:v libx264 -preset slow -crf 28 -pix_fmt yuv420p -profile:v high -c:a aac -b:a 96k -movflags +faststart public/video/jinx-in-the-twilight-forest-720.mp4
+```
+
+```bash
+ffmpeg -sseof -0.1 -i brand/masters/jinx-in-the-twilight-forest.mp4 -frames:v 1 last.png
+```
+
+```bash
+ffmpeg -ss 3 -i brand/masters/jinx-in-the-twilight-forest.mp4 -frames:v 1 walking.png
+```
+
+```bash
+node -e 'const sharp = require("sharp"); sharp("last.png").resize(1280).webp({ quality: 82 }).toFile("public/video/jinx-in-the-twilight-forest-poster.webp"); sharp("walking.png").resize(1280).webp({ quality: 82 }).toFile("public/video/jinx-in-the-twilight-forest-walking.webp")'
+```
+
 ## Brand images
 
 The emblem and the wordmark are each their own drawing on a transparent background, the wordmark drawn for dark backgrounds; where the lettering sits beside the emblem comes from a drawing of the whole logo. `scripts/build-brand.mjs` puts the logo together for dark backgrounds and for light (the light lettering is the dark lettering with its letters turned to ink; its eyes, branch and leaves stay as drawn), and then makes the hero sizes, the icons, the profile pictures, the link-preview image and the press downloads. It also writes each part with nothing enlarged to `brand/masters/`, as masters for other artwork. Its output is committed; run it only when the art changes:

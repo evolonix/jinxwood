@@ -260,6 +260,31 @@ export const PRESS = {
   ],
 } as const;
 
+/**
+ * The brand video, Jinx in the Twilight Forest, from
+ * brand/masters/jinx-in-the-twilight-forest.mp4: shown on the home page and
+ * offered on the press page. The web copies and the two posters live in
+ * public/video/: the home page shows the last frame, Jinx in the hollow, and
+ * the press page a frame of Jinx walking, so it doesn't look like the still
+ * of Jinx in the Twilight Forest beside it. The README says how they are made.
+ */
+export const BRAND_VIDEO = {
+  title: "Jinx in the Twilight Forest",
+  length: "0:15",
+  label:
+    "Jinx the black cat walks through a twilight forest, crosses a stone bridge and climbs into the hollow of an old tree, which glows as Jinx settles in as the Jinxwood emblem.",
+  src: "/video/jinx-in-the-twilight-forest-1080.mp4",
+  smaller: [
+    {
+      src: "/video/jinx-in-the-twilight-forest-720.mp4",
+      media: "(max-width: 48rem)",
+    },
+  ],
+  poster: "/video/jinx-in-the-twilight-forest-poster.webp",
+  walkingPoster: "/video/jinx-in-the-twilight-forest-walking.webp",
+  note: "MP4 with sound, 1920 × 1080, 15 seconds",
+} as const;
+
 export interface Wallpaper {
   label: string;
   /** The download, under public/wallpapers/. */
