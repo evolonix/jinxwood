@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useId, type ReactNode } from "react";
+import { useSeen } from "../_lib/use-seen";
 import { JinxEyes } from "./jinx-eyes";
 
 /**
@@ -9,28 +10,8 @@ import { JinxEyes } from "./jinx-eyes";
  * part of the eyes, and keeps the space above it for the eyes to show in.
  */
 export function PeekingEyes({ children }: { children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [seen, setSeen] = useState(false);
-
-  useEffect(() => {
-    const box = ref.current;
-    if (!box || typeof IntersectionObserver === "undefined") {
-      setSeen(true);
-      return;
-    }
-    // Wait until the edge is well inside the screen, so the peek is seen.
-    const watch = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setSeen(true);
-          watch.disconnect();
-        }
-      },
-      { rootMargin: "0px 0px -20% 0px" },
-    );
-    watch.observe(box);
-    return () => watch.disconnect();
-  }, []);
+  // Wait until the edge is well inside the screen, so the peek is seen.
+  const [ref, seen] = useSeen<HTMLDivElement>("0px 0px -20% 0px");
 
   return (
     <div ref={ref} data-seen={seen ? "" : undefined} className="relative mt-24">

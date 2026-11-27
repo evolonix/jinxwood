@@ -1334,125 +1334,14 @@ for (const [name, widths] of Object.entries(EYES_WIDTHS)) {
   }
 }
 
-// When the eyes blink, a lid slides down over each one. It may only paint
-// inside the eye, so this writes that inside as a mask: EYE_RIM pixels in from
-// the eye's edge, an even margin all the way round, white inside and black
-// outside. The outline is 24 to 48 pixels wide at the drawing's size, so the
-// lid stops within it.
-//
-// While the eyes are closed, the margin darkens to the outline's color so the
-// outline runs evenly all the way round: the drawn lid runs right to the
-// eye's edge at the top, where the rest of the eye has its outline, and where
-// the eyes meet the outline is thinner than the margin. A second mask says
-// where: the eye's own coverage, outside the inside.
-const EYE_RIM = 22;
-
-{
-  const { data, info } = await sharp(eyesTrimmed.eyes)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const { width: w, height: h } = info;
-  const opaque = (x, y) =>
-    x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] >= 128;
-
-  // Each eye's edge, traced along rays from its middle and smoothed: the
-  // drawing's edge has short flat stretches that its thick outline hides, but
-  // a margin that copied them would show. Only its broad shape is kept (the
-  // first EDGE_HARMONICS waves round the eye), and the inside is that shape
-  // brought in by EYE_RIM along its normal.
-  const RAYS = 720;
-  const EDGE_HARMONICS = 12;
-  const outlines = [];
-  for (const [x0, x1] of [
-    [0, Math.floor(w / 2)],
-    [Math.floor(w / 2), w],
-  ]) {
-    let sx = 0;
-    let sy = 0;
-    let n = 0;
-    for (let y = 0; y < h; y++)
-      for (let x = x0; x < x1; x++)
-        if (opaque(x, y)) {
-          sx += x;
-          sy += y;
-          n++;
-        }
-    const cx = sx / n;
-    const cy = sy / n;
-    const r = [];
-    for (let k = 0; k < RAYS; k++) {
-      const t = (2 * Math.PI * k) / RAYS;
-      let d = 0;
-      while (
-        opaque(
-          Math.round(cx + Math.cos(t) * (d + 1)),
-          Math.round(cy + Math.sin(t) * (d + 1)),
-        )
-      )
-        d++;
-      r.push(d + 0.5);
-    }
-    // Low-pass the radius round the eye.
-    const smooth = new Array(RAYS).fill(0);
-    for (let m = 0; m <= EDGE_HARMONICS; m++) {
-      let re = 0;
-      let im = 0;
-      for (let k = 0; k < RAYS; k++) {
-        const t = (2 * Math.PI * m * k) / RAYS;
-        re += r[k] * Math.cos(t);
-        im += r[k] * Math.sin(t);
-      }
-      const scale = (m === 0 ? 1 : 2) / RAYS;
-      for (let k = 0; k < RAYS; k++) {
-        const t = (2 * Math.PI * m * k) / RAYS;
-        smooth[k] += scale * (re * Math.cos(t) + im * Math.sin(t));
-      }
-    }
-    const edge = smooth.map((d, k) => {
-      const t = (2 * Math.PI * k) / RAYS;
-      return [cx + Math.cos(t) * d, cy + Math.sin(t) * d];
-    });
-    outlines.push(edge);
-  }
-  // The smoothed edges brought in by `by` along each point's normal, drawn as
-  // a mask: white within, black outside.
-  const inset = async (by) => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="#000"/>${outlines
-      .map((edge) => {
-        const pts = edge.map(([x, y], k) => {
-          const [ax, ay] = edge[(k + RAYS - 1) % RAYS];
-          const [bx, by2] = edge[(k + 1) % RAYS];
-          const tx = bx - ax;
-          const ty = by2 - ay;
-          const len = Math.hypot(tx, ty) || 1;
-          // The points run clockwise on screen, so the inward normal is the
-          // tangent turned a quarter clockwise.
-          return [x - (ty / len) * by, y + (tx / len) * by];
-        });
-        return `<path fill="#fff" d="M${pts.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join("L")}Z"/>`;
-      })
-      .join("")}</svg>`;
-    return sharp(Buffer.from(svg)).extractChannel(0).raw().toBuffer();
-  };
-  const inside = await inset(EYE_RIM);
-  // The margin is the eye's own coverage outside the inside, and reaches
-  // RIM_OVERLAP pixels in over the lid's edge: a browser scales the two masks
-  // separately, and where they only met, a trace of the eye would show
-  // between them.
-  const RIM_OVERLAP = 3;
-  const rimInner = await inset(EYE_RIM + RIM_OVERLAP);
-  const rim = Buffer.alloc(w * h);
-  for (let i = 0; i < w * h; i++)
-    rim[i] = Math.round((data[i * 4 + 3] * (255 - rimInner[i])) / 255);
-  // At the drawing's own size, so the masks' edges stay as sharp as its own.
-  await sharp(inside, { raw: { width: w, height: h, channels: 1 } })
-    .png({ compressionLevel: 9 })
-    .toFile(pub("img/eyes/eyes-inside.png"));
-  await sharp(rim, { raw: { width: w, height: h, channels: 1 } })
-    .png({ compressionLevel: 9 })
-    .toFile(pub("img/eyes/eyes-rim.png"));
-}
+// When the eyes blink, a lid slides down over each one, covering the whole
+// eye, its dark outline too, so a closed eye is all lid. This writes the
+// eye's shape as a mask for it, at the drawing's own size so its edge stays
+// as sharp as the drawing's.
+await sharp(eyesTrimmed.eyes)
+  .extractChannel(3)
+  .png({ compressionLevel: 9 })
+  .toFile(pub("img/eyes/eyes-shape.png"));
 
 // ---------------------------------------------------------------------------
 // Hero

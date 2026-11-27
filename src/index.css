@@ -101,22 +101,6 @@
     }
   }
 
-  /* The rim of a closed eye darkening, in step with lid-blink. */
-  @keyframes rim-blink {
-    0%,
-    81% {
-      opacity: 0;
-    }
-    86%,
-    95% {
-      opacity: 1;
-    }
-    99%,
-    100% {
-      opacity: 0;
-    }
-  }
-
   @keyframes peek-up {
     from {
       transform: translateY(82%);
@@ -300,18 +284,22 @@ body {
    them once the eyes have risen. Two blinks and then still: movement that
    starts by itself has to stop within five seconds unless the page offers a
    way to stop it. */
-.eye-lids,
-.eye-rim {
+.eye-lids {
   opacity: 0;
 }
 .blink-lids .eye-lids {
   animation: lid-blink 1.6s ease-in-out 1.2s 2;
 }
-.blink-lids .eye-rim {
-  animation: rim-blink 1.6s ease-in-out 1.2s 2;
-}
 .blink-lids .eye-lid-art {
   animation: lid-art-blink 1.6s ease-in-out 1.2s 2;
+}
+
+/* The footer's signature: one slow blink once the eyes come into view. */
+[data-seen].slow-blink .eye-lids {
+  animation: lid-blink 2s ease-in-out 0.4s 1;
+}
+[data-seen].slow-blink .eye-lid-art {
+  animation: lid-art-blink 2s ease-in-out 0.4s 1;
 }
 
 /* Jinx peeking over an edge (peeking-eyes.tsx): the eyes wait just behind
@@ -324,9 +312,6 @@ body {
 }
 [data-seen] .eyes-peek .eye-lids {
   animation: lid-blink 1.6s ease-in-out 1.3s 2;
-}
-[data-seen] .eyes-peek .eye-rim {
-  animation: rim-blink 1.6s ease-in-out 1.3s 2;
 }
 [data-seen] .eyes-peek .eye-lid-art {
   animation: lid-art-blink 1.6s ease-in-out 1.3s 2;
@@ -375,7 +360,6 @@ body {
     display: none;
   }
   .eye-lids,
-  .eye-rim,
   .eye-lid-art {
     animation: none !important;
   }

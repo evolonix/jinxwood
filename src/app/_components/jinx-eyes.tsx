@@ -36,8 +36,8 @@ interface JinxEyesProps {
 
 /**
  * Jinx's eyes on their own, from brand/masters/eyes.png, with a lid over each
- * that can blink: it slides down over the iris and back, inside the eye's
- * outline. The lids stay hidden until an ancestor sets them going (see
+ * that can blink: it slides down over the whole eye, its outline too, and
+ * back. The lids stay hidden until an ancestor sets them going (see
  * .blink-lids in index.css). Always decoration: whatever the eyes mean is
  * said in words beside them.
  */
@@ -63,9 +63,10 @@ export function JinxEyes({ sizes, className }: JinxEyesProps) {
         focusable="false"
       >
         <defs>
-          {/* Only the inside of each eye, within its dark outline. */}
+          {/* The shape of the eyes, so the lids cover each eye out to its
+              edge, its dark outline too, and nothing beyond it. */}
           <mask
-            id={`${id}-inside`}
+            id={`${id}-shape`}
             maskUnits="userSpaceOnUse"
             x="0"
             y="0"
@@ -73,24 +74,7 @@ export function JinxEyes({ sizes, className }: JinxEyesProps) {
             height={height}
           >
             <image
-              href="/img/eyes/eyes-inside.png"
-              width={width}
-              height={height}
-              preserveAspectRatio="none"
-            />
-          </mask>
-          {/* The margin outside the inside, which darkens while the eyes
-              are closed. */}
-          <mask
-            id={`${id}-rim`}
-            maskUnits="userSpaceOnUse"
-            x="0"
-            y="0"
-            width={width}
-            height={height}
-          >
-            <image
-              href="/img/eyes/eyes-rim.png"
+              href="/img/eyes/eyes-shape.png"
               width={width}
               height={height}
               preserveAspectRatio="none"
@@ -102,7 +86,7 @@ export function JinxEyes({ sizes, className }: JinxEyesProps) {
             </clipPath>
           ))}
         </defs>
-        <g mask={`url(#${id}-inside)`}>
+        <g mask={`url(#${id}-shape)`}>
           <g className="eye-lids">
             {LIDS.map(({ edge, band, left, right }, i) => (
               <g key={edge}>
@@ -110,32 +94,21 @@ export function JinxEyes({ sizes, className }: JinxEyesProps) {
                   d={`${edge}L${right} -560L${left} -560Z`}
                   fill="#32011F"
                 />
-                {/* The drawn lid, inside the eye only, so the outline along
-                    the eye's top stays put when the lid slides down. It
-                    fades into the plain plum as it closes, so a closed eye
-                    is an even plum, and back as it opens. */}
-                <g className="eye-lid-art" mask={`url(#${id}-inside)`}>
-                  <image
-                    href="/img/eyes/eyes-960.webp"
-                    width={width}
-                    height={height}
-                    clipPath={`url(#${id}-lid${i})`}
-                  />
-                </g>
+                {/* The drawn lid. It fades into the plain plum as it
+                    closes, so a closed eye is an even plum, and back as it
+                    opens. */}
+                <image
+                  className="eye-lid-art"
+                  href="/img/eyes/eyes-960.webp"
+                  width={width}
+                  height={height}
+                  clipPath={`url(#${id}-lid${i})`}
+                />
                 <path d={band} fill="#170008" />
               </g>
             ))}
           </g>
         </g>
-        {/* While the eyes are closed, the margin darkens to the outline's
-            color, so the outline runs evenly all the way round. */}
-        <rect
-          className="eye-rim"
-          width={width}
-          height={height}
-          fill="#180009"
-          mask={`url(#${id}-rim)`}
-        />
       </svg>
     </div>
   );
