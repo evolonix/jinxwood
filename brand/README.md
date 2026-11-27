@@ -24,15 +24,15 @@ serves nothing from this folder directly.
   as the JPEGs the press page offers, also written by `npm run build:brand`.
   Two drawings of Jinx walking, `jinx.png` (flat) and `jinx-stylized.png`
   (shaded), sit there too, on transparent backgrounds; they are placed by
-  hand, and nothing is made from them.
+  hand, and nothing is made from them. So does the brand video,
+  `jinx-in-the-twilight-forest.mp4`, kept as made.
 - `youtube/`: the channel's profile picture, banner and video watermark are
   written by `npm run build:brand`. The numbered video thumbnails are made by
   hand.
-- `facebook/`, `play/`: the Facebook page's profile picture and the Google
-  Play developer icon are written by `npm run build:brand`; the cover and
-  header images are made by hand.
-
-- `Jinx in the Twilight Forest.mp4`: the brand video, kept here as made.
+- `facebook/`: the page's profile picture and its cover, the forest art with
+  the wordmark, are written by `npm run build:brand`.
+- `play/`: the Google Play developer icon is written by `npm run build:brand`;
+  the header image is made by hand.
 
 Everything else outside `source/` and `masters/` is uploaded by hand to the
 platform it is named for. Other videos, captions and earlier logo attempts are

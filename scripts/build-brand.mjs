@@ -15,8 +15,9 @@
 // sizes, icons, the social image and press downloads.
 //
 // It also writes the transparent masters to brand/masters/, and the profile
-// pictures and the YouTube banner to brand/youtube/, brand/facebook/ and
-// brand/play/. The site does not serve those; they are uploaded by hand.
+// pictures, the YouTube banner and the Facebook cover to brand/youtube/,
+// brand/facebook/ and brand/play/. The site does not serve those; they are
+// uploaded by hand.
 
 import { copyFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -1591,61 +1592,110 @@ const BANNER_INSET = 63;
 // How far the shadow spreads past the lettering, and how dark it gets.
 const BANNER_SHADOW = { reach: 90, blur: 24, strength: 0.7, drop: 6 };
 
-const bannerWordmark = await sharp(await withTrademark("wordmark"))
-  .resize({ height: BANNER_WORDMARK_HEIGHT })
-  .png()
-  .toBuffer();
-const bannerWordmarkWidth = (await sharp(bannerWordmark).metadata()).width;
-if (bannerWordmarkWidth + 2 * BANNER_INSET > BANNER_SAFE.width) {
-  throw new Error("The banner wordmark does not fit the strip a phone shows.");
+/**
+ * The wordmark with its trademark symbol, `height` tall, as composite layers
+ * with its top left corner at `left`, `top`. The clouds behind the lettering
+ * are pale in places, so it gets a soft dark shadow in its own shape: the
+ * wordmark's opacity, blurred and tinted. Also returns its width, to check
+ * that it fits.
+ */
+async function wordmarkOverArt(height, left, top) {
+  const wordmark = await sharp(await withTrademark("wordmark"))
+    .resize({ height })
+    .png()
+    .toBuffer();
+  const room = await sharp(wordmark)
+    .extend({
+      top: BANNER_SHADOW.reach,
+      bottom: BANNER_SHADOW.reach,
+      left: BANNER_SHADOW.reach,
+      right: BANNER_SHADOW.reach,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
+  const alpha = await sharp(room)
+    .extractChannel(3)
+    .blur(BANNER_SHADOW.blur)
+    .linear(BANNER_SHADOW.strength, 0)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const size = { width: alpha.info.width, height: alpha.info.height };
+  const shadow = await sharp({
+    create: { ...size, channels: 3, background: "#160d24" },
+  })
+    .joinChannel(alpha.data, { raw: { ...size, channels: 1 } })
+    .png()
+    .toBuffer();
+  return {
+    width: (await sharp(wordmark).metadata()).width,
+    layers: [
+      {
+        input: shadow,
+        left: left - BANNER_SHADOW.reach,
+        top: top - BANNER_SHADOW.reach + BANNER_SHADOW.drop,
+      },
+      { input: wordmark, left, top },
+    ],
+  };
 }
 
-// The clouds behind the lettering are pale in places, so it gets a soft dark
-// shadow in its own shape: the wordmark's opacity, blurred and tinted.
-const transparent = { r: 0, g: 0, b: 0, alpha: 0 };
-const shadowRoom = await sharp(bannerWordmark)
-  .extend({
-    top: BANNER_SHADOW.reach,
-    bottom: BANNER_SHADOW.reach,
-    left: BANNER_SHADOW.reach,
-    right: BANNER_SHADOW.reach,
-    background: transparent,
-  })
-  .png()
-  .toBuffer();
-const shadowAlpha = await sharp(shadowRoom)
-  .extractChannel(3)
-  .blur(BANNER_SHADOW.blur)
-  .linear(BANNER_SHADOW.strength, 0)
-  .raw()
-  .toBuffer({ resolveWithObject: true });
-const shadowSize = {
-  width: shadowAlpha.info.width,
-  height: shadowAlpha.info.height,
-};
-const bannerShadow = await sharp({
-  create: { ...shadowSize, channels: 3, background: "#160d24" },
-})
-  .joinChannel(shadowAlpha.data, { raw: { ...shadowSize, channels: 1 } })
-  .png()
-  .toBuffer();
-
-const bannerLeft = (BANNER.width - BANNER_SAFE.width) / 2 + BANNER_INSET;
-const bannerTop = (BANNER.height - BANNER_WORDMARK_HEIGHT) / 2;
+const bannerArt = await wordmarkOverArt(
+  BANNER_WORDMARK_HEIGHT,
+  (BANNER.width - BANNER_SAFE.width) / 2 + BANNER_INSET,
+  (BANNER.height - BANNER_WORDMARK_HEIGHT) / 2,
+);
+if (bannerArt.width + 2 * BANNER_INSET > BANNER_SAFE.width) {
+  throw new Error("The banner wordmark does not fit the strip a phone shows.");
+}
 // YouTube takes at most 6 MB; this comes to well under 1 MB.
 await hero
   .clone()
   .resize({ ...BANNER, fit: "cover" })
-  .composite([
-    {
-      input: bannerShadow,
-      left: bannerLeft - BANNER_SHADOW.reach,
-      top: bannerTop - BANNER_SHADOW.reach + BANNER_SHADOW.drop,
-    },
-    { input: bannerWordmark, left: bannerLeft, top: bannerTop },
-  ])
+  .composite(bannerArt.layers)
   .jpeg({ quality: 92, chromaSubsampling: "4:4:4" })
   .toFile(youtube("banner-2560x1440.jpg"));
+
+// ---------------------------------------------------------------------------
+// Facebook page cover
+// ---------------------------------------------------------------------------
+
+// The cover is the forest art 2050 wide, cut to 900 tall from 139 down, which
+// keeps the castle, the bridge and the trees framing them. A desktop shows the
+// cover's full width at about 820:312, so the middle band of it; a phone shows
+// its full height at about 640:360, so the middle strip. Only where the two
+// cross is sure to show everywhere, so the wordmark sits in there, on the
+// left where it ends before the castle, as on the YouTube banner, and a little
+// above the middle, clear of the profile picture at the bottom left.
+const COVER = { width: 2050, height: 900, top: 139 };
+const COVER_SAFE = {
+  width: Math.round((COVER.height * 640) / 360),
+  height: Math.round((COVER.width * 312) / 820),
+};
+const COVER_WORDMARK_HEIGHT = 300;
+const COVER_INSET = 70;
+const COVER_RAISED = 40;
+
+const coverArt = await wordmarkOverArt(
+  COVER_WORDMARK_HEIGHT,
+  Math.round((COVER.width - COVER_SAFE.width) / 2 + COVER_INSET),
+  Math.round((COVER.height - COVER_WORDMARK_HEIGHT) / 2 - COVER_RAISED),
+);
+if (coverArt.width + 2 * COVER_INSET > COVER_SAFE.width) {
+  throw new Error("The cover wordmark does not fit the strip a phone shows.");
+}
+await hero
+  .clone()
+  .resize({ width: COVER.width })
+  .extract({
+    left: 0,
+    top: COVER.top,
+    width: COVER.width,
+    height: COVER.height,
+  })
+  .composite(coverArt.layers)
+  .jpeg({ quality: 92, chromaSubsampling: "4:4:4" })
+  .toFile(join(root, "brand/facebook/page-cover.jpg"));
 
 // ---------------------------------------------------------------------------
 // Generated sizes
