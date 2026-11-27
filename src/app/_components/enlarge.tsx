@@ -6,7 +6,7 @@ import { CloseIcon, EnlargeIcon } from "./icons";
  * A preview that opens large when clicked. `children` is the preview; `view`
  * is what the large view shows, and it is only put on the page while the view
  * is open, so nothing large loads until someone asks for it. Below it go the
- * label and the download, as on the tile.
+ * label and, where there is one, the download, as on the tile.
  *
  * The view is a modal dialog: the page behind it can't be reached while it is
  * open, and Esc, the close button or a click anywhere outside the picture
@@ -15,6 +15,7 @@ import { CloseIcon, EnlargeIcon } from "./icons";
 export function Enlarge({
   label,
   name = label,
+  shape = "rounded-t-2xl rounded-b-none focus-visible:-outline-offset-4",
   note,
   download,
   view,
@@ -23,9 +24,16 @@ export function Enlarge({
   label: string;
   /** What a screen reader hears, where the label alone would not say which. */
   name?: string;
-  note: string;
-  download: string;
+  note?: string;
+  /** The file to download, if the picture is offered as one. */
+  download?: string;
   view: ReactNode;
+  /**
+   * The button's corners, and so its focus ring's. By default it is the top
+   * of a rounded card that clips anything outside it, so the ring is drawn
+   * just inside the card's edge and follows its corners.
+   */
+  shape?: string;
   children: ReactNode;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -41,7 +49,7 @@ export function Enlarge({
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`View larger: ${name}`}
-        className="group relative block w-full cursor-zoom-in rounded-none"
+        className={`group relative block w-full cursor-zoom-in ${shape}`}
       >
         {children}
         <span
@@ -80,9 +88,20 @@ export function Enlarge({
             className="px-safe-lg flex h-full flex-col items-center justify-center gap-4 pt-16 pb-6"
           >
             {view}
-            <div className="ring-night-line w-full max-w-xl overflow-hidden rounded-2xl ring-1">
-              <Download href={download} label={label} name={name} note={note} />
-            </div>
+            {download ? (
+              <div className="ring-night-line w-full max-w-xl overflow-hidden rounded-2xl ring-1">
+                <Download
+                  href={download}
+                  label={label}
+                  name={name}
+                  note={note ?? ""}
+                />
+              </div>
+            ) : (
+              <p className="text-parchment-muted text-center text-sm font-semibold">
+                {label}
+              </p>
+            )}
           </div>
         </dialog>
       )}
@@ -112,7 +131,8 @@ export function LargeImage({
   height: number;
   alt: string;
 }) {
-  const [loaded, setLoaded] = useState(false);
+  // Only one size of some pictures exists; then there is nothing to wait for.
+  const [loaded, setLoaded] = useState(full === preview);
 
   useEffect(() => {
     const image = new Image();
