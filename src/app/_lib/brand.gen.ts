@@ -3,24 +3,24 @@
 // reserve their space before the file arrives.
 export const IMAGE_SIZES = {
   "wordmark": {
-    "width": 1982,
-    "height": 810
+    "width": 1986,
+    "height": 808
   },
   "lockup": {
-    "width": 1540,
-    "height": 638
+    "width": 1538,
+    "height": 636
   },
   "emblem": {
-    "width": 682,
-    "height": 638
+    "width": 680,
+    "height": 636
   },
   "lockup-light": {
-    "width": 1540,
-    "height": 638
+    "width": 1538,
+    "height": 636
   },
   "wordmark-light": {
-    "width": 1982,
-    "height": 810
+    "width": 1986,
+    "height": 808
   },
   "hero": {
     "width": 3584,
@@ -41,25 +41,25 @@ export const TRADEMARK = {
   "at": {
     "wordmark": {
       "x": 1938,
-      "y": 52,
-      "height": 90,
+      "y": 48,
+      "height": 91,
       "color": "#fef0d4"
     },
     "wordmark-light": {
       "x": 1938,
-      "y": 52,
-      "height": 90,
+      "y": 48,
+      "height": 91,
       "color": "#2e1e37"
     },
     "lockup": {
-      "x": 1513,
-      "y": 180,
+      "x": 1511,
+      "y": 176,
       "height": 44,
       "color": "#fef0d4"
     },
     "lockup-light": {
-      "x": 1513,
-      "y": 180,
+      "x": 1511,
+      "y": 176,
       "height": 44,
       "color": "#2e1e37"
     }
