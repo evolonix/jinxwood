@@ -22,6 +22,10 @@ export const IMAGE_SIZES = {
     "width": 1986,
     "height": 808
   },
+  "eyes": {
+    "width": 1562,
+    "height": 689
+  },
   "hero": {
     "width": 3584,
     "height": 2016

@@ -42,9 +42,6 @@
     0 0 0 1px rgb(242 169 59 / 0.25), 0 8px 30px -6px rgb(242 169 59 / 0.45);
 
   --animate-firefly: firefly var(--firefly-duration, 9s) ease-in-out infinite;
-  /* Two blinks and then still: movement that starts by itself has to stop
-     within five seconds unless the page offers a way to stop it. */
-  --animate-blink: blink 2.2s ease-in-out 2;
 
   @keyframes firefly {
     0%,
@@ -64,16 +61,68 @@
     }
   }
 
-  /* The upper lid of each eye slides down over the iris and back up. The
-     distance is in the eyes' own SVG units: enough to close the eye. */
-  @keyframes blink {
+  /* A lid closing over an eye and opening again, at the end of each round.
+     The lids are hidden at rest and only show while they move; the distance
+     is in the eyes image's own pixels, enough to close the eye. */
+  @keyframes lid-blink {
     0%,
-    82%,
-    100% {
+    80% {
+      opacity: 0;
       transform: translateY(0);
     }
-    91% {
-      transform: translateY(54px);
+    81% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    90% {
+      transform: translateY(500px);
+    }
+    99% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+  }
+
+  /* The drawn lid fading toward plain plum as it closes, in step with
+     lid-blink. */
+  @keyframes lid-art-blink {
+    0%,
+    81%,
+    99%,
+    100% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 0.2;
+    }
+  }
+
+  /* The rim of a closed eye darkening, in step with lid-blink. */
+  @keyframes rim-blink {
+    0%,
+    81% {
+      opacity: 0;
+    }
+    86%,
+    95% {
+      opacity: 1;
+    }
+    99%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes peek-up {
+    from {
+      transform: translateY(82%);
+    }
+    to {
+      transform: translateY(0);
     }
   }
 }
@@ -246,6 +295,71 @@ body {
   }
 }
 
+/* The lids over Jinx's eyes (jinx-eyes.tsx) stay hidden until they blink.
+   .blink-lids blinks them twice when they appear; peeking-eyes.tsx blinks
+   them once the eyes have risen. Two blinks and then still: movement that
+   starts by itself has to stop within five seconds unless the page offers a
+   way to stop it. */
+.eye-lids,
+.eye-rim {
+  opacity: 0;
+}
+.blink-lids .eye-lids {
+  animation: lid-blink 1.6s ease-in-out 1.2s 2;
+}
+.blink-lids .eye-rim {
+  animation: rim-blink 1.6s ease-in-out 1.2s 2;
+}
+.blink-lids .eye-lid-art {
+  animation: lid-art-blink 1.6s ease-in-out 1.2s 2;
+}
+
+/* Jinx peeking over an edge (peeking-eyes.tsx): the eyes wait just behind
+   the edge until it scrolls into view, rise, then blink twice. */
+.eyes-peek {
+  transform: translateY(82%);
+}
+[data-seen] .eyes-peek {
+  animation: peek-up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+}
+[data-seen] .eyes-peek .eye-lids {
+  animation: lid-blink 1.6s ease-in-out 1.3s 2;
+}
+[data-seen] .eyes-peek .eye-rim {
+  animation: rim-blink 1.6s ease-in-out 1.3s 2;
+}
+[data-seen] .eyes-peek .eye-lid-art {
+  animation: lid-art-blink 1.6s ease-in-out 1.3s 2;
+}
+
+/* The darkness the eyes peer out of on the not-found page: two soft lobes
+   behind the eyes and a wider one under them, darker than the night. */
+.not-found-dark {
+  background:
+    radial-gradient(
+      closest-side at 33% 30%,
+      rgb(6 3 12 / 0.97),
+      rgb(6 3 12 / 0.88) 50%,
+      rgb(6 3 12 / 0.4) 80%,
+      transparent
+    ),
+    radial-gradient(
+      closest-side at 67% 30%,
+      rgb(6 3 12 / 0.97),
+      rgb(6 3 12 / 0.88) 50%,
+      rgb(6 3 12 / 0.4) 80%,
+      transparent
+    ),
+    radial-gradient(
+      closest-side at 50% 62%,
+      rgb(6 3 12 / 0.92),
+      rgb(6 3 12 / 0.75) 50%,
+      rgb(6 3 12 / 0.3) 80%,
+      transparent
+    );
+  filter: blur(1rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -260,7 +374,14 @@ body {
   .animate-firefly {
     display: none;
   }
-  .animate-blink {
+  .eye-lids,
+  .eye-rim,
+  .eye-lid-art {
+    animation: none !important;
+  }
+  /* The peeking eyes are simply there, already risen. */
+  .eyes-peek {
+    transform: none;
     animation: none !important;
   }
   ::view-transition-old(*),

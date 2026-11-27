@@ -61,6 +61,155 @@
         background-color: #2b1e3f;
         color-scheme: dark;
       }
+      /* The loading screen inside #root, until the app replaces it. It
+         stays invisible for half a second, so a quick load never shows it,
+         then fades in: Jinx's eyes in the dark, their lids blinking now and
+         then, with three dots that glow in turn. */
+      .loading {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 1.5rem;
+        background: radial-gradient(
+          ellipse at center,
+          #24152f 0%,
+          #170d22 55%,
+          #0f0817 100%
+        );
+        opacity: 0;
+        animation: loading-in 0.4s ease-out 0.5s forwards;
+      }
+      .loading-eyes {
+        position: relative;
+        width: min(16rem, 60vw);
+      }
+      .loading-eyes img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .loading-eyes svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      /* The lids, drawn as in jinx-eyes.tsx (where the paths are explained),
+         blink every few seconds. */
+      .loading-lids {
+        opacity: 0;
+        animation: loading-lids 3.2s ease-in-out 1s infinite;
+      }
+      .loading-rim {
+        opacity: 0;
+        animation: loading-rim 3.2s ease-in-out 1s infinite;
+      }
+      .loading-lid-art {
+        animation: loading-lid-art 3.2s ease-in-out 1s infinite;
+      }
+      .loading p {
+        margin: 0;
+        font-family: "Fraunces Variable", Georgia, serif;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #f4ede0;
+      }
+      .loading-dots {
+        display: flex;
+        gap: 0.75rem;
+      }
+      .loading-dots span {
+        width: 0.625rem;
+        height: 0.625rem;
+        border-radius: 50%;
+        background: #f2a93b;
+        opacity: 0.25;
+        animation: loading-dot 1.2s ease-in-out infinite;
+      }
+      .loading-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .loading-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes loading-in {
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes loading-lids {
+        0%,
+        88% {
+          opacity: 0;
+          transform: translateY(0);
+        }
+        89% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        94% {
+          transform: translateY(500px);
+        }
+        99% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(0);
+        }
+      }
+      @keyframes loading-lid-art {
+        0%,
+        89%,
+        99%,
+        100% {
+          opacity: 1;
+        }
+        94% {
+          opacity: 0.2;
+        }
+      }
+      @keyframes loading-rim {
+        0%,
+        89% {
+          opacity: 0;
+        }
+        92%,
+        96% {
+          opacity: 1;
+        }
+        99%,
+        100% {
+          opacity: 0;
+        }
+      }
+      @keyframes loading-dot {
+        0%,
+        100% {
+          opacity: 0.25;
+        }
+        50% {
+          opacity: 1;
+          box-shadow: 0 0 0.75rem rgb(242 169 59 / 0.6);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .loading {
+          animation-duration: 0s;
+        }
+        .loading-lids,
+        .loading-rim,
+        .loading-lid-art,
+        .loading-dots span {
+          animation: none;
+        }
+        .loading-dots span {
+          opacity: 0.6;
+        }
+      }
     </style>
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
@@ -87,7 +236,104 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="loading" role="status">
+        <div class="loading-eyes">
+          <img src="/img/eyes/eyes-640.webp" width="640" height="282" alt="" />
+          <svg viewBox="0 0 1562 689" aria-hidden="true">
+            <defs>
+              <mask
+                id="loading-inside"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="1562"
+                height="689"
+              >
+                <image
+                  href="/img/eyes/eyes-inside.png"
+                  width="1562"
+                  height="689"
+                  preserveAspectRatio="none"
+                />
+              </mask>
+              <clipPath id="loading-lid0">
+                <path
+                  d="M-20 172L52 172L76 176L100 180L124 185L148 189L172 193L196 197L220 201L244 206L268 210L292 215L316 220L340 225L364 231L388 237L412 244L436 251L460 258L484 266L508 275L532 284L556 294L580 305L604 317L628 329L652 342L676 356L700 371L724 387L748 404L750 406L762 406L762 -10L-20 -10Z"
+                />
+              </clipPath>
+              <clipPath id="loading-lid1">
+                <path
+                  d="M795 404L807 404L831 389L855 374L879 360L903 346L927 333L951 321L975 309L999 298L1023 288L1047 278L1071 269L1095 261L1119 253L1143 245L1167 238L1191 231L1215 225L1239 219L1263 214L1287 209L1311 204L1335 200L1359 195L1383 191L1407 187L1431 184L1455 180L1479 176L1503 172L1511 171L1582 171L1582 -10L795 -10Z"
+                />
+              </clipPath>
+              <mask
+                id="loading-rim"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="1562"
+                height="689"
+              >
+                <image
+                  href="/img/eyes/eyes-rim.png"
+                  width="1562"
+                  height="689"
+                  preserveAspectRatio="none"
+                />
+              </mask>
+            </defs>
+            <g mask="url(#loading-inside)">
+              <g class="loading-lids">
+                <path
+                  d="M-20 172L52 172L76 176L100 180L124 185L148 189L172 193L196 197L220 201L244 206L268 210L292 215L316 220L340 225L364 231L388 237L412 244L436 251L460 258L484 266L508 275L532 284L556 294L580 305L604 317L628 329L652 342L676 356L700 371L724 387L748 404L750 406L762 406L762 -560L-20 -560Z"
+                  fill="#32011F"
+                />
+                <g class="loading-lid-art" mask="url(#loading-inside)">
+                  <image
+                    href="/img/eyes/eyes-640.webp"
+                    width="1562"
+                    height="689"
+                    clip-path="url(#loading-lid0)"
+                  />
+                </g>
+                <path
+                  d="M-20 172L52 172L76 176L100 180L124 185L148 189L172 193L196 197L220 201L244 206L268 210L292 215L316 220L340 225L364 231L388 237L412 244L436 251L460 258L484 266L508 275L532 284L556 294L580 305L604 317L628 329L652 342L676 356L700 371L724 387L748 404L750 406L762 406L762 438L750 438L748 437L724 420L700 405L676 390L652 377L628 364L604 352L580 341L556 330L532 321L508 312L484 303L460 296L436 288L412 282L388 275L364 269L340 264L316 259L292 254L268 249L244 244L220 240L196 236L172 231L148 227L124 223L100 218L76 214L52 209L-20 209Z"
+                  fill="#170008"
+                />
+                <path
+                  d="M795 404L807 404L831 389L855 374L879 360L903 346L927 333L951 321L975 309L999 298L1023 288L1047 278L1071 269L1095 261L1119 253L1143 245L1167 238L1191 231L1215 225L1239 219L1263 214L1287 209L1311 204L1335 200L1359 195L1383 191L1407 187L1431 184L1455 180L1479 176L1503 172L1511 171L1582 171L1582 -560L795 -560Z"
+                  fill="#32011F"
+                />
+                <g class="loading-lid-art" mask="url(#loading-inside)">
+                  <image
+                    href="/img/eyes/eyes-640.webp"
+                    width="1562"
+                    height="689"
+                    clip-path="url(#loading-lid1)"
+                  />
+                </g>
+                <path
+                  d="M795 404L807 404L831 389L855 374L879 360L903 346L927 333L951 321L975 309L999 298L1023 288L1047 278L1071 269L1095 261L1119 253L1143 245L1167 238L1191 231L1215 225L1239 219L1263 214L1287 209L1311 204L1335 200L1359 195L1383 191L1407 187L1431 184L1455 180L1479 176L1503 172L1511 171L1582 171L1582 207L1511 207L1503 208L1479 212L1455 216L1431 220L1407 224L1383 228L1359 232L1335 236L1311 240L1287 245L1263 250L1239 255L1215 261L1191 267L1167 273L1143 280L1119 287L1095 295L1071 303L1047 312L1023 321L999 331L975 342L951 353L927 365L903 377L879 390L855 404L831 418L807 433L795 433Z"
+                  fill="#170008"
+                />
+              </g>
+            </g>
+            <rect
+              class="loading-rim"
+              width="1562"
+              height="689"
+              fill="#180009"
+              mask="url(#loading-rim)"
+            />
+          </svg>
+        </div>
+        <p>Loading…</p>
+        <div class="loading-dots" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

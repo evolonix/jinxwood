@@ -1,117 +1,110 @@
-import { useId } from "react";
-
-interface PeekingEyesProps {
-  className?: string;
-}
-
-// The wordmark's colors: the letters' cream, the outline round each eye, the
-// plum of the socket and lid, the iris from its shadowed top to its bright
-// bottom, and the pupil.
-const CREAM = "#FCE5C8";
-const OUTLINE = "#14040E";
-const PLUM_DARK = "#2C0319";
-const PLUM = "#4A0832";
-const PLUM_LIGHT = "#6E1450";
-const IRIS_TOP = "#CF6D03";
-const IRIS_MIDDLE = "#FDAD04";
-const IRIS_BOTTOM = "#FCD005";
-const PUPIL = "#25010F";
-
-// Each eye in its own units: the "o" is an oval 100 wide and 120 tall, and the
-// eye inside it a circle centered on it.
-const RING = { rx: 50, ry: 60 };
-const SOCKET = 40;
-const IRIS = 35.5;
-
-/** A four-pointed star, for the glint. */
-const star = (x: number, y: number, r: number) => {
-  const s = r * 0.18;
-  return `M${x} ${y - r}Q${x + s} ${y - s} ${x + r} ${y}Q${x + s} ${y + s} ${x} ${y + r}Q${x - s} ${y + s} ${x - r} ${y}Q${x - s} ${y - s} ${x} ${y - r}Z`;
-};
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { JinxEyes } from "./jinx-eyes";
 
 /**
- * The two "o"s of the wordmark, with Jinx's eyes in them, on their own.
- * Decorative: the upper lids close and open twice when they appear and then
- * hold still, and never move under reduced motion. Only the lids move, so the
- * rings keep their shape.
+ * Jinx peeking over the top edge of whatever it wraps: the eyes rise from
+ * behind the edge when it scrolls into view, blink twice and hold still, and
+ * two paws grip the edge on either side. Under reduced motion they are simply
+ * there. What it wraps must have an opaque background, which hides the lower
+ * part of the eyes, and keeps the space above it for the eyes to show in.
  */
-export function PeekingEyes({ className = "h-16 w-auto" }: PeekingEyesProps) {
-  const id = useId();
-  const iris = `${id}-iris`;
-  const lid = `${id}-lid`;
+export function PeekingEyes({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = useState(false);
+
+  useEffect(() => {
+    const box = ref.current;
+    if (!box || typeof IntersectionObserver === "undefined") {
+      setSeen(true);
+      return;
+    }
+    // Wait until the edge is well inside the screen, so the peek is seen.
+    const watch = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setSeen(true);
+          watch.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -20% 0px" },
+    );
+    watch.observe(box);
+    return () => watch.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} data-seen={seen ? "" : undefined} className="relative mt-24">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-1/2 w-56 -translate-x-1/2 -translate-y-[78%]"
+      >
+        <div className="eyes-peek">
+          <JinxEyes sizes="14rem" />
+        </div>
+      </div>
+      <div className="relative z-10">{children}</div>
+      <Paw className="absolute top-0 left-[calc(50%-9.25rem)] z-20 w-20 -translate-y-[42%]" />
+      <Paw className="absolute top-0 right-[calc(50%-9.25rem)] z-20 w-20 -translate-y-[42%] -scale-x-100" />
+      <Sparkle className="absolute top-0 left-[calc(50%-10.25rem)] w-4 -translate-y-[420%]" />
+      <Sparkle className="absolute top-0 right-[calc(50%-10.75rem)] w-3 -translate-y-[560%]" />
+      <Sparkle className="absolute top-0 right-[calc(50%-8.75rem)] w-2.5 -translate-y-[900%]" />
+    </div>
+  );
+}
+
+/** A black paw hanging over an edge, its toes curled over the front. */
+function Paw({ className }: { className?: string }) {
+  const fur = useId();
   return (
     <svg
-      viewBox="0 0 202 122"
+      viewBox="0 0 60 44"
       className={className}
       aria-hidden="true"
       focusable="false"
     >
       <defs>
-        <linearGradient id={iris} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0.15" stopColor={IRIS_TOP} />
-          <stop offset="0.5" stopColor={IRIS_MIDDLE} />
-          <stop offset="0.85" stopColor={IRIS_BOTTOM} />
-        </linearGradient>
-        <linearGradient id={lid} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={PLUM_DARK} />
-          <stop offset="0.75" stopColor={PLUM} />
-          <stop offset="1" stopColor={PLUM_LIGHT} />
+        <linearGradient id={fur} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3B2747" />
+          <stop offset="0.55" stopColor="#1E1127" />
+          <stop offset="1" stopColor="#140A1B" />
         </linearGradient>
       </defs>
-      {[-1, 1].map((side) => {
-        // Left eye at 50.5, right at 151.5; `inward` points toward the other.
-        const cx = side < 0 ? 50.5 : 151.5;
-        const cy = 61;
-        const inward = -side;
-        const socket = `${id}-socket${side}`;
-        // The lid's edge runs from high at the outer side to low at the inner
-        // one, bowed a little, as in the wordmark.
-        const outer = { x: cx - inward * 38, y: cy - 21 };
-        const inner = { x: cx + inward * 38, y: cy + 2 };
-        const edge = `M${outer.x} ${outer.y}Q${cx} ${cy - 6} ${inner.x} ${inner.y}`;
-        const lidShape = `${edge}L${inner.x} ${cy - 130}L${outer.x} ${cy - 130}Z`;
-        // The pupil: a curved slit, wide where the lid meets it and coming to
-        // a point near the bottom of the iris. Both sit a touch left of
-        // center, as in the wordmark.
-        const px = cx - 2;
-        const pupil = `M${px - 10} ${cy - 24}Q${px - 8} ${cy + 8} ${px + 1} ${cy + 28}Q${px + 7} ${cy + 6} ${px + 9} ${cy - 24}Z`;
-        // The glint, at the pupil's upper right, just under the lid, which
-        // there is lower in the left eye than in the right.
-        const glint = { x: cx + 8, y: side < 0 ? cy + 3 : cy - 3 };
-        return (
-          <g key={side}>
-            <ellipse cx={cx} cy={cy} rx={RING.rx} ry={RING.ry} fill={CREAM} />
-            <clipPath id={socket}>
-              <circle cx={cx} cy={cy} r={SOCKET} />
-            </clipPath>
-            <circle cx={cx} cy={cy} r={SOCKET} fill={PLUM_DARK} />
-            <g clipPath={`url(#${socket})`}>
-              <circle cx={cx} cy={cy} r={IRIS} fill={`url(#${iris})`} />
-              <path d={pupil} fill={PUPIL} />
-              <path d={star(glint.x, glint.y, 7)} fill="#FFFFFF" />
-              {/* The lid closes by sliding down over the iris. */}
-              <g className="animate-blink">
-                <path d={lidShape} fill={`url(#${lid})`} />
-                <path
-                  d={edge}
-                  fill="none"
-                  stroke={OUTLINE}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </g>
-            </g>
-            <circle
-              cx={cx}
-              cy={cy}
-              r={SOCKET}
-              fill="none"
-              stroke={OUTLINE}
-              strokeWidth="2"
-            />
-          </g>
-        );
-      })}
+      <path
+        d="M3 29C3 14 15 4 30 4s27 10 27 25c0 8-6 13-14 13H17C9 42 3 37 3 29Z"
+        fill={`url(#${fur})`}
+      />
+      <path
+        d="M22 12c-2.5 8-2.5 17 0 28M38 12c2.5 8 2.5 17 0 28"
+        fill="none"
+        stroke="#0B0510"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 13c3-4 8-6.5 12-7"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeOpacity="0.12"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** A small four-pointed sparkle in ember. */
+export function Sparkle({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10 0Q11.2 8.8 20 10Q11.2 11.2 10 20Q8.8 11.2 0 10Q8.8 8.8 10 0Z"
+        fill="#F2A93B"
+      />
     </svg>
   );
 }

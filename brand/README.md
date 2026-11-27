@@ -25,7 +25,11 @@ serves nothing from this folder directly.
   Two drawings of Jinx walking, `jinx.png` (flat) and `jinx-stylized.png`
   (shaded), sit there too, on transparent backgrounds; they are placed by
   hand, and nothing is made from them. So does the brand video,
-  `jinx-in-the-twilight-forest.mp4`, kept as made.
+  `jinx-in-the-twilight-forest.mp4`, kept as made. Jinx's eyes on their own
+  are drawn by hand too: `eyes.png`, from which `npm run build:brand` makes
+  the eyes the site shows on the not-found page, the games page and the
+  loading screen; and `eyes-with-sparkles.png` and `eyes-peeking.png`, which
+  nothing is made from yet.
 - `youtube/`: the channel's profile picture, banner and video watermark are
   written by `npm run build:brand`. The numbered video thumbnails are made by
   hand.
