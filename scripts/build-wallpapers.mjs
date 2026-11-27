@@ -83,7 +83,7 @@ const LOGOS = {
   },
   logo: {
     file: (mode) => press(`jinxwood-logo-for-${mode}.png`),
-    size: [1672, 636],
+    size: [1604, 638],
     axis: 769,
     art: 1523,
   },
@@ -328,8 +328,8 @@ const AS_IN_LOGO = { height: 0.7955, gap: 0.2219, raised: 0.0224 };
 const WORDMARK = {
   file: press("jinxwood-wordmark-for-dark.png"),
   left: 8,
-  middle: 366,
-  height: 716,
+  middle: 369,
+  height: 721,
 };
 
 /**

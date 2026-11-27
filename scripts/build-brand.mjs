@@ -611,10 +611,48 @@ function forLightBackgrounds({ rgba, w, h }) {
       rgba[i * 4 + 1] - c[1],
       rgba[i * 4 + 2] - c[2],
     );
-  // Cream, or the lighter cream some of the letters' edges are drawn in.
-  const creamy = (i) =>
-    dist(i, CREAM) < 40 ||
-    (rgba[i * 4] > 235 && rgba[i * 4 + 1] > 222 && rgba[i * 4 + 2] > 190);
+  // Cream, the lighter cream some of the letters' edges are drawn in, or the
+  // warm beige the letters are shaded with: light, and warm in the way cream
+  // is (red over green over blue, by less than the eyes' yellow or the
+  // branch's orange).
+  const creamy = (i) => {
+    const [r, g, b] = rgba.subarray(i * 4, i * 4 + 3);
+    return (
+      dist(i, CREAM) < 40 ||
+      (r > 235 && g > 222 && b > 190) ||
+      (r > 200 && g > 175 && b > 145 && r >= g && g >= b && r - b < 80)
+    );
+  };
+  // Cream that belongs to a letter: the large patches of it, and any small
+  // patch within a few pixels of one (a stroke of lighter cream along a
+  // letter's edge). A small patch on its own, like the glint in an eye, is
+  // not part of a letter and stays as drawn.
+  const creamOnly = new Uint8Array(rgba.length);
+  for (let i = 0; i < w * h; i++) {
+    if (rgba[i * 4 + 3] > 0 && creamy(i)) creamOnly[i * 4 + 3] = 255;
+  }
+  const patches = piecesOf(creamOnly, w, h);
+  const big = new Uint8Array(w * h);
+  for (const { pixels } of patches) {
+    if (pixels.length >= (w * h) / 1000) for (const i of pixels) big[i] = 1;
+  }
+  const nearBig = (i) => {
+    const x = i % w;
+    const y = (i / w) | 0;
+    for (let dy = -3; dy <= 3; dy++)
+      for (let dx = -3; dx <= 3; dx++) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx >= 0 && nx < w && ny >= 0 && ny < h && big[ny * w + nx])
+          return true;
+      }
+    return false;
+  };
+  const letterCream = Uint8Array.from(big);
+  for (const { pixels } of patches) {
+    if (big[pixels[0]] || !pixels.some(nearBig)) continue;
+    for (const i of pixels) letterCream[i] = 1;
+  }
   for (const { pixels } of piecesOf(rgba, w, h)) {
     const solid = pixels.filter((i) => rgba[i * 4 + 3] > 200);
     const share = solid.filter(creamy).length / Math.max(1, solid.length);
@@ -640,7 +678,7 @@ function forLightBackgrounds({ rgba, w, h }) {
     const meets = [others, darks].filter((list) => list.length).map(mean);
     // Only pixels within a few of the cream are on its edge: light parts of
     // a leaf further off can pass for a blend of cream and outline.
-    const cream = new Set(pixels.filter(creamy));
+    const cream = new Set(pixels.filter((i) => letterCream[i]));
     const byCream = (i) => {
       const x = i % w;
       for (let dy = -3; dy <= 3; dy++)
@@ -651,7 +689,16 @@ function forLightBackgrounds({ rgba, w, h }) {
     };
     for (const i of pixels) {
       if (cream.has(i)) {
-        out.set(INK, i * 4);
+        // Ink, shaded as the cream was: darker in the same proportion as the
+        // pixel is darker than plain cream, and never lighter or another hue.
+        const shade = Math.min(
+          1,
+          (rgba[i * 4] + rgba[i * 4 + 1] + rgba[i * 4 + 2]) /
+            (CREAM[0] + CREAM[1] + CREAM[2]),
+        );
+        for (let c = 0; c < 3; c++) {
+          out[i * 4 + c] = Math.round(INK[c] * shade);
+        }
         continue;
       }
       if (!byCream(i)) continue;
@@ -1146,19 +1193,30 @@ const PLUM_INK = "#2e1e37";
 const BESIDE_D = { right: -0.0195, top: 0.0097, height: 0.1948 };
 
 /**
- * The bounds of the "d" in a cut-out with lettering: of the pieces that end
- * near the right edge of the artwork, the one that reaches highest, which is
- * the d's ascender. The branch under the letters may end further right, but
- * not as high.
+ * The bounds of the "d" in a cut-out with lettering for dark backgrounds.
+ * The letters touch the branch, the eyes and each other through their dark
+ * outlines, so the d is found by its cream alone: of the patches of solid
+ * cream that end near the right edge of the cream, the one that reaches
+ * highest, which is the d's ascender.
  */
 async function boundsOfD(png) {
   const { data, info } = await sharp(png)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  const pieces = piecesOf(data, info.width, info.height);
-  const right = Math.max(...pieces.map((p) => p.bounds.x1));
-  return pieces
+  const cream = new Uint8Array(data.length);
+  for (let i = 0; i < data.length; i += 4) {
+    const [r, g, b, a] = data.subarray(i, i + 4);
+    const isCream =
+      Math.hypot(r - CREAM[0], g - CREAM[1], b - CREAM[2]) < 40 ||
+      (r > 235 && g > 222 && b > 190);
+    if (a > 200 && isCream) cream[i + 3] = 255;
+  }
+  const pieces = piecesOf(cream, info.width, info.height);
+  const largest = Math.max(...pieces.map((p) => p.pixels.length));
+  const patches = pieces.filter((p) => p.pixels.length > largest / 20);
+  const right = Math.max(...patches.map((p) => p.bounds.x1));
+  return patches
     .filter((p) => p.bounds.x1 > right - info.width / 10)
     .reduce((a, b) => (b.bounds.y0 < a.bounds.y0 ? b : a)).bounds;
 }
