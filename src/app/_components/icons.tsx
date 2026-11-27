@@ -75,6 +75,22 @@ export function PlayIcon({ className }: IconProps) {
   );
 }
 
+export function CloseIcon({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </Line>
+  );
+}
+
+export function EnlargeIcon({ className }: IconProps) {
+  return (
+    <Line className={className}>
+      <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />
+    </Line>
+  );
+}
+
 export function ExternalIcon({ className }: IconProps) {
   return (
     <Line className={className}>

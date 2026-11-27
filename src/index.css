@@ -269,3 +269,8 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* The page behind an open large view stays where it is. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}

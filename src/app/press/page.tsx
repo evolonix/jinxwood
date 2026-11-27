@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AppLink } from "../_components/app-link";
 import { Download } from "../_components/download";
+import { Enlarge, LargeBox, LargeImage } from "../_components/enlarge";
 import { Eyebrow } from "../_components/eyebrow";
 import { Logo, TrademarkSymbol, type LogoName } from "../_components/logo";
 import { IMAGE_SIZES } from "../_lib/brand.gen";
@@ -115,35 +116,64 @@ export default function Press() {
           {PRESS.downloads.map((item) => {
             const name: LogoName = item.preview;
             const { width, height } = IMAGE_SIZES[name];
+            const background =
+              item.on === "parchment" ? "bg-parchment" : "bg-night-deep";
             return (
               <li
                 key={item.file}
                 className="ring-night-line overflow-hidden rounded-2xl ring-1"
               >
-                <div
-                  className={`flex h-48 items-center justify-center p-8 ${
-                    item.on === "parchment" ? "bg-parchment" : "bg-night-deep"
-                  }`}
+                <Enlarge
+                  label={item.label}
+                  note={item.note}
+                  download={item.file}
+                  view={
+                    // The logo on the tile's background, with room around it
+                    // as the press rules ask.
+                    <LargeBox
+                      width={width}
+                      height={height}
+                      cap={1280}
+                      className={`rounded-2xl p-[6%] ${background}`}
+                    >
+                      <div
+                        className="relative"
+                        style={{ aspectRatio: `${width} / ${height}` }}
+                      >
+                        <Logo
+                          name={name}
+                          sizes="(max-width: 80rem) 90vw, 1280px"
+                          alt={item.label}
+                          className="h-full w-full"
+                        />
+                        <TrademarkSymbol name={name} />
+                      </div>
+                    </LargeBox>
+                  }
                 >
-                  {/* A box of exactly the logo's shape, as tall as the 8rem
-                      this tile leaves or as wide as it allows, so the
-                      trademark symbol lands where the download has it. */}
                   <div
-                    className="relative"
-                    style={{
-                      width: `min(100%, ${(8 * width) / height}rem)`,
-                      aspectRatio: `${width} / ${height}`,
-                    }}
+                    className={`flex h-48 items-center justify-center p-8 ${background}`}
                   >
-                    <Logo
-                      name={name}
-                      sizes="20rem"
-                      alt=""
-                      className="h-full w-full"
-                    />
-                    <TrademarkSymbol name={name} />
+                    {/* A box of exactly the logo's shape, as tall as the 8rem
+                        this tile leaves or as wide as it allows, so the
+                        trademark symbol lands where the download has it. */}
+                    <div
+                      className="relative"
+                      style={{
+                        width: `min(100%, ${(8 * width) / height}rem)`,
+                        aspectRatio: `${width} / ${height}`,
+                      }}
+                    >
+                      <Logo
+                        name={name}
+                        sizes="20rem"
+                        alt=""
+                        className="h-full w-full"
+                      />
+                      <TrademarkSymbol name={name} />
+                    </div>
                   </div>
-                </div>
+                </Enlarge>
                 <Download
                   href={item.file}
                   label={item.label}
@@ -218,16 +248,31 @@ export default function Press() {
               key={item.file}
               className="ring-night-line overflow-hidden rounded-2xl ring-1"
             >
-              {/* Both pictures are 16:9, shown from a copy 1280 wide. */}
-              <img
-                src={item.preview}
-                width={1280}
-                height={720}
-                alt={item.alt}
-                loading="lazy"
-                decoding="async"
-                className="h-auto w-full"
-              />
+              <Enlarge
+                label={item.label}
+                note={item.note}
+                download={item.file}
+                view={
+                  <LargeImage
+                    full={item.file}
+                    preview={item.preview}
+                    width={item.width}
+                    height={item.height}
+                    alt={item.alt}
+                  />
+                }
+              >
+                {/* Both pictures are 16:9, shown from a copy 1280 wide. */}
+                <img
+                  src={item.preview}
+                  width={1280}
+                  height={720}
+                  alt={item.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-auto w-full"
+                />
+              </Enlarge>
               <Download href={item.file} label={item.label} note={item.note} />
             </li>
           ))}

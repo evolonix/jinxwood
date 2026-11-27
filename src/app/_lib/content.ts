@@ -240,6 +240,8 @@ export const PRESS = {
       preview: "/img/hero/hero-1280.webp",
       alt: "The Jinxwood forest illustration: a castle at twilight, seen through the trees.",
       note: "JPEG, 2560 × 1440",
+      width: 2560,
+      height: 1440,
     },
     {
       label: "Jinx in the tree",
@@ -247,6 +249,8 @@ export const PRESS = {
       preview: "/img/press/jinx-in-the-tree-1280.webp",
       alt: "Jinx the black cat sitting in the glowing hollow of a tree, with the castle beyond.",
       note: "JPEG, 1920 × 1080",
+      width: 1920,
+      height: 1080,
     },
   ],
   rules: [
@@ -263,6 +267,9 @@ export interface Wallpaper {
   /** The small picture of it shown on the page. */
   preview: string;
   note: string;
+  /** The download's size in pixels. */
+  width: number;
+  height: number;
 }
 
 /**
@@ -276,11 +283,14 @@ function wallpaperSet(
   size: string,
   { tree = false } = {},
 ): Wallpaper[] {
+  const [width, height] = size.split("×").map((side) => parseInt(side, 10));
   const one = (label: string, variant: string, type: "png" | "jpg") => ({
     label,
     file: `/wallpapers/${name}-${variant}.${type}`,
     preview: `/img/wallpapers/${name}-${variant}.webp`,
     note: `${type === "png" ? "PNG" : "JPEG"}, ${size}`,
+    width,
+    height,
   });
   return [
     one("Dark", "dark-flat", "png"),

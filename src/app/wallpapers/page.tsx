@@ -1,4 +1,5 @@
 import { Download } from "../_components/download";
+import { Enlarge, LargeImage } from "../_components/enlarge";
 import { Eyebrow } from "../_components/eyebrow";
 import { STUDIO, WALLPAPERS } from "../_lib/content";
 import { usePageMeta } from "../_lib/use-page-meta";
@@ -36,15 +37,31 @@ export default function Wallpapers() {
                 key={item.file}
                 className="ring-night-line bg-night-raised flex flex-col overflow-hidden rounded-2xl ring-1"
               >
-                <img
-                  src={item.preview}
-                  width={set.preview.width}
-                  height={set.preview.height}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="h-auto w-full"
-                />
+                <Enlarge
+                  label={item.label}
+                  name={`${set.device} wallpaper: ${item.label}`}
+                  note={item.note}
+                  download={item.file}
+                  view={
+                    <LargeImage
+                      full={item.file}
+                      preview={item.preview}
+                      width={item.width}
+                      height={item.height}
+                      alt={`${set.device} wallpaper: ${item.label}`}
+                    />
+                  }
+                >
+                  <img
+                    src={item.preview}
+                    width={set.preview.width}
+                    height={set.preview.height}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-auto w-full"
+                  />
+                </Enlarge>
                 <Download
                   href={item.file}
                   label={item.label}
