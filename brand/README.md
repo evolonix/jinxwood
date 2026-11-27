@@ -31,6 +31,8 @@ serves nothing from this folder directly.
   Play developer icon are written by `npm run build:brand`; the cover and
   header images are made by hand.
 
-Everything outside `source/` and `masters/` is uploaded by hand to the
-platform it is named for. Videos, captions and earlier logo attempts are kept
-outside the repo.
+- `Jinx in the Twilight Forest.mp4`: the brand video, kept here as made.
+
+Everything else outside `source/` and `masters/` is uploaded by hand to the
+platform it is named for. Other videos, captions and earlier logo attempts are
+kept outside the repo.
