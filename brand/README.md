@@ -30,7 +30,7 @@ serves nothing from this folder directly.
   describes. Jinx's eyes on their own
   are drawn by hand too: `eyes.png`, from which `npm run build:brand` makes
   the eyes the site shows on the not-found page, the games page and the
-  loading screen; and `eyes-with-sparkles.png` and `eyes-peeking.png`, which
+  loading screen, and the press download of them; and `eyes-with-sparkles.png` and `eyes-peeking.png`, which
   nothing is made from yet.
 - `youtube/`: the channel's profile picture, banner and video watermark are
   written by `npm run build:brand`. The numbered video thumbnails are made by

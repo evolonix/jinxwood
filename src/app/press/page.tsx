@@ -3,6 +3,7 @@ import { AppLink } from "../_components/app-link";
 import { Download } from "../_components/download";
 import { Enlarge, LargeBox, LargeImage } from "../_components/enlarge";
 import { Eyebrow } from "../_components/eyebrow";
+import { JinxEyes } from "../_components/jinx-eyes";
 import { Logo, TrademarkSymbol, type LogoName } from "../_components/logo";
 import { VideoFrame } from "../_components/video-frame";
 import { IMAGE_SIZES } from "../_lib/brand.gen";
@@ -116,7 +117,7 @@ export default function Press() {
       <Block title="Logos">
         <ul className="grid gap-6 sm:grid-cols-2">
           {PRESS.downloads.map((item) => {
-            const name: LogoName = item.preview;
+            const name: MarkName = item.preview;
             const { width, height } = IMAGE_SIZES[name];
             const background =
               item.on === "parchment" ? "bg-parchment" : "bg-night-deep";
@@ -142,13 +143,11 @@ export default function Press() {
                         className="relative"
                         style={{ aspectRatio: `${width} / ${height}` }}
                       >
-                        <Logo
+                        <Mark
                           name={name}
                           sizes="(max-width: 80rem) 90vw, 1280px"
                           alt={item.label}
-                          className="h-full w-full"
                         />
-                        <TrademarkSymbol name={name} />
                       </div>
                     </LargeBox>
                   }
@@ -166,13 +165,7 @@ export default function Press() {
                         aspectRatio: `${width} / ${height}`,
                       }}
                     >
-                      <Logo
-                        name={name}
-                        sizes="20rem"
-                        alt=""
-                        className="h-full w-full"
-                      />
-                      <TrademarkSymbol name={name} />
+                      <Mark name={name} sizes="20rem" alt="" />
                     </div>
                   </div>
                 </Enlarge>
@@ -295,6 +288,37 @@ export default function Press() {
         </ul>
       </Block>
     </div>
+  );
+}
+
+/** The press downloads that are a mark on a transparent background. */
+type MarkName = LogoName | "eyes";
+
+/**
+ * One of those marks, filling its box: a logo with its trademark symbol, or
+ * Jinx's eyes, which carry none.
+ */
+function Mark({
+  name,
+  sizes,
+  alt,
+}: {
+  name: MarkName;
+  sizes: string;
+  alt: string;
+}) {
+  if (name === "eyes") {
+    return (
+      <div role={alt ? "img" : undefined} aria-label={alt || undefined}>
+        <JinxEyes sizes={sizes} />
+      </div>
+    );
+  }
+  return (
+    <>
+      <Logo name={name} sizes={sizes} alt={alt} className="h-full w-full" />
+      <TrademarkSymbol name={name} />
+    </>
   );
 }
 

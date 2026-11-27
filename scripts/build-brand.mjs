@@ -1561,7 +1561,8 @@ await hero
 // ---------------------------------------------------------------------------
 
 // The logos and wordmarks go out with the trademark symbol drawn in. The
-// emblem goes out as it is, one file for any background.
+// emblem and Jinx's eyes go out as they are, one file each for any
+// background.
 await mkdir(pub("press"), { recursive: true });
 const png = { compressionLevel: 9, palette: false };
 await sharp(await withTrademark("lockup"))
@@ -1577,6 +1578,8 @@ await sharp(await withTrademark("wordmark-light"))
   .png(png)
   .toFile(pub("press/jinxwood-wordmark-for-light.png"));
 await sharp(cutOuts.emblem).png(png).toFile(pub("press/jinxwood-emblem.png"));
+// Jinx's eyes go out trimmed, as the site shows them, for any background.
+await sharp(eyesTrimmed.eyes).png(png).toFile(pub("press/jinxwood-eyes.png"));
 await hero
   .clone()
   .resize({ width: 2560 })

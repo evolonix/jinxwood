@@ -232,6 +232,13 @@ export const PRESS = {
       on: "night",
       note: "Transparent PNG, 680 × 636",
     },
+    {
+      label: "Jinx's eyes for any background",
+      file: "/press/jinxwood-eyes.png",
+      preview: "eyes",
+      on: "night",
+      note: "Transparent PNG, 1562 × 689",
+    },
   ],
   art: [
     {
