@@ -64,14 +64,16 @@
     }
   }
 
+  /* The upper lid of each eye slides down over the iris and back up. The
+     distance is in the eyes' own SVG units: enough to close the eye. */
   @keyframes blink {
     0%,
     82%,
     100% {
-      transform: scaleY(1);
+      transform: translateY(0);
     }
     91% {
-      transform: scaleY(0.08);
+      transform: translateY(54px);
     }
   }
 }
