@@ -294,14 +294,6 @@ body {
   animation: lid-art-blink 1.6s ease-in-out 1.2s 2;
 }
 
-/* The footer's signature: one slow blink once the eyes come into view. */
-[data-seen].slow-blink .eye-lids {
-  animation: lid-blink 2s ease-in-out 0.4s 1;
-}
-[data-seen].slow-blink .eye-lid-art {
-  animation: lid-art-blink 2s ease-in-out 0.4s 1;
-}
-
 /* Jinx peeking over an edge (peeking-eyes.tsx): the eyes wait just behind
    the edge until it scrolls into view, rise, then blink twice. */
 .eyes-peek {
