@@ -21,7 +21,9 @@ serves nothing from this folder directly.
   enlarging either. Start any other artwork from these. The forest
   illustration and the picture of Jinx in the tree sit beside them as the
   JPEGs the press page offers, also written by `npm run build:brand`.
-  `originals/` keeps earlier masters for reference; nothing is made from it.
+  Two drawings of Jinx walking, `jinx.png` (flat) and `jinx-stylized.png`
+  (shaded), sit there too, on transparent backgrounds; they are placed by
+  hand, and nothing is made from them.
 - `youtube/`: the channel's profile picture, banner and video watermark are
   written by `npm run build:brand`. The numbered video thumbnails are made by
   hand.
