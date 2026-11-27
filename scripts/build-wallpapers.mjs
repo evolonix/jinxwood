@@ -3,7 +3,7 @@
 // general, and for the 16-inch MacBook Pro and the iPhone Duo. Each comes in
 // dark and light, on a flat brand color and on the forest art, so four files
 // per set. The desktop, the MacBook Pro and the Duo have a fifth: the picture
-// of Jinx in the tree, with the wordmark beside the hollow.
+// of Jinx in the Twilight Forest, with the wordmark beside the hollow.
 //
 //   public/wallpapers/      the wallpapers themselves
 //   public/img/wallpapers/  a small picture of each, shown beside its download
@@ -305,15 +305,18 @@ async function build(wallpaper) {
 }
 
 // ---------------------------------------------------------------------------
-// Jinx in the tree
+// Jinx in the Twilight Forest
 // ---------------------------------------------------------------------------
 
-// The picture of Jinx sitting in the hollow of the big tree, as a wallpaper,
-// with the wordmark beside the hollow exactly as the logo has it beside the
-// emblem: the same size against the hollow, the same distance from it and at
-// the same height. The picture is 1920 x 1080 and is enlarged to fill each
-// screen, so these are softer than the others.
-const TREE = join(root, "brand/source/jinx-in-the-tree.webp");
+// The picture of Jinx in the Twilight Forest, sitting in the hollow of the
+// big tree, as a wallpaper, with the wordmark beside the hollow exactly as the
+// logo has it beside the emblem: the same size against the hollow, the same
+// distance from it and at the same height. The picture is 1920 x 1080 and is
+// enlarged to fill each screen, so these are softer than the others.
+const TWILIGHT_FOREST = join(
+  root,
+  "brand/source/jinx-in-the-twilight-forest.webp",
+);
 // The hollow's glow in the picture, in the picture's own pixels: the row it
 // is centered on, its right edge and its height.
 const HOLLOW = { middle: 545, right: 516, height: 324 };
@@ -333,14 +336,14 @@ const WORDMARK = {
 };
 
 /**
- * Part of the tree picture, enlarged to `width` by `height`, with the
+ * Part of the Twilight Forest picture, enlarged to `width` by `height`, with the
  * wordmark beside the hollow unless `wordmark` is false. `from` is the
  * picture's column the part starts at.
  */
-async function treePart({ from, width, height, wordmark = true }) {
+async function twilightForestPart({ from, width, height, wordmark = true }) {
   const scale = height / 1080;
   const columns = Math.round(width / scale);
-  const picture = sharp(TREE)
+  const picture = sharp(TWILIGHT_FOREST)
     .extract({ left: from, top: 0, width: columns, height: 1080 })
     .resize({ width, height, fit: "fill", kernel: "lanczos3" });
   if (!wordmark) return picture.png().toBuffer();
@@ -375,13 +378,13 @@ async function treePart({ from, width, height, wordmark = true }) {
     .toBuffer();
 }
 
-/** Writes a tree wallpaper from its parts, top to bottom, and its preview. */
-async function buildTree(name, parts, previewWidth) {
+/** Writes a Twilight Forest wallpaper from its parts, top to bottom, and its preview. */
+async function buildTwilightForest(name, parts, previewWidth) {
   const width = parts[0].width;
   const layers = [];
   let top = 0;
   for (const part of parts) {
-    layers.push({ input: await treePart(part), left: 0, top });
+    layers.push({ input: await twilightForestPart(part), left: 0, top });
     top += part.height;
   }
   await sharp({
@@ -399,15 +402,15 @@ await mkdir(previews, { recursive: true });
 for (const wallpaper of [...SCREENS, duo()]) await build(wallpaper);
 
 // A 16:9 monitor: the whole picture.
-await buildTree(
-  "jinxwood-desktop-tree",
+await buildTwilightForest(
+  "jinxwood-desktop-twilight-forest",
   [{ from: 0, width: 3840, height: 2160 }],
   960,
 );
 // The 16-inch MacBook Pro's screen is a little squarer, so a little comes off
 // each side of the picture.
-await buildTree(
-  "jinxwood-macbook-pro-16-tree",
+await buildTwilightForest(
+  "jinxwood-macbook-pro-16-twilight-forest",
   [{ from: 124, width: 3456, height: 2234 }],
   960,
 );
@@ -418,8 +421,8 @@ await buildTree(
 // for it at the logo's size.
 {
   const { width, parts } = duo();
-  await buildTree(
-    "jinxwood-duo-tree",
+  await buildTwilightForest(
+    "jinxwood-duo-twilight-forest",
     [
       { from: 0, width, height: parts[0] },
       { from: 29, width, height: parts[1], wordmark: false },

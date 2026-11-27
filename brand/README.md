@@ -8,10 +8,11 @@ serves nothing from this folder directly.
   pictures are all made; the wordmark (`wordmark.png`), drawn for dark
   backgrounds on a transparent background, from which both versions of the
   lettering are made; a drawing of the whole logo (`lockup-cream.webp`), which
-  says where the lettering sits beside the emblem; the forest illustration; and the picture of Jinx in the tree
-  (`jinx-in-the-tree.webp`), which the wallpapers use. `npm run build:brand`
-  puts the logo together for dark and for light backgrounds and writes every
-  image the site serves into `public/`.
+  says where the lettering sits beside the emblem; the forest illustration;
+  and the picture of Jinx in the Twilight Forest
+  (`jinx-in-the-twilight-forest.webp`), which the wallpapers use.
+  `npm run build:brand` puts the logo together for dark and for light
+  backgrounds and writes every image the site serves into `public/`.
 - `masters/`: the masters, written by `npm run build:brand`, with nothing
   enlarged and no trademark symbol: the logo and wordmark for light and for
   dark backgrounds and the emblem, all transparent; the icon, a rounded square
@@ -19,8 +20,8 @@ serves nothing from this folder directly.
   with the emblem inside the circle a platform crops it to. The wordmark and
   emblem are exactly as drawn; the logo is as large as it can be without
   enlarging either. Start any other artwork from these. The forest
-  illustration and the picture of Jinx in the tree sit beside them as the
-  JPEGs the press page offers, also written by `npm run build:brand`.
+  illustration and the picture of Jinx in the Twilight Forest sit beside them
+  as the JPEGs the press page offers, also written by `npm run build:brand`.
   Two drawings of Jinx walking, `jinx.png` (flat) and `jinx-stylized.png`
   (shaded), sit there too, on transparent backgrounds; they are placed by
   hand, and nothing is made from them.

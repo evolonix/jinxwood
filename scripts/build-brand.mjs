@@ -1542,20 +1542,20 @@ await hero
   .jpeg({ quality: 90, mozjpeg: true })
   .toFile(pub("press/jinxwood-forest.jpg"));
 
-// The picture of Jinx in the tree is offered at the size it was drawn, with
+// The picture of Jinx in the Twilight Forest is offered at the size it was drawn, with
 // the smaller picture the press page shows of it.
-await sharp(source("jinx-in-the-tree.webp"))
+await sharp(source("jinx-in-the-twilight-forest.webp"))
   .jpeg({ quality: 90, mozjpeg: true })
-  .toFile(pub("press/jinx-in-the-tree.jpg"));
+  .toFile(pub("press/jinx-in-the-twilight-forest.jpg"));
 await mkdir(pub("img/press"), { recursive: true });
-await sharp(source("jinx-in-the-tree.webp"))
+await sharp(source("jinx-in-the-twilight-forest.webp"))
   .resize({ width: 1280 })
   .webp(WEBP)
-  .toFile(pub("img/press/jinx-in-the-tree-1280.webp"));
+  .toFile(pub("img/press/jinx-in-the-twilight-forest-1280.webp"));
 
 // Both pictures are kept beside the masters too, as the press page offers
 // them.
-for (const file of ["jinxwood-forest.jpg", "jinx-in-the-tree.jpg"]) {
+for (const file of ["jinxwood-forest.jpg", "jinx-in-the-twilight-forest.jpg"]) {
   await copyFile(pub(`press/${file}`), master(file));
 }
 
